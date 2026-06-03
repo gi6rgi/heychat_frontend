@@ -25,10 +25,14 @@ function Bubble({ role, text }: { role: 'user' | 'assistant'; text: string }) {
 export function CoachingChat({ conversationId }: { conversationId: string }) {
   const { messages, streaming, pending, send } = useCoachingChat(conversationId)
   const [input, setInput] = useState('')
-  const endRef = useRef<HTMLDivElement>(null)
+  const listRef = useRef<HTMLDivElement>(null)
 
+  // Keep the chat pinned to the latest message by scrolling the chat container
+  // itself — never scrollIntoView, which would also scroll the whole page down
+  // to the chat when the conversation page first opens.
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: 'smooth' })
+    const el = listRef.current
+    if (el) el.scrollTop = el.scrollHeight
   }, [messages, streaming])
 
   function onSubmit(e: FormEvent) {
@@ -47,7 +51,7 @@ export function CoachingChat({ conversationId }: { conversationId: string }) {
         <MessagesSquare size={16} /> Ask the coach
       </h2>
 
-      <div className="flex max-h-[55vh] flex-col gap-3 overflow-y-auto">
+      <div ref={listRef} className="flex max-h-[55vh] flex-col gap-3 overflow-y-auto">
         {empty && (
           <p className="py-4 text-center text-sm text-muted-foreground">
             Ask anything about this conversation — e.g. “How could I have answered the project
@@ -58,7 +62,6 @@ export function CoachingChat({ conversationId }: { conversationId: string }) {
           <Bubble key={i} role={m.role} text={m.content} />
         ))}
         {streaming !== null && <Bubble role="assistant" text={streaming} />}
-        <div ref={endRef} />
       </div>
 
       <form onSubmit={onSubmit} className="flex items-center gap-2">
