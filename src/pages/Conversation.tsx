@@ -59,20 +59,12 @@ export default function Conversation() {
                 {formatDateTime(conversation.created_at)}
               </span>
             </div>
-            <div className="flex flex-wrap gap-2">
-              <Link to={`/session/${conversation.scenario_id}?replay_of=${conversation.id}`}>
-                <Button size="lg">
-                  <Repeat2 size={16} />
-                  Try again — same flow
-                </Button>
-              </Link>
-              <Link to={`/session/${conversation.scenario_id}`}>
-                <Button variant="outline" size="lg">
-                  <RotateCcw size={16} />
-                  Practice again
-                </Button>
-              </Link>
-            </div>
+            <Link to={`/session/${conversation.scenario_id}?replay_of=${conversation.id}`}>
+              <Button size="lg">
+                <Repeat2 size={16} />
+                Try again — same flow
+              </Button>
+            </Link>
           </div>
 
           {conversation.has_audio && (
