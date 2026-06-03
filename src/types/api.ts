@@ -66,12 +66,25 @@ export interface AdviceItem {
   quote?: string | null
 }
 
+export interface ExampleAnswer {
+  question: string
+  answer: string
+}
+
 export interface FeedbackReport {
   overall_score: number // 0-10
   headline: string
   summary: string
   metrics: MetricScore[]
   advice: AdviceItem[]
+  example_answers?: ExampleAnswer[]
+}
+
+/** Coaching chat (app/coaching). */
+export interface CoachingMessage {
+  role: 'user' | 'assistant'
+  content: string
+  created_at?: string
 }
 
 export type FeedbackStatus = 'none' | 'generating' | 'ready' | 'error'

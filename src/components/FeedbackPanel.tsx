@@ -1,5 +1,5 @@
 import { motion } from 'motion/react'
-import { ArrowRight, CheckCircle2, ChevronDown, Quote, TriangleAlert } from 'lucide-react'
+import { ArrowRight, CheckCircle2, ChevronDown, Quote, Sparkles, TriangleAlert } from 'lucide-react'
 import type { AdviceItem, FeedbackReport, MetricScore } from '@/types/api'
 import { cn } from '@/lib/utils'
 
@@ -188,8 +188,27 @@ export function FeedbackPanel({
     .sort((a, b) => a.score - b.score)
   const prevByName = new Map((previous?.metrics ?? []).map((m) => [m.name, m.score]))
 
+  const examples = report.example_answers ?? []
+
   return (
     <div className="flex flex-col gap-6">
+      {/* Model answers — concrete examples to use in the next attempt. */}
+      {examples.length > 0 && (
+        <div className="flex flex-col gap-3 rounded-2xl border border-brand/25 bg-brand/[0.07] p-5">
+          <h3 className="flex items-center gap-2 text-sm font-semibold text-brand-light">
+            <Sparkles size={16} /> Model answers to use next time
+          </h3>
+          <div className="flex flex-col gap-2.5">
+            {examples.map((ex, i) => (
+              <div key={i} className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-3.5">
+                <p className="text-sm font-semibold">{ex.question}</p>
+                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{ex.answer}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Hero: score + verdict */}
       <div className="flex items-center gap-5 rounded-2xl border border-white/[0.08] bg-card/60 p-5">
         <ScoreRing score={report.overall_score} />
