@@ -1,7 +1,20 @@
+import { useState } from 'react'
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom'
-import { ArrowLeft, FileText, Mic, MicOff, PhoneOff, Play, Repeat2 } from 'lucide-react'
+import {
+  ArrowLeft,
+  FileText,
+  Mic,
+  MicOff,
+  PhoneOff,
+  Play,
+  Repeat2,
+  Volume2,
+  VolumeX,
+} from 'lucide-react'
 import { useScenario } from '@/hooks/useScenarios'
 import { useVoiceSession } from '@/hooks/useVoiceSession'
+import { useAmbience } from '@/hooks/useAmbience'
+import { scenarioAmbience } from '@/audio/ambience'
 import { MicOrb } from '@/components/voice/MicOrb'
 import { MicLevelMeter } from '@/components/voice/MicLevelMeter'
 import { TranscriptFeed } from '@/components/voice/TranscriptFeed'
@@ -33,6 +46,9 @@ export default function Session() {
     stop,
     toggleMute,
   } = useVoiceSession(scenarioId, replayOf)
+
+  const [ambienceOn, setAmbienceOn] = useState(true)
+  useAmbience(ambienceOn ? scenarioAmbience(scenarioId) : 'none', status === 'live')
 
   const live = status === 'live'
   const connecting = status === 'connecting'
@@ -101,6 +117,14 @@ export default function Session() {
                   aria-label={muted ? 'Unmute microphone' : 'Mute microphone'}
                 >
                   {muted ? <MicOff size={18} /> : <Mic size={18} />}
+                </Button>
+                <Button
+                  size="icon-lg"
+                  variant={ambienceOn ? 'outline' : 'secondary'}
+                  onClick={() => setAmbienceOn((v) => !v)}
+                  aria-label={ambienceOn ? 'Turn off background noise' : 'Turn on background noise'}
+                >
+                  {ambienceOn ? <Volume2 size={18} /> : <VolumeX size={18} />}
                 </Button>
                 <Button size="xl" variant="destructive" onClick={stop}>
                   <PhoneOff size={18} />
