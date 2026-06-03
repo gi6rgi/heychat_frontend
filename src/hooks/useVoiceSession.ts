@@ -1,0 +1,184 @@
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+import { getWsBaseUrl } from '@/lib/api-client'
+import { getAccessToken } from '@/lib/supabase'
+import { queryKeys } from '@/lib/query-keys'
+import { VoicePlayer } from '@/audio/player'
+import { VoiceRecorder } from '@/audio/recorder'
+import type { ServerMessage, Turn } from '@/types/api'
+
+export type SessionStatus = 'idle' | 'connecting' | 'live' | 'ended' | 'error'
+
+/**
+ * Drives one voice training session: opens the backend WebSocket, streams mic
+ * audio up, plays the agent's audio down, and surfaces live transcripts.
+ */
+export function useVoiceSession(scenarioId: string | undefined, replayOf?: string | null) {
+  const [status, setStatus] = useState<SessionStatus>('idle')
+  const [error, setError] = useState<string | null>(null)
+  const [transcripts, setTranscripts] = useState<Turn[]>([])
+  const [isAgentSpeaking, setIsAgentSpeaking] = useState(false)
+  const [muted, setMuted] = useState(false)
+  const [inputLevel, setInputLevel] = useState(0)
+  const [conversationId, setConversationId] = useState<string | null>(null)
+
+  const queryClient = useQueryClient()
+  const lastLevelTs = useRef(0)
+
+  const wsRef = useRef<WebSocket | null>(null)
+  const recorderRef = useRef<VoiceRecorder | null>(null)
+  const playerRef = useRef<VoicePlayer | null>(null)
+  const stoppingRef = useRef(false)
+  const turnSeq = useRef(0)
+
+  const appendTranscript = useCallback((role: 'user' | 'agent', text: string) => {
+    setTranscripts((prev) => {
+      const last = prev[prev.length - 1]
+      if (last && last.role === role) {
+        const merged = { ...last, text: last.text + text }
+        return [...prev.slice(0, -1), merged]
+      }
+      return [...prev, { id: `t${turnSeq.current++}`, role, text }]
+    })
+  }, [])
+
+  const cleanup = useCallback(async () => {
+    wsRef.current?.close()
+    wsRef.current = null
+    await recorderRef.current?.stop()
+    recorderRef.current = null
+    await playerRef.current?.close()
+    playerRef.current = null
+  }, [])
+
+  const stop = useCallback(async () => {
+    stoppingRef.current = true
+    await cleanup()
+    setIsAgentSpeaking(false)
+    setInputLevel(0)
+    setStatus('ended')
+    // The transcript is now persisted server-side — refresh the history list.
+    queryClient.invalidateQueries({ queryKey: queryKeys.conversations() })
+  }, [cleanup, queryClient])
+
+  const start = useCallback(async () => {
+    if (!scenarioId || status === 'connecting' || status === 'live') return
+    stoppingRef.current = false
+    setError(null)
+    setTranscripts([])
+    setConversationId(null)
+    setStatus('connecting')
+
+    try {
+      const player = new VoicePlayer(setIsAgentSpeaking)
+      await player.resume()
+      playerRef.current = player
+
+      const recorder = new VoiceRecorder()
+      recorderRef.current = recorder
+
+      const sessionId = crypto.randomUUID()
+      // Browsers can't set headers on a WebSocket, so the token goes in the query.
+      const token = await getAccessToken()
+      let url =
+        `${getWsBaseUrl()}/ws/sessions/${sessionId}` +
+        `?scenario_id=${encodeURIComponent(scenarioId)}&token=${encodeURIComponent(token)}`
+      if (replayOf) url += `&replay_of=${encodeURIComponent(replayOf)}`
+      const ws = new WebSocket(url)
+      ws.binaryType = 'arraybuffer'
+      wsRef.current = ws
+
+      ws.onopen = async () => {
+        let sent = 0
+        await recorder.start(
+          (chunk) => {
+            if (ws.readyState === WebSocket.OPEN) {
+              ws.send(chunk)
+              if (++sent % 50 === 0) console.debug('[ws] sent %d audio frames', sent)
+            }
+          },
+          (level) => {
+            // Throttle level updates to ~15fps so we don't re-render per chunk.
+            const now = performance.now()
+            if (now - lastLevelTs.current >= 66) {
+              lastLevelTs.current = now
+              setInputLevel(level)
+            }
+          },
+        )
+        setStatus('live')
+      }
+
+      ws.onmessage = (event) => {
+        if (event.data instanceof ArrayBuffer) {
+          playerRef.current?.enqueue(event.data)
+          return
+        }
+        const msg = JSON.parse(event.data as string) as ServerMessage
+        switch (msg.type) {
+          case 'transcript':
+            appendTranscript(msg.role, msg.text)
+            break
+          case 'interrupted':
+            playerRef.current?.flush()
+            break
+          case 'turn_complete':
+            break
+          case 'error':
+            setError(msg.message)
+            break
+          case 'ready':
+            setConversationId(msg.conversation_id)
+            break
+        }
+      }
+
+      ws.onerror = () => {
+        if (!stoppingRef.current) {
+          setError('Connection lost')
+          setStatus('error')
+        }
+      }
+
+      ws.onclose = () => {
+        if (!stoppingRef.current) {
+          cleanup()
+          setStatus((s) => (s === 'error' ? s : 'ended'))
+        }
+      }
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Could not access the microphone')
+      setStatus('error')
+      await cleanup()
+    }
+  }, [scenarioId, replayOf, status, appendTranscript, cleanup])
+
+  const toggleMute = useCallback(() => {
+    setMuted((m) => {
+      const next = !m
+      recorderRef.current?.setMuted(next)
+      return next
+    })
+  }, [])
+
+  // Tear down on unmount.
+  useEffect(() => {
+    return () => {
+      stoppingRef.current = true
+      void cleanup()
+    }
+  }, [cleanup])
+
+  return {
+    status,
+    error,
+    transcripts,
+    isAgentSpeaking,
+    muted,
+    inputLevel,
+    conversationId,
+    start,
+    stop,
+    toggleMute,
+  }
+}
