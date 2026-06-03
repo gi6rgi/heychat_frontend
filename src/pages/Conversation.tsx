@@ -68,27 +68,6 @@ export default function Conversation() {
             </Link>
           </div>
 
-          {conversation.has_audio && (
-            <div className="flex flex-col gap-3 rounded-2xl border border-white/[0.08] bg-card/30 p-5">
-              <h2 className="text-sm font-medium text-muted-foreground">Recording</h2>
-              <div className="grid gap-4 sm:grid-cols-2">
-                {(['user', 'agent'] as const).map((track) => (
-                  <div key={track} className="flex flex-col gap-1.5">
-                    <span className="text-xs text-muted-foreground">
-                      {track === 'user' ? 'You' : 'Agent'}
-                    </span>
-                    <audio
-                      controls
-                      preload="none"
-                      className="w-full"
-                      src={`${getApiBaseUrl()}/conversations/${conversation.id}/audio/${track}`}
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
           <div className="flex flex-col gap-6">
             {/* Feedback — full-width scorecard once ready, otherwise a prompt card. */}
             {status === 'ready' && feedback?.report ? (
@@ -136,9 +115,17 @@ export default function Conversation() {
             {/* Coaching chat — discuss the result and ask for advice. */}
             <CoachingChat conversationId={conversation.id} />
 
-            {/* Transcript */}
+            {/* Recording + transcript (bottom of the page) */}
             <div className="rounded-2xl border border-white/[0.08] bg-card/30 p-5">
               <h2 className="mb-4 text-sm font-medium text-muted-foreground">Transcript</h2>
+              {conversation.has_audio && (
+                <audio
+                  controls
+                  preload="none"
+                  className="mb-4 w-full"
+                  src={`${getApiBaseUrl()}/conversations/${conversation.id}/audio`}
+                />
+              )}
               <TranscriptFeed turns={turns} autoScroll={false} />
             </div>
           </div>
