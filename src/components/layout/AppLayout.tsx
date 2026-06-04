@@ -23,7 +23,7 @@ export function AppLayout() {
             <span className="flex size-7 items-center justify-center rounded-lg bg-gradient-to-br from-brand-light via-brand to-brand-dark text-white">
               <Mic size={16} />
             </span>
-            HeyChat
+            HeyRizz
           </Link>
           <nav className="flex items-center gap-4 text-sm">
             <NavLink

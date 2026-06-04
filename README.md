@@ -1,4 +1,4 @@
-# HeyChat — Frontend
+# HeyRizz — Frontend
 
 Web client for the voice trainer. The user picks a scenario and talks to an AI
 partner with their voice, right in the browser.
