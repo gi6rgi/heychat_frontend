@@ -1,7 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
-import { AnimatePresence, motion } from "motion/react";
+import {
+  AnimatePresence,
+  motion,
+  useMotionValue,
+  useTransform,
+} from "motion/react";
 import {
   ArrowLeft,
   ArrowRight,
@@ -14,10 +19,12 @@ import {
   X,
 } from "lucide-react";
 import {
-  GOAL_IDEAS,
+  GOAL_CARDS,
   MOOD_CHIPS,
-  SCENE_IDEAS,
+  SCENE_CARDS,
   VIBE_CARDS,
+  WHO_CARDS,
+  type VibeCard,
 } from "@/components/match/matchFlow";
 import { generateCharacter, matchCharacter } from "@/services/characters";
 import { getScenario } from "@/services/scenarios";
@@ -35,19 +42,24 @@ import type {
 type Mode = "match" | "create";
 type Step =
   | "entry"
+  // Match path: one intake form, then the vibe deck.
   | "intake"
   | "vibes"
+  // Create path: three swipe decks — who, where, what for.
+  | "who"
+  | "where"
+  | "goal"
   | "working"
   | "reveal"
   | "nomatch"
   | "error";
 
-const PROGRESS: Step[] = ["intake", "vibes", "reveal"];
+const PROGRESS = [0, 1, 2];
 
 /** Map every step onto the 3-dot progress (working/nomatch live at the end). */
 function progressIndex(step: Step): number {
-  if (step === "intake") return 0;
-  if (step === "vibes") return 1;
+  if (step === "intake" || step === "who") return 0;
+  if (step === "vibes" || step === "where") return 1;
   return 2;
 }
 
@@ -72,36 +84,191 @@ const WORKING_LINES: Record<Mode, string[]> = {
   ],
 };
 
-/** Tap-to-fill suggestion chips for a free-text field (tap again to clear). */
-function IdeaChips({
-  ideas,
-  value,
+/** One draggable card of a swipe deck: drag right to choose, left to pass. */
+function SwipeCard({
+  card,
   onPick,
+  onSkip,
 }: {
-  ideas: string[];
-  value: string;
-  onPick: (next: string) => void;
+  card: VibeCard;
+  onPick: () => void;
+  onSkip: () => void;
 }) {
+  const x = useMotionValue(0);
+  const rotate = useTransform(x, [-220, 220], [-12, 12]);
+  // Dim the card as it's dragged toward "not this".
+  const opacity = useTransform(x, [-220, 0, 220], [0.55, 1, 1]);
   return (
-    <div className="flex flex-wrap gap-1.5">
-      {ideas.map((idea) => {
-        const active = value === idea;
-        return (
-          <button
-            key={idea}
-            type="button"
-            onClick={() => onPick(active ? "" : idea)}
-            className={cn(
-              "rounded-full border px-2.5 py-1 text-xs transition-colors",
-              active
-                ? "border-brand/60 bg-brand/15 text-brand-light"
-                : "border-white/[0.1] bg-card/60 text-muted-foreground hover:border-brand/40 hover:text-foreground",
-            )}
+    <motion.div
+      style={{ x, rotate, opacity }}
+      drag="x"
+      dragSnapToOrigin
+      dragElastic={0.7}
+      onDragEnd={(_, info) => {
+        if (info.offset.x > 90 || info.velocity.x > 600) onPick();
+        else if (info.offset.x < -90 || info.velocity.x < -600) onSkip();
+      }}
+      initial={{ opacity: 0, scale: 0.94, y: 14 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      // Exit only happens on a pass (picking unmounts the whole step), so the
+      // card always flies out left.
+      exit={{
+        opacity: 0,
+        x: -220,
+        rotate: -8,
+        transition: { duration: 0.28, ease: "easeIn" },
+      }}
+      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+      whileDrag={{ scale: 1.03, cursor: "grabbing" }}
+      className={cn(
+        "absolute inset-0 bottom-2 flex cursor-grab touch-none flex-col justify-between rounded-2xl border border-white/15 bg-gradient-to-br p-5 shadow-xl shadow-black/30 backdrop-blur-sm select-none",
+        card.accent,
+      )}
+    >
+      <div>
+        {card.emoji && (
+          <span aria-hidden className="absolute top-4 right-5 text-3xl">
+            {card.emoji}
+          </span>
+        )}
+        <h3 className="pr-10 text-lg font-semibold">{card.title}</h3>
+        <p className="mt-1 pr-10 text-sm leading-relaxed text-foreground/80">
+          {card.description}
+        </p>
+      </div>
+      <div className="flex flex-wrap gap-1.5">
+        {card.tags.map((t) => (
+          <span
+            key={t}
+            className="rounded-full bg-black/25 px-2 py-0.5 text-xs text-foreground/80"
           >
-            {idea}
-          </button>
-        );
-      })}
+            {t}
+          </span>
+        ))}
+      </div>
+    </motion.div>
+  );
+}
+
+/** One create-flow question as a swipe deck.
+ *
+ * First right-swipe answers the question and moves on; passing on every card
+ * (or tapping the link) reveals a free-text fallback instead. */
+function DeckStep({
+  title,
+  sub,
+  cards,
+  required,
+  manualPlaceholder,
+  optionalHint,
+  onDone,
+}: {
+  title: string;
+  sub: string;
+  cards: VibeCard[];
+  /** When true the manual fallback can't be submitted empty. */
+  required?: boolean;
+  manualPlaceholder: string;
+  optionalHint?: string;
+  onDone: (value: string) => void;
+}) {
+  const [idx, setIdx] = useState(0);
+  const [manual, setManual] = useState(false);
+  const [draft, setDraft] = useState("");
+  const card = cards[idx];
+  const nextCard = cards[idx + 1];
+
+  function skip() {
+    if (idx + 1 >= cards.length) setManual(true);
+    else setIdx(idx + 1);
+  }
+
+  if (manual || !card) {
+    return (
+      <div className="flex flex-col gap-4">
+        <div>
+          <h2 className="text-xl font-bold tracking-tight">{title}</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
+            In your own words — paint it however you like.
+          </p>
+        </div>
+        <textarea
+          autoFocus
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          rows={3}
+          placeholder={manualPlaceholder}
+          className="resize-none rounded-xl border border-border bg-background/60 px-3 py-2.5 text-sm leading-relaxed outline-none placeholder:text-muted-foreground/50 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+        />
+        {optionalHint && (
+          <p className="text-xs text-muted-foreground/70">{optionalHint}</p>
+        )}
+        <Button
+          size="xl"
+          className="w-full"
+          disabled={required && !draft.trim()}
+          onClick={() => onDone(draft.trim())}
+        >
+          Continue
+          <ArrowRight size={17} />
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex items-end justify-between">
+        <div>
+          <h2 className="text-xl font-bold tracking-tight">{title}</h2>
+          <p className="mt-1 text-sm text-muted-foreground">{sub}</p>
+        </div>
+        <span className="shrink-0 text-sm tabular-nums text-muted-foreground">
+          {idx + 1} / {cards.length}
+        </span>
+      </div>
+
+      <div className="relative h-52">
+        {/* The next card peeks out behind the current one (deck feel). */}
+        {nextCard && (
+          <div
+            aria-hidden
+            className={cn(
+              "absolute inset-x-3 top-2 bottom-0 rounded-2xl border border-white/[0.06] bg-gradient-to-br opacity-50",
+              nextCard.accent,
+            )}
+          />
+        )}
+        <AnimatePresence mode="popLayout">
+          <SwipeCard
+            key={card.id}
+            card={card}
+            onPick={() => onDone(`${card.title} — ${card.description}`)}
+            onSkip={skip}
+          />
+        </AnimatePresence>
+      </div>
+
+      <div className="flex items-center justify-center gap-3">
+        <Button size="lg" variant="outline" onClick={skip}>
+          <X size={16} className="text-muted-foreground" />
+          Not this
+        </Button>
+        <Button
+          size="lg"
+          onClick={() => onDone(`${card.title} — ${card.description}`)}
+        >
+          <Heart size={16} />
+          This one
+        </Button>
+      </div>
+      <button
+        type="button"
+        onClick={() => setManual(true)}
+        className="text-center text-sm text-muted-foreground transition-colors hover:text-foreground"
+      >
+        Or type my own instead
+      </button>
     </div>
   );
 }
@@ -205,14 +372,13 @@ function FlowCard({
   const queryClient = useQueryClient();
   const [mode, setMode] = useState<Mode>("match");
   const [step, setStep] = useState<Step>("entry");
-  // Intake answers.
+  // Match intake answers.
   const [moods, setMoods] = useState<string[]>([]);
   const [wish, setWish] = useState("");
-  // Where the user imagines the scene happening (create mode only).
+  // Create-deck answers: who the companion is, where the scene happens, and
+  // the goal to chase (empty = free-flowing chat).
+  const [who, setWho] = useState("");
   const [scene, setScene] = useState("");
-  // What the user wants to train/achieve; turns the scene into a goal-driven
-  // one with a live verdict (create mode only).
-  const [goal, setGoal] = useState("");
   // Vibe card swipes.
   const [reactions, setReactions] = useState<VibeReaction[]>([]);
   const [swipeDir, setSwipeDir] = useState(1);
@@ -239,17 +405,17 @@ function FlowCard({
 
   function begin(m: Mode) {
     setMode(m);
-    setStep("intake");
+    setStep(m === "create" ? "who" : "intake");
   }
 
   /** "Create my own" after a match attempt: restart the flow from a clean
-   * slate in create mode, so the user also gets the scene and goal fields
+   * slate in create mode, so the user also gets the scene and goal decks
    * (the match intake never collected those). */
   function restartAsCreate() {
     setMoods([]);
     setWish("");
+    setWho("");
     setScene("");
-    setGoal("");
     setReactions([]);
     setSwipeDir(1);
     setResult(null);
@@ -309,35 +475,25 @@ function FlowCard({
     setReactions(next);
     if (next.length === VIBE_CARDS.length) {
       void submit(
-        {
-          moods,
-          description: wish.trim(),
-          scene: scene.trim(),
-          goal: goal.trim(),
-          vibes: next,
-        },
+        { moods, description: wish.trim(), scene: "", goal: "", vibes: next },
         mode,
       );
     }
   }
 
   function back() {
-    if (step === "intake") setStep("entry");
+    if (step === "intake" || step === "who") setStep("entry");
     else if (step === "vibes") {
       setReactions([]);
       setStep("intake");
-    }
+    } else if (step === "where") setStep("who");
+    else if (step === "goal") setStep("where");
   }
 
   const card = VIBE_CARDS[reactions.length];
   const nextCard = VIBE_CARDS[reactions.length + 1];
-  // Any signal is enough to continue — a mood, a wish, a scene or a goal.
-  const canContinue =
-    moods.length > 0 ||
-    wish.trim().length > 0 ||
-    scene.trim().length > 0 ||
-    goal.trim().length > 0;
-  const showBack = step === "intake" || step === "vibes";
+  const canContinue = moods.length > 0 || wish.trim().length > 0;
+  const showBack = ["intake", "vibes", "who", "where", "goal"].includes(step);
   const showProgress = step !== "entry";
 
   return (
@@ -449,7 +605,7 @@ function FlowCard({
                 </div>
               </div>
               <p className="text-xs text-muted-foreground/70">
-                About 30 seconds. A few taps — typing optional.
+                About 30 seconds. A few swipes — typing optional.
               </p>
             </motion.div>
           )}
@@ -465,9 +621,7 @@ function FlowCard({
                   What kind of companion would feel right today?
                 </h2>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  {mode === "create"
-                    ? "We’ll create someone new — and a scene to meet them in."
-                    : "We’ll use this to find who fits your mood."}
+                  We’ll use this to find who fits your mood.
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -511,52 +665,6 @@ function FlowCard({
                   className="resize-none rounded-xl border border-border bg-background/60 px-3 py-2.5 text-sm leading-relaxed outline-none placeholder:text-muted-foreground/50 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
                 />
               </div>
-              {mode === "create" && (
-                <>
-                  <div className="flex flex-col gap-1.5">
-                    <label
-                      htmlFor="match-scene"
-                      className="text-xs font-medium tracking-wide text-muted-foreground uppercase"
-                    >
-                      Set the scene — where does it happen?
-                    </label>
-                    <IdeaChips
-                      ideas={SCENE_IDEAS}
-                      value={scene}
-                      onPick={setScene}
-                    />
-                    <textarea
-                      id="match-scene"
-                      value={scene}
-                      onChange={(e) => setScene(e.target.value)}
-                      rows={2}
-                      placeholder="…or describe your own. Optional — we’ll invent one if you skip it."
-                      className="resize-none rounded-xl border border-border bg-background/60 px-3 py-2.5 text-sm leading-relaxed outline-none placeholder:text-muted-foreground/50 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-                    />
-                  </div>
-                  <div className="flex flex-col gap-1.5">
-                    <label
-                      htmlFor="match-goal"
-                      className="text-xs font-medium tracking-wide text-muted-foreground uppercase"
-                    >
-                      Your goal — what do you want to pull off?
-                    </label>
-                    <IdeaChips
-                      ideas={GOAL_IDEAS}
-                      value={goal}
-                      onPick={setGoal}
-                    />
-                    <textarea
-                      id="match-goal"
-                      value={goal}
-                      onChange={(e) => setGoal(e.target.value)}
-                      rows={2}
-                      placeholder="…or write your own. Optional — leave empty for a free-flowing chat."
-                      className="resize-none rounded-xl border border-border bg-background/60 px-3 py-2.5 text-sm leading-relaxed outline-none placeholder:text-muted-foreground/50 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-                    />
-                  </div>
-                </>
-              )}
               <Button
                 size="xl"
                 className="w-full"
@@ -566,6 +674,56 @@ function FlowCard({
                 Continue
                 <ArrowRight size={17} />
               </Button>
+            </motion.div>
+          )}
+
+          {step === "who" && (
+            <motion.div key="who" {...stepMotion}>
+              <DeckStep
+                title="Who would you love to talk to?"
+                sub="Swipe right when it clicks — left to pass."
+                cards={WHO_CARDS}
+                required
+                manualPlaceholder="Someone calm, smart, and a little playful. A person I can talk to after work."
+                onDone={(v) => {
+                  setWho(v);
+                  setStep("where");
+                }}
+              />
+            </motion.div>
+          )}
+
+          {step === "where" && (
+            <motion.div key="where" {...stepMotion}>
+              <DeckStep
+                title="Where does it happen?"
+                sub="Pick the scene that pulls you in."
+                cards={SCENE_CARDS}
+                manualPlaceholder="A rainy bus stop at 2am… grandma’s kitchen… the bridge of a starship."
+                optionalHint="Leave empty and we’ll invent the scene for you."
+                onDone={(v) => {
+                  setScene(v);
+                  setStep("goal");
+                }}
+              />
+            </motion.div>
+          )}
+
+          {step === "goal" && (
+            <motion.div key="goal" {...stepMotion}>
+              <DeckStep
+                title="What do you want to pull off?"
+                sub="Give the scene a goal — we’ll tell you if you nailed it."
+                cards={GOAL_CARDS}
+                manualPlaceholder="Get invited to the afterparty… win the argument kindly… ask for help."
+                optionalHint="Leave empty for a free-flowing chat with no goal."
+                onDone={(v) =>
+                  void submit(
+                    { moods: [], description: who, scene, goal: v, vibes: [] },
+                    "create",
+                  )
+                }
+              />
             </motion.div>
           )}
 
