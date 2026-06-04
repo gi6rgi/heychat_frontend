@@ -9,6 +9,7 @@ import {
   Heart,
   Hourglass,
   Minus,
+  Target,
   Wand2,
   X,
 } from "lucide-react";
@@ -170,6 +171,9 @@ function FlowCard({
   const [wish, setWish] = useState("");
   // Where the user imagines the scene happening (create mode only).
   const [scene, setScene] = useState("");
+  // What the user wants to train/achieve; turns the scene into a goal-driven
+  // one with a live verdict (create mode only).
+  const [goal, setGoal] = useState("");
   // Vibe card swipes.
   const [reactions, setReactions] = useState<VibeReaction[]>([]);
   const [swipeDir, setSwipeDir] = useState(1);
@@ -249,7 +253,13 @@ function FlowCard({
     setReactions(next);
     if (next.length === VIBE_CARDS.length) {
       void submit(
-        { moods, description: wish.trim(), scene: scene.trim(), vibes: next },
+        {
+          moods,
+          description: wish.trim(),
+          scene: scene.trim(),
+          goal: goal.trim(),
+          vibes: next,
+        },
         mode,
       );
     }
@@ -441,22 +451,40 @@ function FlowCard({
                 />
               </div>
               {mode === "create" && (
-                <div className="flex flex-col gap-1.5">
-                  <label
-                    htmlFor="match-scene"
-                    className="text-xs font-medium tracking-wide text-muted-foreground uppercase"
-                  >
-                    Set the scene — where does it happen?
-                  </label>
-                  <textarea
-                    id="match-scene"
-                    value={scene}
-                    onChange={(e) => setScene(e.target.value)}
-                    rows={2}
-                    placeholder="A rooftop bar at sunset… a sleeper train through the mountains… the galley of a starship. Optional — we’ll invent one if you skip it."
-                    className="resize-none rounded-xl border border-border bg-background/60 px-3 py-2.5 text-sm leading-relaxed outline-none placeholder:text-muted-foreground/50 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
-                  />
-                </div>
+                <>
+                  <div className="flex flex-col gap-1.5">
+                    <label
+                      htmlFor="match-scene"
+                      className="text-xs font-medium tracking-wide text-muted-foreground uppercase"
+                    >
+                      Set the scene — where does it happen?
+                    </label>
+                    <textarea
+                      id="match-scene"
+                      value={scene}
+                      onChange={(e) => setScene(e.target.value)}
+                      rows={2}
+                      placeholder="A rooftop bar at sunset… a sleeper train through the mountains… the galley of a starship. Optional — we’ll invent one if you skip it."
+                      className="resize-none rounded-xl border border-border bg-background/60 px-3 py-2.5 text-sm leading-relaxed outline-none placeholder:text-muted-foreground/50 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <label
+                      htmlFor="match-goal"
+                      className="text-xs font-medium tracking-wide text-muted-foreground uppercase"
+                    >
+                      Your goal — what do you want to pull off?
+                    </label>
+                    <textarea
+                      id="match-goal"
+                      value={goal}
+                      onChange={(e) => setGoal(e.target.value)}
+                      rows={2}
+                      placeholder="Get a second date… hold my ground on the price… say no without apologizing. Optional — leave empty for a free-flowing chat."
+                      className="resize-none rounded-xl border border-border bg-background/60 px-3 py-2.5 text-sm leading-relaxed outline-none placeholder:text-muted-foreground/50 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+                    />
+                  </div>
+                </>
               )}
               <Button
                 size="xl"
@@ -593,6 +621,12 @@ function FlowCard({
                 <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">
                   {result.scenario.description}
                 </p>
+                {result.scenario.goal && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-brand/30 bg-brand/10 px-2.5 py-1 text-xs font-medium text-brand-light">
+                    <Target size={12} />
+                    Goal: {result.scenario.goal}
+                  </span>
+                )}
               </div>
 
               {result.reason && (

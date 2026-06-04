@@ -27,6 +27,8 @@ export interface CharacterIntake {
   description: string;
   /** "Set the scene" — where the user imagines the conversation happening. */
   scene: string;
+  /** What the user wants to train/achieve; empty = plain companion chat. */
+  goal: string;
   vibes: VibeReaction[];
 }
 
@@ -114,13 +116,6 @@ export interface FeedbackReport {
   metrics: MetricScore[];
   advice: AdviceItem[];
   example_answers?: ExampleAnswer[];
-}
-
-/** Coaching chat (app/coaching). */
-export interface CoachingMessage {
-  role: "user" | "assistant";
-  content: string;
-  created_at?: string;
 }
 
 export type FeedbackStatus = "none" | "generating" | "ready" | "error";

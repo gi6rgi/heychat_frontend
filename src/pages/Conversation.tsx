@@ -4,7 +4,6 @@ import { ArrowLeft, Loader2, Repeat2, RotateCcw, Sparkles } from 'lucide-react'
 import { useConversation, useFeedback, useGenerateFeedback } from '@/hooks/useConversations'
 import { TranscriptFeed } from '@/components/voice/TranscriptFeed'
 import { FeedbackPanel } from '@/components/FeedbackPanel'
-import { CoachingChat } from '@/components/CoachingChat'
 import { Button } from '@/components/ui/button'
 import { formatDateTime } from '@/lib/utils'
 import type { Turn } from '@/types/api'
@@ -110,9 +109,6 @@ export default function Conversation() {
                 )}
               </div>
             )}
-
-            {/* Coaching chat — discuss the result and ask for advice. */}
-            <CoachingChat conversationId={conversation.id} />
 
             {/* Transcript (bottom of the page) */}
             <div className="rounded-2xl border border-white/[0.08] bg-card/30 p-5">
