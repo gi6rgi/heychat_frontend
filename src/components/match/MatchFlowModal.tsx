@@ -244,6 +244,7 @@ function FlowCard({
   }
 
   const card = VIBE_CARDS[reactions.length];
+  const nextCard = VIBE_CARDS[reactions.length + 1];
   const canContinue = moods.length > 0 || wish.trim().length > 0;
   const showBack = step === "intake" || step === "vibes";
   const showProgress = step !== "entry";
@@ -256,9 +257,11 @@ function FlowCard({
       initial={{ opacity: 0, scale: 0.96, y: 12 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.96, y: 12 }}
-      transition={{ duration: 0.25, ease: "easeOut" }}
+      transition={{ type: "spring", stiffness: 320, damping: 28 }}
       onClick={(e) => e.stopPropagation()}
-      className="relative w-full max-w-lg overflow-hidden rounded-3xl border border-white/10 bg-card shadow-2xl shadow-black/50"
+      // overflow-clip (not -hidden): a clipped box can't be focus-scrolled, so
+      // clicking buttons mid step-transition can't permanently shift content.
+      className="relative w-full max-w-lg overflow-clip rounded-3xl border border-white/10 bg-card shadow-2xl shadow-black/50"
     >
       {/* Aurora atmosphere behind the content */}
       <div
@@ -346,7 +349,7 @@ function FlowCard({
                   </Button>
                   <Button
                     size="lg"
-                    variant="ghost"
+                    variant="outline"
                     onClick={() => begin("create")}
                   >
                     Create manually
@@ -354,7 +357,7 @@ function FlowCard({
                 </div>
               </div>
               <p className="text-xs text-muted-foreground/70">
-                Takes about 30 seconds — a few taps, typing optional.
+                About 30 seconds. A few taps — typing optional.
               </p>
             </motion.div>
           )}
@@ -448,21 +451,31 @@ function FlowCard({
                 </span>
               </div>
 
-              <div className="relative h-44">
+              <div className="relative h-48">
+                {/* The next card peeks out behind the current one (deck feel). */}
+                {nextCard && (
+                  <div
+                    aria-hidden
+                    className={cn(
+                      "absolute inset-x-3 top-2 bottom-0 rounded-2xl border border-white/[0.06] bg-gradient-to-br opacity-50",
+                      nextCard.accent,
+                    )}
+                  />
+                )}
                 <AnimatePresence mode="popLayout" custom={swipeDir}>
                   <motion.div
                     key={card.id}
-                    initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                    initial={{ opacity: 0, scale: 0.94, y: 14 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{
                       opacity: 0,
-                      x: swipeDir * 160,
-                      rotate: swipeDir * 6,
-                      transition: { duration: 0.25 },
+                      x: swipeDir * 200,
+                      rotate: swipeDir * 8,
+                      transition: { duration: 0.28, ease: "easeIn" },
                     }}
-                    transition={{ duration: 0.25, ease: "easeOut" }}
+                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
                     className={cn(
-                      "absolute inset-0 flex flex-col justify-between rounded-2xl border border-white/10 bg-gradient-to-br p-5",
+                      "absolute inset-0 bottom-2 flex flex-col justify-between rounded-2xl border border-white/15 bg-gradient-to-br p-5 shadow-xl shadow-black/30 backdrop-blur-sm",
                       card.accent,
                     )}
                   >
@@ -544,8 +557,13 @@ function FlowCard({
               </div>
 
               {result.reason && (
-                <div className="flex flex-col gap-2 rounded-xl border border-white/[0.08] bg-background/40 p-4">
-                  <h3 className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.18, duration: 0.3, ease: "easeOut" }}
+                  className="flex flex-col gap-2 rounded-xl border border-brand/15 bg-gradient-to-br from-brand/[0.07] to-transparent p-4"
+                >
+                  <h3 className="text-xs font-medium tracking-wide text-brand-light/80 uppercase">
                     Why you two fit
                   </h3>
                   <p className="flex gap-2 text-sm leading-relaxed">
@@ -555,7 +573,7 @@ function FlowCard({
                     />
                     {result.reason}
                   </p>
-                </div>
+                </motion.div>
               )}
 
               <div className="flex flex-col gap-2.5">

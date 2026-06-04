@@ -8,12 +8,13 @@ export function AppLayout() {
   const { isAnonymous, email } = useAuth()
   return (
     <div className="min-h-screen bg-background text-foreground">
-      {/* Warm radial glow behind everything for the orange brand feel. */}
+      {/* Pink/purple ambient glow behind everything. */}
       <div
-        className="pointer-events-none fixed inset-0 -z-10 opacity-60"
+        className="pointer-events-none fixed inset-0 -z-10 opacity-70"
         style={{
           background:
-            'radial-gradient(60% 50% at 50% 0%, oklch(0.70 0.19 50 / 0.18), transparent 70%)',
+            'radial-gradient(55% 45% at 50% 0%, oklch(0.67 0.24 322 / 0.16), transparent 70%),' +
+            ' radial-gradient(40% 35% at 85% 80%, oklch(0.55 0.22 295 / 0.10), transparent 70%)',
         }}
       />
       <header className="sticky top-0 z-10 border-b border-border/60 bg-background/70 backdrop-blur-md">

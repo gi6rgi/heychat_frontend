@@ -46,14 +46,14 @@ export const VIBE_CARDS: VibeCard[] = [
     title: "Warm Listener",
     description: "Calm, emotionally present, easy to open up to.",
     tags: ["warm", "supportive", "low-pressure"],
-    accent: "from-amber-400/25 to-orange-500/10",
+    accent: "from-rose-400/25 to-pink-500/10",
   },
   {
     id: "playful-spark",
     title: "Playful Spark",
     description: "Light teasing, fun energy, spontaneous conversations.",
     tags: ["playful", "fun", "flirty"],
-    accent: "from-pink-500/25 to-rose-500/10",
+    accent: "from-fuchsia-500/25 to-pink-600/10",
   },
   {
     id: "deep-mind",
@@ -61,20 +61,20 @@ export const VIBE_CARDS: VibeCard[] = [
     description:
       "Reflective questions, thoughtful conversations, emotional depth.",
     tags: ["deep", "thoughtful", "curious"],
-    accent: "from-sky-500/25 to-indigo-500/10",
+    accent: "from-sky-400/20 to-indigo-500/10",
   },
   {
     id: "mysterious-muse",
     title: "Mysterious Muse",
     description: "Intriguing, cinematic, story-driven energy.",
     tags: ["mysterious", "fantasy", "intense"],
-    accent: "from-violet-500/25 to-purple-600/10",
+    accent: "from-violet-500/30 to-purple-700/10",
   },
   {
     id: "confident-coach",
     title: "Confident Coach",
     description: "Motivating, direct, helps you move forward.",
     tags: ["confident", "motivation", "bold"],
-    accent: "from-emerald-500/25 to-teal-600/10",
+    accent: "from-purple-400/20 to-fuchsia-600/10",
   },
 ];

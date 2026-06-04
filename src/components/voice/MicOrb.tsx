@@ -8,7 +8,7 @@ interface MicOrbProps {
   muted: boolean
 }
 
-/** Pulsing orange orb that reflects who is "talking". */
+/** Pulsing brand-gradient orb that reflects who is "talking". */
 export function MicOrb({ status, isAgentSpeaking, muted }: MicOrbProps) {
   const live = status === 'live'
   const active = live && isAgentSpeaking
