@@ -87,10 +87,13 @@ const WORKING_LINES: Record<Mode, string[]> = {
 /** One draggable card of a swipe deck: drag right to choose, left to pass. */
 function SwipeCard({
   card,
+  nudge,
   onPick,
   onSkip,
 }: {
   card: VibeCard;
+  /** Play a little right-left wiggle on mount to show the card is draggable. */
+  nudge?: boolean;
   onPick: () => void;
   onSkip: () => void;
 }) {
@@ -98,6 +101,9 @@ function SwipeCard({
   const rotate = useTransform(x, [-220, 220], [-12, 12]);
   // Dim the card as it's dragged toward "not this".
   const opacity = useTransform(x, [-220, 0, 220], [0.55, 1, 1]);
+  // Verdict stamps fade in with the drag, telling you what release will do.
+  const pickStamp = useTransform(x, [24, 110], [0, 1]);
+  const skipStamp = useTransform(x, [-110, -24], [1, 0]);
   return (
     <motion.div
       style={{ x, rotate, opacity }}
@@ -109,7 +115,12 @@ function SwipeCard({
         else if (info.offset.x < -90 || info.velocity.x < -600) onSkip();
       }}
       initial={{ opacity: 0, scale: 0.94, y: 14 }}
-      animate={{ opacity: 1, scale: 1, y: 0 }}
+      animate={{
+        opacity: 1,
+        scale: 1,
+        y: 0,
+        x: nudge ? [0, 20, -14, 0] : 0,
+      }}
       // Exit only happens on a pass (picking unmounts the whole step), so the
       // card always flies out left.
       exit={{
@@ -118,7 +129,19 @@ function SwipeCard({
         rotate: -8,
         transition: { duration: 0.28, ease: "easeIn" },
       }}
-      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+      transition={{
+        type: "spring",
+        stiffness: 380,
+        damping: 30,
+        x: nudge
+          ? {
+              delay: 0.7,
+              duration: 1.2,
+              ease: "easeInOut",
+              times: [0, 0.4, 0.75, 1],
+            }
+          : undefined,
+      }}
       whileDrag={{ scale: 1.03, cursor: "grabbing" }}
       className={cn(
         "absolute inset-0 bottom-2 flex cursor-grab touch-none flex-col justify-between rounded-2xl border border-white/15 bg-gradient-to-br p-5 shadow-xl shadow-black/30 backdrop-blur-sm select-none",
@@ -146,6 +169,26 @@ function SwipeCard({
           </span>
         ))}
       </div>
+      {/* Drag-verdict stamps (Tinder-style). Only one is ever visible, so
+          both sit centered where nothing else competes for attention. */}
+      <motion.div
+        aria-hidden
+        style={{ opacity: pickStamp }}
+        className="pointer-events-none absolute inset-0 grid place-items-center"
+      >
+        <span className="-rotate-12 rounded-xl border-2 border-brand-light bg-black/55 px-4 py-1.5 text-xl font-extrabold tracking-widest text-brand-light uppercase shadow-lg backdrop-blur-sm">
+          This one
+        </span>
+      </motion.div>
+      <motion.div
+        aria-hidden
+        style={{ opacity: skipStamp }}
+        className="pointer-events-none absolute inset-0 grid place-items-center"
+      >
+        <span className="rotate-12 rounded-xl border-2 border-white/60 bg-black/55 px-4 py-1.5 text-xl font-extrabold tracking-widest text-white/85 uppercase shadow-lg backdrop-blur-sm">
+          Not this
+        </span>
+      </motion.div>
     </motion.div>
   );
 }
@@ -243,15 +286,17 @@ function DeckStep({
           <SwipeCard
             key={card.id}
             card={card}
+            nudge={idx === 0}
             onPick={() => onDone(`${card.title} — ${card.description}`)}
             onSkip={skip}
           />
         </AnimatePresence>
       </div>
 
+      {/* Buttons mirror the swipe directions: pass ←, choose →. */}
       <div className="flex items-center justify-center gap-3">
         <Button size="lg" variant="outline" onClick={skip}>
-          <X size={16} className="text-muted-foreground" />
+          <ArrowLeft size={16} className="text-muted-foreground" />
           Not this
         </Button>
         <Button
@@ -260,6 +305,7 @@ function DeckStep({
         >
           <Heart size={16} />
           This one
+          <ArrowRight size={16} />
         </Button>
       </div>
       <button
