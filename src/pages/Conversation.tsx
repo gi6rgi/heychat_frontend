@@ -7,7 +7,6 @@ import { FeedbackPanel } from '@/components/FeedbackPanel'
 import { CoachingChat } from '@/components/CoachingChat'
 import { Button } from '@/components/ui/button'
 import { formatDateTime } from '@/lib/utils'
-import { getApiBaseUrl } from '@/lib/api-client'
 import type { Turn } from '@/types/api'
 
 export default function Conversation() {
@@ -115,17 +114,9 @@ export default function Conversation() {
             {/* Coaching chat — discuss the result and ask for advice. */}
             <CoachingChat conversationId={conversation.id} />
 
-            {/* Recording + transcript (bottom of the page) */}
+            {/* Transcript (bottom of the page) */}
             <div className="rounded-2xl border border-white/[0.08] bg-card/30 p-5">
               <h2 className="mb-4 text-sm font-medium text-muted-foreground">Transcript</h2>
-              {conversation.has_audio && (
-                <audio
-                  controls
-                  preload="none"
-                  className="mb-4 w-full"
-                  src={`${getApiBaseUrl()}/conversations/${conversation.id}/audio`}
-                />
-              )}
               <TranscriptFeed turns={turns} autoScroll={false} />
             </div>
           </div>
