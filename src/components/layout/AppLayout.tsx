@@ -2,10 +2,9 @@ import { Link, NavLink, Outlet } from 'react-router-dom'
 import { Mic } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useAuth } from '@/lib/auth'
-import { SaveAccountDialog } from '@/components/account/SaveAccountDialog'
 
 export function AppLayout() {
-  const { isAnonymous, email } = useAuth()
+  const { email } = useAuth()
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Pink/purple ambient glow behind everything. */}
@@ -44,12 +43,12 @@ export function AppLayout() {
               History
             </NavLink>
           </nav>
+          {/* Save-progress (email upgrade) is hidden for now — anonymous
+              sessions only. Bring back <SaveAccountDialog /> to re-enable. */}
           <div className="ml-auto flex items-center">
-            {isAnonymous ? (
-              <SaveAccountDialog />
-            ) : email ? (
+            {email && (
               <span className="text-sm text-muted-foreground">{email}</span>
-            ) : null}
+            )}
           </div>
         </div>
       </header>
