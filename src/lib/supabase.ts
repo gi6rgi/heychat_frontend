@@ -5,7 +5,7 @@ const supabaseAnonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY as string | unde
 
 if (!supabaseUrl || !supabaseAnonKey) {
   // Fail loud in dev: every API/WS call depends on a valid session.
-  console.error('Missing VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY — auth will not work.')
+  console.error('Missing VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY - auth will not work.')
 }
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {

@@ -2,7 +2,7 @@
  * Static content for the Conversational Match flow: intent chips for the
  * conversational intake and the Tinder-style vibe cards. The actual matching
  * and character generation are LLM-powered on the backend
- * (/characters/match, /characters/generate) — this module only describes the
+ * (/characters/match, /characters/generate) - this module only describes the
  * choices we show.
  */
 import {
@@ -41,7 +41,7 @@ export interface VibeCard {
   emoji?: string;
 }
 
-/** "Pick the vibes that feel closest" — swiped Like / Maybe / Skip. */
+/** "Pick the vibes that feel closest" - swiped Like / Maybe / Skip. */
 export const VIBE_CARDS: VibeCard[] = [
   {
     id: "warm-listener",
@@ -162,7 +162,7 @@ export const GOAL_CARDS: VibeCard[] = [
   {
     id: "firm-no",
     title: "Say no without apologizing",
-    description: "Set the boundary — and keep it warm.",
+    description: "Set the boundary - and keep it warm.",
     tags: ["boundaries", "calm"],
     accent: "from-violet-500/30 to-purple-700/10",
     emoji: "🙅",

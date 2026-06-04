@@ -86,7 +86,7 @@ export default function Session() {
               {replayOf && (
                 <span className="inline-flex items-center gap-1.5 rounded-full border border-brand/30 bg-brand/10 px-2.5 py-1 text-xs font-medium text-brand-light">
                   <Repeat2 size={13} />
-                  Replaying your last attempt — same flow
+                  Replaying your last attempt - same flow
                 </span>
               )}
             </div>

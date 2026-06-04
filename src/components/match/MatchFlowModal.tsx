@@ -45,7 +45,7 @@ type Step =
   // Match path: one intake form, then the vibe deck.
   | "intake"
   | "vibes"
-  // Create path: three swipe decks — who, where, what for.
+  // Create path: three swipe decks - who, where, what for.
   | "who"
   | "where"
   | "goal"
@@ -232,7 +232,7 @@ function DeckStep({
         <div>
           <h2 className="text-xl font-bold tracking-tight">{title}</h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            In your own words — paint it however you like.
+            In your own words - paint it however you like.
           </p>
         </div>
         <textarea
@@ -287,7 +287,7 @@ function DeckStep({
             key={card.id}
             card={card}
             nudge={idx === 0}
-            onPick={() => onDone(`${card.title} — ${card.description}`)}
+            onPick={() => onDone(`${card.title} - ${card.description}`)}
             onSkip={skip}
           />
         </AnimatePresence>
@@ -301,7 +301,7 @@ function DeckStep({
         </Button>
         <Button
           size="lg"
-          onClick={() => onDone(`${card.title} — ${card.description}`)}
+          onClick={() => onDone(`${card.title} - ${card.description}`)}
         >
           <Heart size={16} />
           This one
@@ -319,7 +319,7 @@ function DeckStep({
   );
 }
 
-/** Pulsing voice-orb motif — echoes the in-session MicOrb identity. */
+/** Pulsing voice-orb motif - echoes the in-session MicOrb identity. */
 function MatchOrb({ size = 88, initial }: { size?: number; initial?: string }) {
   return (
     <div
@@ -398,7 +398,7 @@ export function MatchFlowModal({
           transition={{ duration: 0.2 }}
           // No close-on-overlay-click: a card drag that ends past the dialog's
           // edge fires a click on the overlay and would dismiss the whole
-          // flow. Closing is explicit — the ✕ button or Escape.
+          // flow. Closing is explicit - the ✕ button or Escape.
           className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-black/60 p-4 backdrop-blur-md"
         >
           {/* Flow state lives in FlowCard, which mounts fresh on every open. */}
@@ -437,7 +437,7 @@ function FlowCard({
     created: boolean;
   } | null>(null);
   const [noMatchReason, setNoMatchReason] = useState("");
-  // Friendly daily-limit notice (HTTP 429) — retrying won't help today, so
+  // Friendly daily-limit notice (HTTP 429) - retrying won't help today, so
   // the error step renders it as information instead of a failure.
   const [limitMessage, setLimitMessage] = useState<string | null>(null);
   // Last submitted intake, kept for retries and the "create instead" actions.
@@ -503,9 +503,9 @@ function FlowCard({
       if (e instanceof ApiError && e.status === 429) {
         try {
           const detail = (JSON.parse(e.body) as { detail?: string }).detail;
-          setLimitMessage(detail || "Daily limit reached — come back tomorrow!");
+          setLimitMessage(detail || "Daily limit reached - come back tomorrow!");
         } catch {
-          setLimitMessage("Daily limit reached — come back tomorrow!");
+          setLimitMessage("Daily limit reached - come back tomorrow!");
         }
       }
       setStep("error");
@@ -624,7 +624,7 @@ function FlowCard({
                   </span>
                 </h2>
                 <p className="mx-auto max-w-sm text-sm leading-relaxed text-muted-foreground">
-                  Imagine who you’d love to talk to — and where it happens. A
+                  Imagine who you’d love to talk to - and where it happens. A
                   rooftop bar, a night train, anywhere. We’ll bring the scene to
                   life for a real voice conversation.
                 </p>
@@ -652,7 +652,7 @@ function FlowCard({
                 </div>
               </div>
               <p className="text-xs text-muted-foreground/70">
-                About 30 seconds. A few swipes — typing optional.
+                Takes about 30 seconds - just a few swipes.
               </p>
             </motion.div>
           )}
@@ -728,7 +728,7 @@ function FlowCard({
             <motion.div key="who" {...stepMotion}>
               <DeckStep
                 title="Who would you love to talk to?"
-                sub="Swipe right when it clicks — left to pass."
+                sub="Swipe right when it clicks - left to pass."
                 cards={WHO_CARDS}
                 required
                 manualPlaceholder="Someone calm, smart, and a little playful. A person I can talk to after work."
@@ -760,7 +760,7 @@ function FlowCard({
             <motion.div key="goal" {...stepMotion}>
               <DeckStep
                 title="What do you want to pull off?"
-                sub="Give the scene a goal — we’ll tell you if you nailed it."
+                sub="Give the scene a goal - we’ll tell you if you nailed it."
                 cards={GOAL_CARDS}
                 manualPlaceholder="Get invited to the afterparty… win the argument kindly… ask for help."
                 optionalHint="Leave empty for a free-flowing chat with no goal."
@@ -786,7 +786,7 @@ function FlowCard({
                     Pick the vibes that feel closest
                   </h2>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    React to a few quick cards — gut feeling is enough.
+                    React to a few quick cards - gut feeling is enough.
                   </p>
                 </div>
                 <span className="shrink-0 text-sm tabular-nums text-muted-foreground">
@@ -967,7 +967,7 @@ function FlowCard({
                   <Wand2 size={24} className="text-brand-light" />
                 </div>
                 <h2 className="text-xl font-bold tracking-tight">
-                  No one quite fits — yet
+                  No one quite fits - yet
                 </h2>
                 {noMatchReason && (
                   <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">
@@ -975,7 +975,7 @@ function FlowCard({
                   </p>
                 )}
                 <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">
-                  Let’s build them from scratch — this time you can set the
+                  Let’s build them from scratch - this time you can set the
                   scene and a goal too.
                 </p>
               </div>

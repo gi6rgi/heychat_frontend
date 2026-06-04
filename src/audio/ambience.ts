@@ -3,7 +3,7 @@
  *
  * A looping brown-noise bed is shaped with high/low-pass filters into a subtle
  * "room tone"; livelier scenarios add a slow gain swell to suggest a murmuring
- * crowd. It plays only in the browser for immersion — it is never sent to the
+ * crowd. It plays only in the browser for immersion - it is never sent to the
  * agent nor mixed into the recording.
  */
 export type Ambience = 'bar' | 'cafe' | 'office' | 'room' | 'none'

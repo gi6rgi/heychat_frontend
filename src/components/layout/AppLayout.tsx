@@ -43,7 +43,7 @@ export function AppLayout() {
               History
             </NavLink>
           </nav>
-          {/* Save-progress (email upgrade) is hidden for now — anonymous
+          {/* Save-progress (email upgrade) is hidden for now - anonymous
               sessions only. Bring back <SaveAccountDialog /> to re-enable. */}
           <div className="ml-auto flex items-center">
             {email && (

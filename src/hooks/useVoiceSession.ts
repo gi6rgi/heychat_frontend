@@ -18,7 +18,7 @@ const LIMIT_CODES = new Set(['daily_limit', 'capacity', 'concurrent_session'])
 export function useVoiceSession(scenarioId: string | undefined, replayOf?: string | null) {
   const [status, setStatus] = useState<SessionStatus>('idle')
   const [error, setError] = useState<string | null>(null)
-  // Friendly usage-limit notice (daily budget, session time cap) — rendered
+  // Friendly usage-limit notice (daily budget, session time cap) - rendered
   // as information, not as an error.
   const [limitNotice, setLimitNotice] = useState<string | null>(null)
   // Goal verdict from the persona's end_conversation call; the server closes
@@ -68,7 +68,7 @@ export function useVoiceSession(scenarioId: string | undefined, replayOf?: strin
     setIsAgentSpeaking(false)
     setInputLevel(0)
     setStatus('ended')
-    // The transcript is now persisted server-side — refresh the history list.
+    // The transcript is now persisted server-side - refresh the history list.
     queryClient.invalidateQueries({ queryKey: queryKeys.conversations() })
   }, [cleanup, queryClient])
 
@@ -139,13 +139,13 @@ export function useVoiceSession(scenarioId: string | undefined, replayOf?: strin
             break
           case 'error':
             // Limit rejections arrive right before the server closes the
-            // socket — show them as a notice, not a scary error.
+            // socket - show them as a notice, not a scary error.
             if (msg.code && LIMIT_CODES.has(msg.code)) setLimitNotice(msg.message)
             else setError(msg.message)
             break
           case 'session_limit':
             setLimitNotice(
-              'Time flies! This session reached its 10-minute limit — the conversation is saved to your history.',
+              'Time flies! This session reached its 10-minute limit - the conversation is saved to your history.',
             )
             break
           case 'goal_result':

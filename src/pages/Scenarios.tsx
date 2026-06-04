@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 
 export default function Scenarios() {
   const { data: scenarios, isLoading, isError } = useScenarios();
-  // The match flow greets the user on every visit to the catalog — it's the
+  // The match flow greets the user on every visit to the catalog - it's the
   // primary entry point; "Browse characters" / Esc drops to the grid behind.
   const [matchOpen, setMatchOpen] = useState(true);
 
@@ -20,7 +20,7 @@ export default function Scenarios() {
             it out loud
           </h1>
           <p className="max-w-xl text-muted-foreground">
-            Pick a ready-made scene with a goal to chase — or create your own
+            Pick a ready-made scene with a goal to chase - or create your own
             companion and the place you meet. Real voice, zero judgment.
           </p>
         </div>

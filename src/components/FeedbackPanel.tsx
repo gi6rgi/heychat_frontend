@@ -192,7 +192,7 @@ export function FeedbackPanel({
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Model answers — concrete examples to use in the next attempt. */}
+      {/* Model answers - concrete examples to use in the next attempt. */}
       {examples.length > 0 && (
         <div className="flex flex-col gap-3 rounded-2xl border border-brand/25 bg-brand/[0.07] p-5">
           <h3 className="flex items-center gap-2 text-sm font-semibold text-brand-light">
@@ -238,7 +238,7 @@ export function FeedbackPanel({
             accent="text-emerald-400"
             metrics={strengths}
             prevByName={prevByName}
-            emptyText="No clear strengths this time — focus on the areas at right."
+            emptyText="No clear strengths this time - focus on the areas at right."
           />
           <MetricColumn
             title="Focus areas"
@@ -246,7 +246,7 @@ export function FeedbackPanel({
             accent="text-brand-light"
             metrics={focus}
             prevByName={prevByName}
-            emptyText="Nothing major to fix — nice work."
+            emptyText="Nothing major to fix - nice work."
           />
         </div>
       )}

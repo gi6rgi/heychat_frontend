@@ -25,7 +25,7 @@ export interface VibeReaction {
 export interface CharacterIntake {
   moods: string[];
   description: string;
-  /** "Set the scene" — where the user imagines the conversation happening. */
+  /** "Set the scene" - where the user imagines the conversation happening. */
   scene: string;
   /** What the user wants to train/achieve; empty = plain companion chat. */
   goal: string;

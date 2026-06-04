@@ -72,7 +72,7 @@ export function SaveAccountDialog() {
               <Dialog.Description className="text-sm text-muted-foreground">
                 {status === 'done'
                   ? 'Your progress is now tied to your email.'
-                  : `We sent a confirmation link to ${email}. Click it to finish saving your account — your history stays linked.`}
+                  : `We sent a confirmation link to ${email}. Click it to finish saving your account - your history stays linked.`}
               </Dialog.Description>
               <Button className="w-full" onClick={() => setOpen(false)}>
                 Done
