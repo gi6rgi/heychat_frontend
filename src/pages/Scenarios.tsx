@@ -1,25 +1,15 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Sparkles } from "lucide-react";
 import { useScenarios } from "@/hooks/useScenarios";
 import { ScenarioCard } from "@/components/ScenarioCard";
 import { MatchFlowModal } from "@/components/match/MatchFlowModal";
 import { Button } from "@/components/ui/button";
 
-/** Shown the match intro once; afterwards it stays one click away. */
-const MATCH_INTRO_SEEN_KEY = "heychat.matchIntroSeen";
-
 export default function Scenarios() {
   const { data: scenarios, isLoading, isError } = useScenarios();
-  // First-visit entry point: open the match flow on top of the catalog instead
-  // of dropping new users straight into a grid. Afterwards it stays one click
-  // away behind the "Find my match" button.
-  const [matchOpen, setMatchOpen] = useState(
-    () => !localStorage.getItem(MATCH_INTRO_SEEN_KEY),
-  );
-
-  useEffect(() => {
-    localStorage.setItem(MATCH_INTRO_SEEN_KEY, "1");
-  }, []);
+  // The match flow greets the user on every visit to the catalog — it's the
+  // primary entry point; "Browse characters" / Esc drops to the grid behind.
+  const [matchOpen, setMatchOpen] = useState(true);
 
   return (
     <div className="flex flex-col gap-8">
