@@ -37,7 +37,11 @@ export type ServerMessage =
   | { type: "transcript"; role: "user" | "agent"; text: string }
   | { type: "interrupted" }
   | { type: "turn_complete" }
-  | { type: "error"; message: string };
+  // `code` marks usage-limit rejections ("daily_limit", "capacity",
+  // "concurrent_session") so the UI can show a friendly notice, not an error.
+  | { type: "error"; message: string; code?: string | null }
+  // Sent right before the server ends a session that hit its time cap.
+  | { type: "session_limit"; reason: string };
 
 export interface Turn {
   id: string;

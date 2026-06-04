@@ -7,6 +7,7 @@ import {
   ArrowRight,
   Check,
   Heart,
+  Hourglass,
   Minus,
   Wand2,
   X,
@@ -14,6 +15,7 @@ import {
 import { MOOD_CHIPS, VIBE_CARDS } from "@/components/match/matchFlow";
 import { generateCharacter, matchCharacter } from "@/services/characters";
 import { getScenario } from "@/services/scenarios";
+import { ApiError } from "@/lib/api-client";
 import { queryKeys } from "@/lib/query-keys";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -175,6 +177,9 @@ function FlowCard({
     created: boolean;
   } | null>(null);
   const [noMatchReason, setNoMatchReason] = useState("");
+  // Friendly daily-limit notice (HTTP 429) — retrying won't help today, so
+  // the error step renders it as information instead of a failure.
+  const [limitMessage, setLimitMessage] = useState<string | null>(null);
   // Last submitted intake, kept for retries and the "create instead" actions.
   const [intake, setIntake] = useState<CharacterIntake | null>(null);
 
@@ -193,6 +198,7 @@ function FlowCard({
 
   async function submit(payload: CharacterIntake, m: Mode) {
     setIntake(payload);
+    setLimitMessage(null);
     setStep("working");
     try {
       if (m === "create") {
@@ -216,7 +222,15 @@ function FlowCard({
           setStep("nomatch");
         }
       }
-    } catch {
+    } catch (e) {
+      if (e instanceof ApiError && e.status === 429) {
+        try {
+          const detail = (JSON.parse(e.body) as { detail?: string }).detail;
+          setLimitMessage(detail || "Daily limit reached — come back tomorrow!");
+        } catch {
+          setLimitMessage("Daily limit reached — come back tomorrow!");
+        }
+      }
       setStep("error");
     }
   }
@@ -658,21 +672,33 @@ function FlowCard({
               {...stepMotion}
               className="flex flex-col items-center gap-4 py-6 text-center"
             >
-              <p className="max-w-sm text-sm text-destructive">
-                Something went wrong while{" "}
-                {mode === "create"
-                  ? "creating your companion"
-                  : "finding your match"}
-                .
-              </p>
-              <Button
-                size="lg"
-                onClick={() =>
-                  intake && void submit(intake, mode)
-                }
-              >
-                Try again
-              </Button>
+              {limitMessage ? (
+                <>
+                  <p className="flex max-w-sm items-start gap-2 rounded-xl border border-brand/30 bg-brand/10 px-3.5 py-2.5 text-left text-sm text-brand-light">
+                    <Hourglass size={15} className="mt-0.5 shrink-0" />
+                    {limitMessage}
+                  </p>
+                  <Button size="lg" variant="outline" onClick={onClose}>
+                    Browse characters
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <p className="max-w-sm text-sm text-destructive">
+                    Something went wrong while{" "}
+                    {mode === "create"
+                      ? "creating your companion"
+                      : "finding your match"}
+                    .
+                  </p>
+                  <Button
+                    size="lg"
+                    onClick={() => intake && void submit(intake, mode)}
+                  >
+                    Try again
+                  </Button>
+                </>
+              )}
             </motion.div>
           )}
         </AnimatePresence>

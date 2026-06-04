@@ -30,7 +30,15 @@ export async function streamChat(
     body: JSON.stringify({ content }),
   })
   if (!res.ok || !res.body) {
-    onError?.(`Request failed (${res.status})`)
+    // Surface the backend's friendly detail (e.g. the daily-limit notice).
+    let message = `Request failed (${res.status})`
+    try {
+      const detail = (await res.json()).detail
+      if (typeof detail === 'string' && detail) message = detail
+    } catch {
+      /* keep the generic message */
+    }
+    onError?.(message)
     return
   }
 

@@ -9,6 +9,8 @@ import type { ServerMessage, Turn } from '@/types/api'
 
 export type SessionStatus = 'idle' | 'connecting' | 'live' | 'ended' | 'error'
 
+const LIMIT_CODES = new Set(['daily_limit', 'capacity', 'concurrent_session'])
+
 /**
  * Drives one voice training session: opens the backend WebSocket, streams mic
  * audio up, plays the agent's audio down, and surfaces live transcripts.
@@ -16,6 +18,9 @@ export type SessionStatus = 'idle' | 'connecting' | 'live' | 'ended' | 'error'
 export function useVoiceSession(scenarioId: string | undefined, replayOf?: string | null) {
   const [status, setStatus] = useState<SessionStatus>('idle')
   const [error, setError] = useState<string | null>(null)
+  // Friendly usage-limit notice (daily budget, session time cap) — rendered
+  // as information, not as an error.
+  const [limitNotice, setLimitNotice] = useState<string | null>(null)
   const [transcripts, setTranscripts] = useState<Turn[]>([])
   const [isAgentSpeaking, setIsAgentSpeaking] = useState(false)
   const [muted, setMuted] = useState(false)
@@ -65,6 +70,7 @@ export function useVoiceSession(scenarioId: string | undefined, replayOf?: strin
     if (!scenarioId || status === 'connecting' || status === 'live') return
     stoppingRef.current = false
     setError(null)
+    setLimitNotice(null)
     setTranscripts([])
     setConversationId(null)
     setStatus('connecting')
@@ -125,7 +131,15 @@ export function useVoiceSession(scenarioId: string | undefined, replayOf?: strin
           case 'turn_complete':
             break
           case 'error':
-            setError(msg.message)
+            // Limit rejections arrive right before the server closes the
+            // socket — show them as a notice, not a scary error.
+            if (msg.code && LIMIT_CODES.has(msg.code)) setLimitNotice(msg.message)
+            else setError(msg.message)
+            break
+          case 'session_limit':
+            setLimitNotice(
+              'Time flies! This session reached its 10-minute limit — the conversation is saved to your history.',
+            )
             break
           case 'ready':
             setConversationId(msg.conversation_id)
@@ -172,6 +186,7 @@ export function useVoiceSession(scenarioId: string | undefined, replayOf?: strin
   return {
     status,
     error,
+    limitNotice,
     transcripts,
     isAgentSpeaking,
     muted,

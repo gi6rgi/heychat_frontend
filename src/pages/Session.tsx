@@ -3,6 +3,7 @@ import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom'
 import {
   ArrowLeft,
   FileText,
+  Hourglass,
   Mic,
   MicOff,
   PhoneOff,
@@ -37,6 +38,7 @@ export default function Session() {
   const {
     status,
     error,
+    limitNotice,
     transcripts,
     isAgentSpeaking,
     muted,
@@ -88,6 +90,12 @@ export default function Session() {
             <span className="text-muted-foreground">{STATUS_LABEL[status]}</span>
           </div>
 
+          {limitNotice && (
+            <p className="flex max-w-sm items-start gap-2 rounded-xl border border-brand/30 bg-brand/10 px-3.5 py-2.5 text-sm text-brand-light">
+              <Hourglass size={15} className="mt-0.5 shrink-0" />
+              {limitNotice}
+            </p>
+          )}
           {error && <p className="text-sm text-destructive">{error}</p>}
 
           <div className="flex items-center gap-3">
