@@ -242,6 +242,23 @@ function FlowCard({
     setStep("intake");
   }
 
+  /** "Create my own" after a match attempt: restart the flow from a clean
+   * slate in create mode, so the user also gets the scene and goal fields
+   * (the match intake never collected those). */
+  function restartAsCreate() {
+    setMoods([]);
+    setWish("");
+    setScene("");
+    setGoal("");
+    setReactions([]);
+    setSwipeDir(1);
+    setResult(null);
+    setNoMatchReason("");
+    setLimitMessage(null);
+    setIntake(null);
+    begin("create");
+  }
+
   async function submit(payload: CharacterIntake, m: Mode) {
     setIntake(payload);
     setLimitMessage(null);
@@ -713,10 +730,10 @@ function FlowCard({
                   <ArrowRight size={17} />
                 </Button>
                 <div className="flex items-center justify-center gap-4">
-                  {!result.created && intake && (
+                  {!result.created && (
                     <button
                       type="button"
-                      onClick={() => void submit(intake!, "create")}
+                      onClick={restartAsCreate}
                       className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
                     >
                       <Wand2 size={14} /> Create my own instead
@@ -753,18 +770,12 @@ function FlowCard({
                   </p>
                 )}
                 <p className="max-w-sm text-sm leading-relaxed text-muted-foreground">
-                  Let’s create someone from scratch — exactly the companion you
-                  described.
+                  Let’s build them from scratch — this time you can set the
+                  scene and a goal too.
                 </p>
               </div>
               <div className="flex flex-col gap-2.5">
-                <Button
-                  size="xl"
-                  className="w-full"
-                  onClick={() =>
-                    intake && void submit(intake, "create")
-                  }
-                >
+                <Button size="xl" className="w-full" onClick={restartAsCreate}>
                   <Wand2 size={17} />
                   Create my companion
                 </Button>
