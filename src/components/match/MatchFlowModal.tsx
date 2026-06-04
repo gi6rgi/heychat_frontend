@@ -396,8 +396,10 @@ export function MatchFlowModal({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
+          // No close-on-overlay-click: a card drag that ends past the dialog's
+          // edge fires a click on the overlay and would dismiss the whole
+          // flow. Closing is explicit — the ✕ button or Escape.
           className="fixed inset-0 z-50 grid place-items-center overflow-y-auto bg-black/60 p-4 backdrop-blur-md"
-          onClick={onClose}
         >
           {/* Flow state lives in FlowCard, which mounts fresh on every open. */}
           <FlowCard scenarios={scenarios} onClose={onClose} />
@@ -551,7 +553,6 @@ function FlowCard({
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.96, y: 12 }}
       transition={{ type: "spring", stiffness: 320, damping: 28 }}
-      onClick={(e) => e.stopPropagation()}
       // overflow-clip (not -hidden): a clipped box can't be focus-scrolled, so
       // clicking buttons mid step-transition can't permanently shift content.
       className="relative w-full max-w-lg overflow-clip rounded-3xl border border-white/10 bg-card shadow-2xl shadow-black/50"
