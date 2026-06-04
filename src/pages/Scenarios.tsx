@@ -16,12 +16,12 @@ export default function Scenarios() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-bold tracking-tight">
-            Practice <span className="text-brand-light">conversations</span> out
-            loud
+            Step into a <span className="text-brand-light">scene</span> and say
+            it out loud
           </h1>
           <p className="max-w-xl text-muted-foreground">
-            Pick a scenario and talk to an AI partner with your voice. A safe
-            space to rehearse and build confidence.
+            Pick a ready-made scene with a goal to chase — or create your own
+            companion and the place you meet. Real voice, zero judgment.
           </p>
         </div>
         <Button

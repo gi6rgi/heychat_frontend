@@ -1,14 +1,18 @@
 import { useState } from 'react'
 import { useParams, useNavigate, useSearchParams, Link } from 'react-router-dom'
+import { motion } from 'motion/react'
 import {
   ArrowLeft,
   FileText,
   Hourglass,
   Mic,
   MicOff,
+  PartyPopper,
   PhoneOff,
   Play,
   Repeat2,
+  RotateCcw,
+  Target,
   Volume2,
   VolumeX,
 } from 'lucide-react'
@@ -39,6 +43,7 @@ export default function Session() {
     status,
     error,
     limitNotice,
+    goalResult,
     transcripts,
     isAgentSpeaking,
     muted,
@@ -62,7 +67,7 @@ export default function Session() {
         onClick={() => navigate('/')}
         className="flex w-fit items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
       >
-        <ArrowLeft size={16} /> All scenarios
+        <ArrowLeft size={16} /> All scenes
       </button>
 
       <div className="grid gap-6 lg:grid-cols-[1fr_1.1fr]">
@@ -71,15 +76,52 @@ export default function Session() {
           <div className="text-center">
             <h1 className="text-2xl font-bold">{scenario?.title ?? '…'}</h1>
             <p className="mt-1 text-sm text-muted-foreground">{scenario?.description}</p>
-            {replayOf && (
-              <span className="mt-2 inline-flex items-center gap-1.5 rounded-full border border-brand/30 bg-brand/10 px-2.5 py-1 text-xs font-medium text-brand-light">
-                <Repeat2 size={13} />
-                Replaying your last attempt — same flow
-              </span>
-            )}
+            <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
+              {scenario?.goal && (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-brand/30 bg-brand/10 px-2.5 py-1 text-xs font-medium text-brand-light">
+                  <Target size={13} />
+                  Goal: {scenario.goal}
+                </span>
+              )}
+              {replayOf && (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-brand/30 bg-brand/10 px-2.5 py-1 text-xs font-medium text-brand-light">
+                  <Repeat2 size={13} />
+                  Replaying your last attempt — same flow
+                </span>
+              )}
+            </div>
           </div>
 
-          <MicOrb status={status} isAgentSpeaking={isAgentSpeaking} muted={muted} />
+          {goalResult ? (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.85 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 24 }}
+              className="flex flex-col items-center gap-3 py-4 text-center"
+            >
+              <div
+                className={`flex size-20 items-center justify-center rounded-full ${
+                  goalResult.outcome === 'success'
+                    ? 'bg-gradient-to-br from-brand-light via-brand to-brand-dark shadow-[0_0_40px_-8px_var(--color-brand)]'
+                    : 'border border-white/[0.08] bg-muted'
+                }`}
+              >
+                {goalResult.outcome === 'success' ? (
+                  <PartyPopper size={32} className="text-white" />
+                ) : (
+                  <RotateCcw size={30} className="text-muted-foreground" />
+                )}
+              </div>
+              <h2 className="text-xl font-bold">
+                {goalResult.outcome === 'success' ? 'Goal achieved! 🎉' : 'Not this time'}
+              </h2>
+              {goalResult.reason && (
+                <p className="max-w-sm text-sm text-muted-foreground">{goalResult.reason}</p>
+              )}
+            </motion.div>
+          ) : (
+            <MicOrb status={status} isAgentSpeaking={isAgentSpeaking} muted={muted} />
+          )}
 
           {live && <MicLevelMeter level={inputLevel} active={!muted} />}
 

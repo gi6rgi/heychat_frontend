@@ -21,6 +21,12 @@ export function useVoiceSession(scenarioId: string | undefined, replayOf?: strin
   // Friendly usage-limit notice (daily budget, session time cap) — rendered
   // as information, not as an error.
   const [limitNotice, setLimitNotice] = useState<string | null>(null)
+  // Goal verdict from the persona's end_conversation call; the server closes
+  // the session right after the goodbye line plays out.
+  const [goalResult, setGoalResult] = useState<{
+    outcome: 'success' | 'failure'
+    reason: string
+  } | null>(null)
   const [transcripts, setTranscripts] = useState<Turn[]>([])
   const [isAgentSpeaking, setIsAgentSpeaking] = useState(false)
   const [muted, setMuted] = useState(false)
@@ -71,6 +77,7 @@ export function useVoiceSession(scenarioId: string | undefined, replayOf?: strin
     stoppingRef.current = false
     setError(null)
     setLimitNotice(null)
+    setGoalResult(null)
     setTranscripts([])
     setConversationId(null)
     setStatus('connecting')
@@ -141,6 +148,9 @@ export function useVoiceSession(scenarioId: string | undefined, replayOf?: strin
               'Time flies! This session reached its 10-minute limit — the conversation is saved to your history.',
             )
             break
+          case 'goal_result':
+            setGoalResult({ outcome: msg.outcome, reason: msg.reason })
+            break
           case 'ready':
             setConversationId(msg.conversation_id)
             break
@@ -187,6 +197,7 @@ export function useVoiceSession(scenarioId: string | undefined, replayOf?: strin
     status,
     error,
     limitNotice,
+    goalResult,
     transcripts,
     isAgentSpeaking,
     muted,

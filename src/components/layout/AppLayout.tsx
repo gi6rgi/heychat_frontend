@@ -33,7 +33,7 @@ export function AppLayout() {
                 cn('transition-colors hover:text-foreground', isActive ? 'text-foreground' : 'text-muted-foreground')
               }
             >
-              Scenarios
+              Scenes
             </NavLink>
             <NavLink
               to="/history"

@@ -61,6 +61,7 @@ const WORKING_LINES: Record<Mode, string[]> = {
   create: [
     "Reading your vibe…",
     "Imagining someone just for you…",
+    "Painting the scene…",
     "Writing their story…",
   ],
 };
@@ -167,6 +168,8 @@ function FlowCard({
   // Intake answers.
   const [moods, setMoods] = useState<string[]>([]);
   const [wish, setWish] = useState("");
+  // Where the user imagines the scene happening (create mode only).
+  const [scene, setScene] = useState("");
   // Vibe card swipes.
   const [reactions, setReactions] = useState<VibeReaction[]>([]);
   const [swipeDir, setSwipeDir] = useState(1);
@@ -245,7 +248,10 @@ function FlowCard({
     ];
     setReactions(next);
     if (next.length === VIBE_CARDS.length) {
-      void submit({ moods, description: wish.trim(), vibes: next }, mode);
+      void submit(
+        { moods, description: wish.trim(), scene: scene.trim(), vibes: next },
+        mode,
+      );
     }
   }
 
@@ -267,7 +273,7 @@ function FlowCard({
     <motion.div
       role="dialog"
       aria-modal="true"
-      aria-label="Find your first companion"
+      aria-label="Create your companion"
       initial={{ opacity: 0, scale: 0.96, y: 12 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.96, y: 12 }}
@@ -338,23 +344,24 @@ function FlowCard({
               <MatchOrb />
               <div className="flex flex-col gap-2">
                 <h2 className="text-2xl font-bold tracking-tight">
-                  Let’s find your first{" "}
+                  Your companion, your{" "}
                   <span className="bg-gradient-to-r from-brand-light to-brand bg-clip-text text-transparent">
-                    companion
+                    scene
                   </span>
                 </h2>
                 <p className="mx-auto max-w-sm text-sm leading-relaxed text-muted-foreground">
-                  Tell us what kind of connection you want, and we’ll introduce
-                  you to someone who fits your mood.
+                  Imagine who you’d love to talk to — and where it happens. A
+                  rooftop bar, a night train, anywhere. We’ll bring the scene to
+                  life for a real voice conversation.
                 </p>
               </div>
               <div className="flex w-full flex-col gap-2.5 pt-1">
                 <Button
                   size="xl"
                   className="w-full"
-                  onClick={() => begin("match")}
+                  onClick={() => begin("create")}
                 >
-                  Find my match
+                  Create my companion
                   <ArrowRight size={17} />
                 </Button>
                 <div className="grid grid-cols-2 gap-2.5">
@@ -364,9 +371,9 @@ function FlowCard({
                   <Button
                     size="lg"
                     variant="outline"
-                    onClick={() => begin("create")}
+                    onClick={() => begin("match")}
                   >
-                    Create manually
+                    Find my match
                   </Button>
                 </div>
               </div>
@@ -388,7 +395,7 @@ function FlowCard({
                 </h2>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {mode === "create"
-                    ? "We’ll create someone new from your answers."
+                    ? "We’ll create someone new — and a scene to meet them in."
                     : "We’ll use this to find who fits your mood."}
                 </p>
               </div>
@@ -433,6 +440,24 @@ function FlowCard({
                   className="resize-none rounded-xl border border-border bg-background/60 px-3 py-2.5 text-sm leading-relaxed outline-none placeholder:text-muted-foreground/50 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
                 />
               </div>
+              {mode === "create" && (
+                <div className="flex flex-col gap-1.5">
+                  <label
+                    htmlFor="match-scene"
+                    className="text-xs font-medium tracking-wide text-muted-foreground uppercase"
+                  >
+                    Set the scene — where does it happen?
+                  </label>
+                  <textarea
+                    id="match-scene"
+                    value={scene}
+                    onChange={(e) => setScene(e.target.value)}
+                    rows={2}
+                    placeholder="A rooftop bar at sunset… a sleeper train through the mountains… the galley of a starship. Optional — we’ll invent one if you skip it."
+                    className="resize-none rounded-xl border border-border bg-background/60 px-3 py-2.5 text-sm leading-relaxed outline-none placeholder:text-muted-foreground/50 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+                  />
+                </div>
+              )}
               <Button
                 size="xl"
                 className="w-full"

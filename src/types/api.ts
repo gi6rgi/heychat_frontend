@@ -8,6 +8,8 @@ export interface Scenario {
   system_instruction: string;
   voice_name: string | null;
   greet_first: boolean;
+  /** Task for a training scenario ("Get her phone number"); null = plain chat. */
+  goal: string | null;
 }
 
 /** Conversational Match flow (app/characters/schemas.py). */
@@ -23,6 +25,8 @@ export interface VibeReaction {
 export interface CharacterIntake {
   moods: string[];
   description: string;
+  /** "Set the scene" — where the user imagines the conversation happening. */
+  scene: string;
   vibes: VibeReaction[];
 }
 
@@ -41,7 +45,9 @@ export type ServerMessage =
   // "concurrent_session") so the UI can show a friendly notice, not an error.
   | { type: "error"; message: string; code?: string | null }
   // Sent right before the server ends a session that hit its time cap.
-  | { type: "session_limit"; reason: string };
+  | { type: "session_limit"; reason: string }
+  // The persona settled the scenario goal; the session ends right after.
+  | { type: "goal_result"; outcome: "success" | "failure"; reason: string };
 
 export interface Turn {
   id: string;
@@ -58,6 +64,8 @@ export interface ConversationSummary {
   created_at: string;
   message_count: number;
   replay_of?: string | null;
+  /** "success"/"failure" from the goal verdict, null for plain chats. */
+  goal_outcome?: string | null;
 }
 
 export interface ConversationMessage {
@@ -74,6 +82,8 @@ export interface ConversationDetail {
   created_at: string;
   has_audio: boolean;
   replay_of?: string | null;
+  /** "success"/"failure" from the goal verdict, null for plain chats. */
+  goal_outcome?: string | null;
   messages: ConversationMessage[];
 }
 

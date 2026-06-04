@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight, Sparkles, Target } from "lucide-react";
 import type { Scenario } from "@/types/api";
 
 export function ScenarioCard({ scenario }: { scenario: Scenario }) {
@@ -35,6 +35,12 @@ export function ScenarioCard({ scenario }: { scenario: Scenario }) {
       <p className="text-sm leading-relaxed text-muted-foreground">
         {scenario.description}
       </p>
+      {scenario.goal && (
+        <span className="mt-auto inline-flex w-fit items-center gap-1.5 rounded-full border border-brand/25 bg-brand/10 px-2.5 py-1 text-xs font-medium text-brand-light">
+          <Target size={12} />
+          {scenario.goal}
+        </span>
+      )}
     </motion.button>
   );
 }
