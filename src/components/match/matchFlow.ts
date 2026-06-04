@@ -30,6 +30,24 @@ export const MOOD_CHIPS: MoodChip[] = [
   { label: "Surprise me", icon: Sparkles },
 ];
 
+/** Tap-to-fill ideas for "Set the scene". Tapping again clears the field. */
+export const SCENE_IDEAS: string[] = [
+  "Rooftop bar at sunset",
+  "Sleeper train through the mountains",
+  "Cozy coffee shop on a rainy day",
+  "Beach bonfire after midnight",
+  "Spaceship lounge among the stars",
+];
+
+/** Tap-to-fill ideas for "Your goal". Tapping again clears the field. */
+export const GOAL_IDEAS: string[] = [
+  "Get their phone number",
+  "Land a second date",
+  "Negotiate a better price",
+  "Say no without apologizing",
+  "Make them laugh three times",
+];
+
 export interface VibeCard {
   id: string;
   title: string;

@@ -13,7 +13,12 @@ import {
   Wand2,
   X,
 } from "lucide-react";
-import { MOOD_CHIPS, VIBE_CARDS } from "@/components/match/matchFlow";
+import {
+  GOAL_IDEAS,
+  MOOD_CHIPS,
+  SCENE_IDEAS,
+  VIBE_CARDS,
+} from "@/components/match/matchFlow";
 import { generateCharacter, matchCharacter } from "@/services/characters";
 import { getScenario } from "@/services/scenarios";
 import { ApiError } from "@/lib/api-client";
@@ -66,6 +71,40 @@ const WORKING_LINES: Record<Mode, string[]> = {
     "Writing their story…",
   ],
 };
+
+/** Tap-to-fill suggestion chips for a free-text field (tap again to clear). */
+function IdeaChips({
+  ideas,
+  value,
+  onPick,
+}: {
+  ideas: string[];
+  value: string;
+  onPick: (next: string) => void;
+}) {
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      {ideas.map((idea) => {
+        const active = value === idea;
+        return (
+          <button
+            key={idea}
+            type="button"
+            onClick={() => onPick(active ? "" : idea)}
+            className={cn(
+              "rounded-full border px-2.5 py-1 text-xs transition-colors",
+              active
+                ? "border-brand/60 bg-brand/15 text-brand-light"
+                : "border-white/[0.1] bg-card/60 text-muted-foreground hover:border-brand/40 hover:text-foreground",
+            )}
+          >
+            {idea}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
 
 /** Pulsing voice-orb motif — echoes the in-session MicOrb identity. */
 function MatchOrb({ size = 88, initial }: { size?: number; initial?: string }) {
@@ -275,7 +314,12 @@ function FlowCard({
 
   const card = VIBE_CARDS[reactions.length];
   const nextCard = VIBE_CARDS[reactions.length + 1];
-  const canContinue = moods.length > 0 || wish.trim().length > 0;
+  // Any signal is enough to continue — a mood, a wish, a scene or a goal.
+  const canContinue =
+    moods.length > 0 ||
+    wish.trim().length > 0 ||
+    scene.trim().length > 0 ||
+    goal.trim().length > 0;
   const showBack = step === "intake" || step === "vibes";
   const showProgress = step !== "entry";
 
@@ -459,12 +503,17 @@ function FlowCard({
                     >
                       Set the scene — where does it happen?
                     </label>
+                    <IdeaChips
+                      ideas={SCENE_IDEAS}
+                      value={scene}
+                      onPick={setScene}
+                    />
                     <textarea
                       id="match-scene"
                       value={scene}
                       onChange={(e) => setScene(e.target.value)}
                       rows={2}
-                      placeholder="A rooftop bar at sunset… a sleeper train through the mountains… the galley of a starship. Optional — we’ll invent one if you skip it."
+                      placeholder="…or describe your own. Optional — we’ll invent one if you skip it."
                       className="resize-none rounded-xl border border-border bg-background/60 px-3 py-2.5 text-sm leading-relaxed outline-none placeholder:text-muted-foreground/50 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
                     />
                   </div>
@@ -475,12 +524,17 @@ function FlowCard({
                     >
                       Your goal — what do you want to pull off?
                     </label>
+                    <IdeaChips
+                      ideas={GOAL_IDEAS}
+                      value={goal}
+                      onPick={setGoal}
+                    />
                     <textarea
                       id="match-goal"
                       value={goal}
                       onChange={(e) => setGoal(e.target.value)}
                       rows={2}
-                      placeholder="Get a second date… hold my ground on the price… say no without apologizing. Optional — leave empty for a free-flowing chat."
+                      placeholder="…or write your own. Optional — leave empty for a free-flowing chat."
                       className="resize-none rounded-xl border border-border bg-background/60 px-3 py-2.5 text-sm leading-relaxed outline-none placeholder:text-muted-foreground/50 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
                     />
                   </div>
