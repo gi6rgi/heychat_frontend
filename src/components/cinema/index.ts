@@ -5,5 +5,4 @@ export { Kicker } from "./Kicker";
 export { AmberAction } from "./AmberAction";
 export { Hairline } from "./Hairline";
 export { Meter } from "./Meter";
-export { Stars } from "./Stars";
 export { Waveform } from "./Waveform";

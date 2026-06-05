@@ -46,10 +46,6 @@ export interface Scene {
   ambience: Ambience;
   locked: boolean;
   isNew: boolean;
-  /** 0–5, rendered as ★/☆ in the metadata line; null when locked/unplayed */
-  stars: number | null;
-  /** best score 0–100 in the metadata line; null when locked/unplayed */
-  best: number | null;
   /** two seed subtitle lines so the live view shows its anatomy pre-connect */
   openingLines: [string, string];
 }
@@ -87,8 +83,6 @@ export function toScene(s: Scenario): Scene {
     ambience: (s.ambience as Ambience) ?? "room",
     locked: s.locked,
     isNew: s.is_new,
-    stars: null,
-    best: null,
     openingLines:
       s.opening_lines && s.opening_lines.length >= 2
         ? [s.opening_lines[0], s.opening_lines[1]]
