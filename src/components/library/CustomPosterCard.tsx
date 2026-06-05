@@ -41,7 +41,13 @@ export function CustomPosterCard({ scenario }: { scenario: Scenario }) {
 
   return (
     <Link to={`/scene/${scenario.id}`} viewTransition className="group block">
-      <div className="relative aspect-[2/3] overflow-hidden border border-hairline">
+      <div
+        className={cn(
+          "relative aspect-[2/3] overflow-hidden border border-hairline",
+          !remove.isPending &&
+            "transition-transform duration-[450ms] ease-[var(--ease-cinema)] group-hover:scale-[1.025]",
+        )}
+      >
         {/* dark placeholder: initial + title, like a one-sheet proof */}
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-night px-4 text-center">
           <span className="font-display text-5xl font-light text-paper-faint">
@@ -69,9 +75,9 @@ export function CustomPosterCard({ scenario }: { scenario: Scenario }) {
             loading="lazy"
             onLoad={() => setLoaded(true)}
             className={cn(
-              "absolute inset-0 h-full w-full object-cover transition-[opacity,transform] duration-[450ms] ease-[var(--ease-cinema)]",
+              "absolute inset-0 h-full w-full object-cover transition-opacity duration-[450ms] ease-[var(--ease-cinema)]",
               loaded ? "opacity-100" : "opacity-0",
-              remove.isPending ? "opacity-40" : "group-hover:scale-[1.025]",
+              remove.isPending && "opacity-40",
             )}
           />
         )}
@@ -124,9 +130,17 @@ export function CustomPosterCard({ scenario }: { scenario: Scenario }) {
               "transition-colors duration-300 ease-[var(--ease-cinema)] group-hover:text-paper",
             )}
           >
-            YOURS
-            <span className="px-1.5 text-paper-faint">·</span>
-            {painting ? "PAINTING…" : "CUSTOM"}
+            {(painting
+              ? ["YOURS", "PAINTING…"]
+              : scenario.tags?.length
+                ? scenario.tags
+                : ["YOURS", "CUSTOM"]
+            ).map((tag, i) => (
+              <span key={tag}>
+                {i > 0 && <span className="px-1.5 text-paper-faint">·</span>}
+                {tag}
+              </span>
+            ))}
           </span>
         )}
       </div>

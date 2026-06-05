@@ -37,7 +37,7 @@ export function LibraryTopBar({
 
       <nav
         aria-label="Filter scenarios by genre"
-        className="hidden items-center font-mono text-[13px] tracking-[0.08em] md:flex"
+        className="hidden items-center font-label text-[13px] font-medium tracking-[0.14em] md:flex"
       >
         {genres.map((genre, i) => (
           <span key={genre} className="flex items-center">
