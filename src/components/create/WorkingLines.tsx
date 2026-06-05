@@ -19,7 +19,7 @@ export function WorkingLines({ lines }: { lines: string[] }) {
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -6 }}
         transition={{ duration: 0.4, ease: "easeOut" }}
-        className="font-display text-lg italic text-paper-dim"
+        className="font-display text-xl italic text-paper/90 [font-variation-settings:'opsz'_40,'SOFT'_30,'WONK'_0]"
       >
         {lines[idx]}
       </motion.p>

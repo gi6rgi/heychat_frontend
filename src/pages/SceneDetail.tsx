@@ -77,21 +77,29 @@ export default function SceneDetail() {
               {title}
             </motion.h1>
 
-            {/* the mission briefing: goal chip + plain-language objective */}
-            {scene.goal && (
-              <motion.div
-                {...rise(0.25)}
-                className="mt-7 max-w-lg border-l border-amber/70 pl-4"
+            {logline && (
+              <motion.p
+                {...rise(0.2)}
+                className="font-display mt-6 max-w-lg text-2xl italic leading-snug text-paper/90 [font-variation-settings:'opsz'_40,'SOFT'_30,'WONK'_0]"
               >
-                <p className="font-label text-[12px] font-medium uppercase tracking-[0.16em] text-amber">
-                  Your goal · {scene.goal}
+                {logline}
+              </motion.p>
+            )}
+
+            {/* the goal, framed like a title-card plate: the GOAL label sits
+                in a gap of the box's top border (native fieldset/legend). */}
+            {scene.goal && (
+              <motion.fieldset
+                {...rise(0.25)}
+                className="mt-8 inline-block border border-amber/70 px-7 pb-5 pt-1"
+              >
+                <legend className="px-2 font-label text-[12px] font-medium uppercase tracking-[0.2em] text-amber">
+                  Goal
+                </legend>
+                <p className="font-display text-3xl font-light leading-tight text-amber sm:text-4xl md:text-5xl">
+                  {scene.goal}
                 </p>
-                {scene.objective && (
-                  <p className="mt-2 font-display text-[16px] leading-relaxed text-paper/80">
-                    {scene.objective}
-                  </p>
-                )}
-              </motion.div>
+              </motion.fieldset>
             )}
 
             {liveTo && (

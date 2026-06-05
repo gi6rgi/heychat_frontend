@@ -26,7 +26,9 @@ export function MatchOrb({
             aria-hidden
             className="absolute inset-0 rounded-full border border-amber-dim"
             initial={{ scale: 0.7, opacity: 0 }}
-            animate={{ scale: [0.7, 1.25], opacity: [0.5, 0] }}
+            // opacity starts and ends at 0 so the infinite repeat has no
+            // visible seam (it used to snap from 0 back to 0.5).
+            animate={{ scale: [0.7, 1.25], opacity: [0, 0.5, 0] }}
             transition={{
               duration: 3.2,
               repeat: Infinity,

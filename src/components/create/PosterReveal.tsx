@@ -17,7 +17,7 @@ export function PosterReveal({ scenario }: { scenario: Scenario }) {
   const painting = !loaded && scenario.image_status === "generating";
 
   return (
-    <div className="relative aspect-[2/3] w-52 overflow-hidden border border-hairline sm:w-60">
+    <div className="relative aspect-[2/3] w-60 overflow-hidden border border-hairline sm:w-72 md:w-80">
       {/* dark placeholder: the scene's initial, like a one-sheet proof */}
       <div className="absolute inset-0 flex items-center justify-center bg-night">
         <span className="font-display text-6xl font-light text-paper-faint">

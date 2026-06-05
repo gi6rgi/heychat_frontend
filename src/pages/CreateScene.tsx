@@ -53,15 +53,6 @@ export default function CreateScene() {
   );
   const revealed = liveResult ?? result;
 
-  function reset() {
-    setWho("");
-    setScene("");
-    setResult(null);
-    setLimitMessage(null);
-    setIntake(null);
-    setStep("who");
-  }
-
   async function submit(payload: CharacterIntake) {
     setIntake(payload);
     setLimitMessage(null);
@@ -182,43 +173,36 @@ export default function CreateScene() {
               <motion.div
                 key={`reveal-${revealed.id}`}
                 {...stepMotion}
-                className="mx-auto flex max-w-xl flex-col items-center gap-7 text-center"
+                className="mx-auto flex w-full max-w-5xl flex-col items-center gap-10 md:flex-row md:gap-16"
               >
                 <PosterReveal scenario={revealed} />
-                <div className="flex flex-col gap-4">
-                  <Kicker className="text-amber">Made for you</Kicker>
+                {/* text column: centered stack on phones, left-aligned beside
+                    the poster from md up — same type tiers as the detail page. */}
+                <div className="flex max-w-xl flex-col items-center gap-5 text-center md:items-start md:text-left">
                   <h2 className="font-display text-4xl font-light leading-[1.05] text-paper sm:text-5xl">
                     {revealed.title}
                   </h2>
-                  <p className="font-display text-lg italic leading-snug text-paper-dim">
+                  <p className="font-display text-2xl italic leading-snug text-paper/90 [font-variation-settings:'opsz'_40,'SOFT'_30,'WONK'_0]">
                     {revealed.description}
                   </p>
+                  {/* same goal plate as the scene detail page: GOAL label in a
+                      gap of the box's top border, the goal big in amber. */}
                   {revealed.goal && (
-                    <div className="flex flex-col gap-2">
-                      <p className="font-mono text-[13px] uppercase tracking-[0.1em] text-amber/90">
-                        Goal · {revealed.goal}
+                    <fieldset className="mt-2 border border-amber/70 px-7 pb-5 pt-1 text-left">
+                      <legend className="px-2 font-label text-[12px] font-medium uppercase tracking-[0.2em] text-amber">
+                        Goal
+                      </legend>
+                      <p className="font-display text-3xl font-light leading-tight text-amber sm:text-4xl">
+                        {revealed.goal}
                       </p>
-                      {revealed.objective && (
-                        <p className="mx-auto max-w-md font-display text-[15px] leading-relaxed text-paper-dim">
-                          {revealed.objective}
-                        </p>
-                      )}
-                    </div>
+                    </fieldset>
                   )}
-                </div>
-                <div className="flex flex-col items-center gap-5">
-                  <AmberAction
-                    size="lg"
-                    onClick={() => navigate(`/scene/${revealed.id}/live`)}
-                  >
-                    Start scene
-                  </AmberAction>
-                  <div className="flex items-center gap-8">
-                    <AmberAction tone="dim" arrow={false} onClick={reset}>
-                      Create another
-                    </AmberAction>
-                    <AmberAction tone="dim" arrow={false} to="/">
-                      Browse scenes
+                  <div className="mt-3">
+                    <AmberAction
+                      size="lg"
+                      onClick={() => navigate(`/scene/${revealed.id}/live`)}
+                    >
+                      Start scene
                     </AmberAction>
                   </div>
                 </div>
