@@ -22,16 +22,21 @@ export function PosterCard({ scene }: { scene: Scene }) {
   // as CustomPosterCard).
   const [loaded, setLoaded] = useState(false);
   const poster = (
-    <div className="relative aspect-[2/3] overflow-hidden">
+    <div
+      className={cn(
+        "relative aspect-[2/3] overflow-hidden",
+        !scene.locked &&
+          "transition-transform duration-[450ms] ease-[var(--ease-cinema)] group-hover:scale-[1.025]",
+      )}
+    >
       <img
         src={scene.poster}
         alt={`${scene.title} poster`}
         loading="lazy"
         onLoad={() => setLoaded(true)}
         className={cn(
-          "h-full w-full object-cover transition-[opacity,transform] duration-[450ms] ease-[var(--ease-cinema)]",
+          "h-full w-full object-cover transition-opacity duration-[450ms] ease-[var(--ease-cinema)]",
           !loaded ? "opacity-0" : scene.locked ? "opacity-[0.45]" : "opacity-100",
-          !scene.locked && "group-hover:scale-[1.025]",
         )}
       />
       {scene.locked && (

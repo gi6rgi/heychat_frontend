@@ -88,7 +88,7 @@ export function DeckStep({
             key={card.id}
             type="button"
             onClick={() => onDone(`${card.title}: ${card.description}`)}
-            className="group relative aspect-[4/5] overflow-hidden border border-hairline text-left transition-colors duration-300 ease-[var(--ease-cinema)] hover:border-amber"
+            className="group relative aspect-[4/5] overflow-hidden border border-hairline text-left transition-[scale,border-color] duration-[450ms] ease-[var(--ease-cinema)] hover:scale-[1.025] hover:border-amber"
           >
             <img
               src={card.image}
@@ -96,7 +96,7 @@ export function DeckStep({
               loading="lazy"
               onLoad={() => setLoaded((prev) => new Set(prev).add(card.id))}
               className={cn(
-                "h-full w-full object-cover transition-[opacity,transform] duration-[450ms] ease-[var(--ease-cinema)] group-hover:scale-[1.025]",
+                "h-full w-full object-cover transition-opacity duration-[450ms] ease-[var(--ease-cinema)]",
                 loaded.has(card.id) ? "opacity-100" : "opacity-0",
               )}
             />
@@ -118,14 +118,10 @@ export function DeckStep({
         <button
           type="button"
           onClick={() => setManual(true)}
-          className="group relative aspect-[4/5] overflow-hidden border border-hairline text-left transition-colors duration-300 ease-[var(--ease-cinema)] hover:border-amber"
+          className="group relative aspect-[4/5] overflow-hidden border border-hairline text-left transition-[scale,border-color] duration-[450ms] ease-[var(--ease-cinema)] hover:scale-[1.025] hover:border-amber"
         >
           <div className="flex h-full w-full items-center justify-center bg-white/[0.03]">
-            <Plus
-              aria-hidden
-              className="h-10 w-10 text-amber transition-transform duration-[450ms] ease-[var(--ease-cinema)] group-hover:scale-110"
-              strokeWidth={1}
-            />
+            <Plus aria-hidden className="h-10 w-10 text-amber" strokeWidth={1} />
           </div>
           <div className="absolute inset-x-0 bottom-0 flex flex-col gap-2 p-5">
             <span className="font-display text-3xl leading-tight text-paper">
