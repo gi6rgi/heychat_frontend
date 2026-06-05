@@ -145,7 +145,7 @@ export function useVoiceSession(scenarioId: string | undefined, replayOf?: strin
             break
           case 'session_limit':
             setLimitNotice(
-              'Time flies! This session reached its 10-minute limit — the conversation is saved to your history.',
+              'Time flies! This session reached its 10-minute limit. The conversation is saved to your history.',
             )
             break
           case 'goal_result':
