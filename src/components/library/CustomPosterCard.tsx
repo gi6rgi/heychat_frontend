@@ -126,7 +126,9 @@ export function CustomPosterCard({ scenario }: { scenario: Scenario }) {
         ) : (
           <span
             className={cn(
-              "font-label text-[12px] font-medium uppercase tracking-[0.12em] text-paper-dim",
+              // One line, ellipsized — same rule as PosterCard so long tag
+              // lines never wrap or stretch the grid on narrow screens.
+              "block truncate font-label text-[12px] font-medium uppercase tracking-[0.12em] text-paper-dim",
               "transition-colors duration-300 ease-[var(--ease-cinema)] group-hover:text-paper",
             )}
           >

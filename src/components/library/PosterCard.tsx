@@ -61,7 +61,9 @@ export function PosterCard({ scene }: { scene: Scene }) {
   ) : (
     <span
       className={cn(
-        "font-label text-[12px] font-medium uppercase tracking-[0.12em] text-paper-dim",
+        // One line, ellipsized: a long tag line must never wrap into a
+        // ragged second row or stretch the grid on narrow screens.
+        "block truncate font-label text-[12px] font-medium uppercase tracking-[0.12em] text-paper-dim",
         "transition-colors duration-300 ease-[var(--ease-cinema)] group-hover:text-paper",
       )}
     >

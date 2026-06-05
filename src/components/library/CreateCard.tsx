@@ -18,7 +18,7 @@ export function CreateCard() {
           className="h-7 w-7 text-amber"
           strokeWidth={1.25}
         />
-        <span className="font-label text-[13px] font-medium uppercase tracking-[0.16em] text-amber">
+        <span className="px-4 text-center font-label text-[13px] font-medium uppercase tracking-[0.16em] text-amber">
           Create your own
         </span>
       </div>
