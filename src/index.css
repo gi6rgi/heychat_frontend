@@ -1,142 +1,133 @@
 @import "tailwindcss";
-@import "tw-animate-css";
-@import "shadcn/tailwind.css";
-@import "@fontsource-variable/inter";
+
+/* Three fonts, by role — Fraunces (display), Archivo (labels), IBM Plex Mono (data) */
+@import "@fontsource-variable/fraunces/full.css";
+@import "@fontsource-variable/fraunces/full-italic.css";
+@import "@fontsource-variable/archivo/wght.css";
+@import "@fontsource/ibm-plex-mono/400.css";
+@import "@fontsource/ibm-plex-mono/500.css";
+@import "@fontsource/ibm-plex-mono/600.css";
 
 @custom-variant dark (&:is(.dark *));
 
-@theme inline {
-    --font-heading: var(--font-sans);
-    --font-sans: 'Inter Variable', sans-serif;
-    /* Pink → purple brand gradient over a violet-tinted dark. */
-    --color-brand-light: #F472B6;
-    --color-brand: #D946EF;
-    --color-brand-dark: #9333EA;
-    --color-sidebar-ring: var(--sidebar-ring);
-    --color-sidebar-border: var(--sidebar-border);
-    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-    --color-sidebar-accent: var(--sidebar-accent);
-    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-    --color-sidebar-primary: var(--sidebar-primary);
-    --color-sidebar-foreground: var(--sidebar-foreground);
-    --color-sidebar: var(--sidebar);
-    --color-ring: var(--ring);
-    --color-input: var(--input);
-    --color-border: var(--border);
-    --color-destructive: var(--destructive);
-    --color-accent-foreground: var(--accent-foreground);
-    --color-accent: var(--accent);
-    --color-muted-foreground: var(--muted-foreground);
-    --color-muted: var(--muted);
-    --color-secondary-foreground: var(--secondary-foreground);
-    --color-secondary: var(--secondary);
-    --color-primary-foreground: var(--primary-foreground);
-    --color-primary: var(--primary);
-    --color-popover-foreground: var(--popover-foreground);
-    --color-popover: var(--popover);
-    --color-card-foreground: var(--card-foreground);
-    --color-card: var(--card);
-    --color-foreground: var(--foreground);
-    --color-background: var(--background);
-    --radius-sm: calc(var(--radius) * 0.6);
-    --radius-md: calc(var(--radius) * 0.8);
-    --radius-lg: var(--radius);
-    --radius-xl: calc(var(--radius) * 1.4);
-    --radius-2xl: calc(var(--radius) * 1.8);
-    --radius-3xl: calc(var(--radius) * 2.2);
-    --radius-4xl: calc(var(--radius) * 2.6);
-}
+@theme {
+  /* color — the whole palette. amber is the ONLY accent. */
+  --color-night: #1a1916; /* app shell */
+  --color-night-deep: #141311; /* auditorium / behind letterbox */
+  --color-paper: #f2ede4; /* primary text on dark */
+  --color-paper-dim: rgba(242, 237, 228, 0.55);
+  --color-paper-faint: rgba(242, 237, 228, 0.32);
+  --color-hairline: rgba(242, 237, 228, 0.22);
+  --color-hairline-soft: rgba(242, 237, 228, 0.1);
+  --color-amber: #e8a33d;
+  --color-amber-dim: rgba(232, 163, 61, 0.55);
+  --color-amber-faint: rgba(232, 163, 61, 0.16);
 
-/* Dark-first theme. Violet-tinted surfaces, pink/purple glow (hue ~310-325). */
-:root {
-    --background: oklch(0.155 0.012 310);
-    --foreground: oklch(0.93 0 0);
-    --card: oklch(0.185 0.016 310);
-    --card-foreground: oklch(0.93 0 0);
-    --popover: oklch(0.185 0.016 310);
-    --popover-foreground: oklch(0.93 0 0);
-    --primary: oklch(0.67 0.24 322);
-    --primary-foreground: oklch(0.98 0 0);
-    --secondary: oklch(0.215 0.014 310);
-    --secondary-foreground: oklch(0.93 0 0);
-    --muted: oklch(0.215 0.014 310);
-    --muted-foreground: oklch(0.64 0.015 310);
-    --accent: oklch(0.245 0.055 320);
-    --accent-foreground: oklch(0.93 0 0);
-    --destructive: oklch(0.704 0.191 22.216);
-    --border: oklch(1 0 0 / 8%);
-    --input: oklch(1 0 0 / 12%);
-    --ring: oklch(0.67 0.24 322);
-    --radius: 0.625rem;
-    --sidebar: oklch(0.115 0.014 310);
-    --sidebar-foreground: oklch(0.9 0 0);
-    --sidebar-primary: oklch(0.67 0.24 322);
-    --sidebar-primary-foreground: oklch(0.98 0 0);
-    --sidebar-accent: oklch(0.205 0.05 320);
-    --sidebar-accent-foreground: oklch(0.93 0 0);
-    --sidebar-border: oklch(1 0 0 / 7%);
-    --sidebar-ring: oklch(0.67 0.24 322);
-}
+  /* type */
+  --font-display: "Fraunces Variable", Georgia, "Times New Roman", serif;
+  --font-label: "Archivo Variable", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
 
-.dark {
-    --background: oklch(0.155 0.012 310);
-    --foreground: oklch(0.93 0 0);
-    --card: oklch(0.185 0.016 310);
-    --card-foreground: oklch(0.93 0 0);
-    --popover: oklch(0.185 0.016 310);
-    --popover-foreground: oklch(0.93 0 0);
-    --primary: oklch(0.67 0.24 322);
-    --primary-foreground: oklch(0.98 0 0);
-    --secondary: oklch(0.215 0.014 310);
-    --secondary-foreground: oklch(0.93 0 0);
-    --muted: oklch(0.215 0.014 310);
-    --muted-foreground: oklch(0.64 0.015 310);
-    --accent: oklch(0.245 0.055 320);
-    --accent-foreground: oklch(0.93 0 0);
-    --destructive: oklch(0.704 0.191 22.216);
-    --border: oklch(1 0 0 / 8%);
-    --input: oklch(1 0 0 / 12%);
-    --ring: oklch(0.67 0.24 322);
-    --sidebar: oklch(0.115 0.014 310);
-    --sidebar-foreground: oklch(0.9 0 0);
-    --sidebar-primary: oklch(0.67 0.24 322);
-    --sidebar-primary-foreground: oklch(0.98 0 0);
-    --sidebar-accent: oklch(0.205 0.05 320);
-    --sidebar-accent-foreground: oklch(0.93 0 0);
-    --sidebar-border: oklch(1 0 0 / 7%);
-    --sidebar-ring: oklch(0.67 0.24 322);
+  /* zero radius everywhere (anti-slop rule) */
+  --radius: 0px;
+  --radius-sm: 0px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
+  --radius-2xl: 0px;
+  --radius-3xl: 0px;
+
+  /* cinematic eases — slow, no bounce */
+  --ease-cinema: cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
-    scrollbar-width: thin;
-    scrollbar-color: oklch(0.3 0.02 310) transparent;
-    }
-  body {
-    @apply bg-background text-foreground;
-    }
-  html {
-    @apply font-sans;
-    }
+  /* :where() keeps specificity at 0 so `rounded-full` (the diegetic mic
+     circles in the live view) can still opt back in to a radius. */
+  :where(*) {
+    border-radius: 0;
+  }
+
   html,
   body,
   #root {
-    overflow-x: hidden;
+    height: 100%;
   }
 
-  ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+  html {
+    /* always reserve the scrollbar gutter so the centered layout never shifts
+       horizontally between scrolling and non-scrolling pages */
+    scrollbar-gutter: stable;
+    overflow-y: scroll;
   }
-  ::-webkit-scrollbar-track {
-    background: transparent;
+
+  body {
+    margin: 0;
+    background: var(--color-night);
+    color: var(--color-paper);
+    font-family: var(--font-label);
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    font-synthesis: none;
   }
-  ::-webkit-scrollbar-thumb {
-    background: oklch(0.3 0.02 310);
-    border-radius: 3px;
+
+  ::selection {
+    background: var(--color-amber);
+    color: var(--color-night);
   }
-  ::-webkit-scrollbar-thumb:hover {
-    background: oklch(0.4 0.025 310);
+
+  /* Tailwind v4 Preflight gives <button> cursor: default; restore the pointer
+     on interactive controls (genre filters, help, mic/ambience, AmberAction
+     buttons). Anchors / <Link> already show it. */
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  /* Fraunces looks best as display with high optical size + a touch of soft. */
+  .font-display {
+    font-variation-settings: "opsz" 144, "SOFT" 30, "WONK" 0;
+    letter-spacing: -0.01em;
+  }
+}
+
+/* slow fade+rise used by staggered reveals; honor reduced-motion */
+@keyframes cinema-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-rise {
+  animation: cinema-rise 520ms var(--ease-cinema) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-rise {
+    animation: none;
+  }
+}
+
+/* Library → Detail page transition. Both screens render the same scene image
+   (poster-wall reveal, then full-bleed still), so a slow root cross-fade reads
+   as the posters dissolving while the scene holds, not a hard cut. Opt-in per
+   navigation via <Link viewTransition> on the poster cards. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 560ms;
+  animation-timing-function: var(--ease-cinema);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
   }
 }
