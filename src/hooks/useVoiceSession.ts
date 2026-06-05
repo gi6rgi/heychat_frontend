@@ -5,6 +5,7 @@ import { getAccessToken } from '@/lib/supabase'
 import { queryKeys } from '@/lib/query-keys'
 import { VoicePlayer } from '@/audio/player'
 import { VoiceRecorder } from '@/audio/recorder'
+import { setPreferredMic, setPreferredSpeaker } from '@/audio/devices'
 import type { ServerMessage, Turn } from '@/types/api'
 
 export type SessionStatus = 'idle' | 'connecting' | 'live' | 'ended' | 'error'
@@ -196,6 +197,18 @@ export function useVoiceSession(scenarioId: string | undefined, replayOf?: strin
     })
   }, [])
 
+  // Device switches persist the preference AND apply live to the running
+  // recorder/player (future sessions pick the preference up on their own).
+  const setMicDevice = useCallback((deviceId: string | null) => {
+    setPreferredMic(deviceId)
+    void recorderRef.current?.setDevice(deviceId)
+  }, [])
+
+  const setSpeakerDevice = useCallback((deviceId: string | null) => {
+    setPreferredSpeaker(deviceId)
+    void playerRef.current?.setSink(deviceId)
+  }, [])
+
   // Tear down on unmount.
   useEffect(() => {
     return () => {
@@ -217,5 +230,7 @@ export function useVoiceSession(scenarioId: string | undefined, replayOf?: strin
     start,
     stop,
     toggleMute,
+    setMicDevice,
+    setSpeakerDevice,
   }
 }

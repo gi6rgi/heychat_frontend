@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { motion } from "motion/react";
-import { Mic, MicOff, Volume2, VolumeX, PhoneOff } from "lucide-react";
-import { AmberAction, Container, Kicker, Meter, Waveform } from "@/components/cinema";
+import { Mic, MicOff, PhoneOff, Settings } from "lucide-react";
+import { AmberAction, Container, Kicker, Waveform } from "@/components/cinema";
 import { SceneTimer } from "@/components/live/SceneTimer";
 import { Subtitles, type SubtitleLine } from "@/components/live/Subtitles";
 import { cleanTranscript } from "@/lib/transcript";
@@ -11,7 +11,9 @@ import { useVoiceSession } from "@/hooks/useVoiceSession";
 import { useScenario } from "@/hooks/useScenarios";
 import { useAmbience } from "@/hooks/useAmbience";
 import { scenarioAmbience, type Ambience } from "@/audio/ambience";
+import { getPreferredMic, getPreferredSpeaker } from "@/audio/devices";
 import { toScene, type Scene } from "@/lib/scenes";
+import { cn } from "@/lib/utils";
 
 /**
  * Live Scene (brief 3.3) — full-bleed scene still under a neutral dark
@@ -45,24 +47,48 @@ export default function LiveScene() {
     start,
     stop,
     toggleMute,
+    setMicDevice,
+    setSpeakerDevice,
   } = useVoiceSession(scenarioId);
 
-  // Ambience bed: on by default, only sounds while the session is live.
+  // Audio device picker: devices are enumerated when the panel opens (labels
+  // are only populated once the mic permission is granted, which the
+  // auto-started session already did).
+  const [devicesOpen, setDevicesOpen] = useState(false);
+  const [inputs, setInputs] = useState<MediaDeviceInfo[]>([]);
+  const [outputs, setOutputs] = useState<MediaDeviceInfo[]>([]);
+  const [micId, setMicId] = useState<string | null>(() => getPreferredMic());
+  const [speakerId, setSpeakerId] = useState<string | null>(() =>
+    getPreferredSpeaker(),
+  );
+  const canPickSpeaker = "setSinkId" in AudioContext.prototype;
+
+  async function toggleDevices() {
+    if (devicesOpen) {
+      setDevicesOpen(false);
+      return;
+    }
+    const all = await navigator.mediaDevices.enumerateDevices();
+    setInputs(all.filter((d) => d.kind === "audioinput" && d.deviceId));
+    setOutputs(all.filter((d) => d.kind === "audiooutput" && d.deviceId));
+    setDevicesOpen(true);
+  }
+
+  function pickMic(deviceId: string) {
+    setMicId(deviceId);
+    setMicDevice(deviceId);
+  }
+
+  function pickSpeaker(deviceId: string) {
+    setSpeakerId(deviceId);
+    setSpeakerDevice(deviceId);
+  }
+
+  // Ambience bed: always on, only sounds while the session is live.
   const ambKind: Ambience = scene
     ? scene.ambience
     : scenarioAmbience(scenarioId);
-  const [ambienceOn, setAmbienceOn] = useState(true);
-  useAmbience(ambienceOn ? ambKind : "none", status === "live");
-
-  // Rapport placeholder: starts ~0.35, drifts up slowly while live.
-  const [rapport, setRapport] = useState(0.35);
-  useEffect(() => {
-    if (status !== "live") return;
-    const id = setInterval(() => {
-      setRapport((r) => Math.min(0.92, r + 0.015));
-    }, 4000);
-    return () => clearInterval(id);
-  }, [status]);
+  useAmbience(ambKind, status === "live");
 
   // Auto-start on arrival: the Detail "Start Scene" action and the create-flow
   // reveal navigate straight here, so we begin the session immediately (the mic
@@ -144,27 +170,44 @@ export default function LiveScene() {
       />
 
       <Container className="relative z-10 flex h-full flex-col justify-between py-8 md:py-12">
-        {/* TOP ROW: scene id + timer (left), character + emotion (right) */}
+        {/* TOP ROW: goal plate (left), character + timer (right) */}
         <header className="flex items-start justify-between gap-6">
-          <div className="flex flex-col gap-3">
-            <Kicker className="text-paper-dim">
-              {scene.title.toUpperCase()}
-            </Kicker>
-            <SceneTimer running={status === "live"} />
+          <div className="flex flex-col">
+            {/* the goal as a quest banner, bleeding to the screen's left edge.
+                The plate is OPAQUE black inside an OPAQUE 1px amber shell,
+                clipped to the arrow shape, and the finished composite is faded
+                with `opacity` — that's the one way to get a translucent fill
+                plus an edge that follows the clip without the edge color
+                bleeding through the fill (the khaki bug). Text sits on top,
+                outside the fade, at full strength. */}
             {scene.goal && (
-              <p className="max-w-xs font-label text-[12px] font-medium uppercase tracking-[0.14em] text-amber/80">
-                Goal · {scene.goal}
-              </p>
+              <div className="relative -ml-6 self-start md:-ml-10">
+                <div
+                  aria-hidden
+                  className="absolute inset-0 bg-amber p-px opacity-65 [clip-path:polygon(0_0,calc(100%_-_28px)_0,100%_50%,calc(100%_-_28px)_100%,0_100%)]"
+                >
+                  <div className="h-full w-full bg-black [clip-path:polygon(0_0,calc(100%_-_28px)_0,100%_50%,calc(100%_-_28px)_100%,0_100%)]" />
+                </div>
+                <div className="relative py-3 pl-6 pr-16">
+                  <span className="font-label text-[11px] font-medium uppercase tracking-[0.2em] text-amber">
+                    Goal
+                  </span>
+                  <p className="mt-1 font-display text-2xl font-light leading-tight text-amber">
+                    {scene.goal}
+                  </p>
+                </div>
+              </div>
             )}
           </div>
 
-          <div className="flex flex-col items-end gap-1.5 text-right">
+          <div className="flex flex-col items-end gap-2 pt-3 text-right">
             <h1 className="font-display text-2xl uppercase leading-none tracking-[0.02em] text-paper">
               {characterName}
             </h1>
-            <span className="font-display text-base italic leading-none text-amber">
-              {scene.emotion}
-            </span>
+            <SceneTimer
+              running={status === "live"}
+              className="text-2xl text-paper-dim"
+            />
           </div>
         </header>
 
@@ -179,26 +222,6 @@ export default function LiveScene() {
               <p className="font-display text-2xl italic text-paper-faint">
                 The scene is set.
               </p>
-            )}
-
-            {/* goal verdict from the persona's end_conversation call */}
-            {goalResult && status === "ended" && (
-              <div className="flex flex-col items-center gap-2 text-center">
-                <Kicker
-                  className={
-                    goalResult.outcome === "success"
-                      ? "text-amber"
-                      : "text-paper-dim"
-                  }
-                >
-                  {goalResult.outcome === "success"
-                    ? "SCENE COMPLETE"
-                    : "SCENE OVER"}
-                </Kicker>
-                <p className="max-w-xl font-display text-lg italic leading-snug text-paper/90">
-                  {goalResult.reason}
-                </p>
-              </div>
             )}
 
             {/* usage-limit notice (daily budget, session cap) — info, not error */}
@@ -244,42 +267,155 @@ export default function LiveScene() {
             </div>
           </div>
 
-          {/* controls row: rapport label (left) · circular controls (right) */}
-          <div className="flex items-end justify-between gap-6">
-            <Kicker className="text-paper-dim">RAPPORT</Kicker>
-            <div className="flex items-start gap-5">
+          {/* controls row: audio devices + mic toggle, bottom right */}
+          <div className="flex items-end justify-end gap-5">
+            <div className="relative">
               <RoundButton
-                ariaLabel={muted ? "Unmute microphone" : "Mute microphone"}
-                on={!muted && status === "live"}
-                onClick={toggleMute}
+                ariaLabel="Audio device settings"
+                on={devicesOpen}
+                onClick={() => void toggleDevices()}
               >
-                {muted ? (
-                  <MicOff className="size-5" aria-hidden />
-                ) : (
-                  <Mic className="size-5" aria-hidden />
-                )}
+                <Settings className="size-5" aria-hidden />
               </RoundButton>
-              <RoundButton
-                ariaLabel={ambienceOn ? "Mute ambience" : "Unmute ambience"}
-                on={ambienceOn}
-                label="AMBIENCE"
-                onClick={() => setAmbienceOn((a) => !a)}
-              >
-                {ambienceOn ? (
-                  <Volume2 className="size-5" aria-hidden />
-                ) : (
-                  <VolumeX className="size-5" aria-hidden />
-                )}
-              </RoundButton>
+
+              {devicesOpen && (
+                <div className="absolute bottom-full right-0 z-20 mb-4 flex w-80 flex-col gap-5 border border-hairline bg-night-deep/95 p-5 text-left">
+                  <div className="flex flex-col gap-2">
+                    <span className="font-label text-[11px] font-medium uppercase tracking-[0.16em] text-paper-faint">
+                      Microphone
+                    </span>
+                    {inputs.map((d, i) => (
+                      <button
+                        key={d.deviceId}
+                        type="button"
+                        onClick={() => pickMic(d.deviceId)}
+                        className={cn(
+                          "truncate text-left font-label text-[12px] font-medium uppercase tracking-[0.08em] transition-colors duration-300",
+                          micId === d.deviceId ||
+                            (!micId && d.deviceId === "default")
+                            ? "text-amber"
+                            : "text-paper-dim hover:text-paper",
+                        )}
+                      >
+                        {d.label || `Microphone ${i + 1}`}
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="flex flex-col gap-2">
+                    <span className="font-label text-[11px] font-medium uppercase tracking-[0.16em] text-paper-faint">
+                      Speaker
+                    </span>
+                    {canPickSpeaker && outputs.length > 0 ? (
+                      outputs.map((d, i) => (
+                        <button
+                          key={d.deviceId}
+                          type="button"
+                          onClick={() => pickSpeaker(d.deviceId)}
+                          className={cn(
+                            "truncate text-left font-label text-[12px] font-medium uppercase tracking-[0.08em] transition-colors duration-300",
+                            speakerId === d.deviceId ||
+                              (!speakerId && d.deviceId === "default")
+                              ? "text-amber"
+                              : "text-paper-dim hover:text-paper",
+                          )}
+                        >
+                          {d.label || `Speaker ${i + 1}`}
+                        </button>
+                      ))
+                    ) : (
+                      <span className="font-display text-sm italic text-paper-faint">
+                        Speaker choice isn't supported in this browser.
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
+
+            <RoundButton
+              ariaLabel={muted ? "Unmute microphone" : "Mute microphone"}
+              on={!muted && status === "live"}
+              onClick={toggleMute}
+            >
+              {muted ? (
+                <MicOff className="size-5" aria-hidden />
+              ) : (
+                <Mic className="size-5" aria-hidden />
+              )}
+            </RoundButton>
           </div>
         </div>
       </Container>
 
-      {/* rapport meter pinned to the very bottom edge, full width */}
-      <div className="absolute inset-x-0 bottom-0 z-10">
-        <Meter value={rapport} head />
-      </div>
+      {/* MISSION VERDICT — the persona ended the scene: darken the film and
+          stamp the outcome, with the coach's one-liner and the debrief door. */}
+      {goalResult && status === "ended" && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, ease: [0.22, 0.61, 0.36, 1] }}
+          className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-6 bg-night-deep/85 px-6 text-center"
+        >
+          {scene.goal && (
+            <Kicker
+              className={
+                goalResult.outcome === "success"
+                  ? "text-amber"
+                  : "text-paper-dim"
+              }
+            >
+              Goal · {scene.goal}
+            </Kicker>
+          )}
+          <motion.h2
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              duration: 0.5,
+              delay: 0.15,
+              ease: [0.22, 0.61, 0.36, 1],
+            }}
+            className={cn(
+              "font-display text-5xl font-light uppercase leading-[0.95] tracking-[-0.02em] sm:text-6xl md:text-7xl",
+              goalResult.outcome === "success" ? "text-amber" : "text-paper",
+            )}
+          >
+            {goalResult.outcome === "success"
+              ? "Mission accomplished"
+              : "Mission failed"}
+          </motion.h2>
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              duration: 0.5,
+              delay: 0.3,
+              ease: [0.22, 0.61, 0.36, 1],
+            }}
+            className="max-w-xl font-display text-2xl italic leading-snug text-paper/90 [font-variation-settings:'opsz'_40,'SOFT'_30,'WONK'_0]"
+          >
+            {goalResult.reason}
+          </motion.p>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              duration: 0.5,
+              delay: 0.45,
+              ease: [0.22, 0.61, 0.36, 1],
+            }}
+            className="mt-4"
+          >
+            <AmberAction
+              to={`/scene/${scene.slug}/debrief${conversationId ? `?c=${conversationId}` : ""}`}
+              size="lg"
+            >
+              Debrief
+            </AmberAction>
+          </motion.div>
+        </motion.div>
+      )}
     </div>
   );
 }

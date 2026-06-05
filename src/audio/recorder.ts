@@ -5,6 +5,8 @@
  * for us; the worklet only quantises Float32 -> Int16. Chunks are emitted as
  * ArrayBuffers ready to be sent over the WebSocket as binary frames.
  */
+import { getPreferredMic } from './devices'
+
 const CAPTURE_SAMPLE_RATE = 16000
 
 /** Root-mean-square amplitude of a PCM16 buffer, normalised to ~0..1. */
@@ -38,14 +40,9 @@ export class VoiceRecorder {
     // graph, so the worklet's process() is never called → no audio captured.
     if (this.ctx.state === 'suspended') await this.ctx.resume()
 
-    this.stream = await navigator.mediaDevices.getUserMedia({
-      audio: {
-        channelCount: 1,
-        echoCancellation: true,
-        noiseSuppression: true,
-        autoGainControl: true,
-      },
-    })
+    this.stream = await navigator.mediaDevices.getUserMedia(
+      this.constraints(getPreferredMic()),
+    )
 
     this.source = this.ctx.createMediaStreamSource(this.stream)
     this.node = new AudioWorkletNode(this.ctx, 'pcm-capture')
@@ -73,6 +70,33 @@ export class VoiceRecorder {
     // will only schedule its process() if it has a path to the destination.
     // Connecting it there keeps it alive and stays silent (no echo).
     this.node.connect(this.ctx.destination)
+  }
+
+  private constraints(deviceId: string | null): MediaStreamConstraints {
+    return {
+      audio: {
+        channelCount: 1,
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true,
+        // `ideal` (not `exact`) falls back to the system default if the
+        // remembered device has been unplugged.
+        ...(deviceId ? { deviceId: { ideal: deviceId } } : {}),
+      },
+    }
+  }
+
+  /** Swap the capture stream to another input mid-session. */
+  async setDevice(deviceId: string | null): Promise<void> {
+    if (!this.ctx || !this.node) return
+    const stream = await navigator.mediaDevices.getUserMedia(
+      this.constraints(deviceId),
+    )
+    this.source?.disconnect()
+    this.stream?.getTracks().forEach((t) => t.stop())
+    this.stream = stream
+    this.source = this.ctx.createMediaStreamSource(stream)
+    this.source.connect(this.node)
   }
 
   setMuted(muted: boolean): void {
