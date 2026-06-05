@@ -81,6 +81,23 @@ export default function SceneDetail() {
             </motion.p>
           )}
 
+          {/* the mission briefing: goal chip + plain-language objective */}
+          {scene?.goal && (
+            <motion.div
+              {...rise(0.25)}
+              className="mt-7 max-w-lg border-l border-amber/70 pl-4"
+            >
+              <p className="font-label text-[12px] font-medium uppercase tracking-[0.16em] text-amber">
+                Your goal · {scene.goal}
+              </p>
+              {scene.objective && (
+                <p className="mt-2 font-display text-[16px] leading-relaxed text-paper/80">
+                  {scene.objective}
+                </p>
+              )}
+            </motion.div>
+          )}
+
           {liveTo && (
             <motion.div {...rise(0.3)} className="mt-9">
               <AmberAction to={liveTo} viewTransition size="lg">

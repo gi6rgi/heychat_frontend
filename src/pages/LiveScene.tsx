@@ -151,6 +151,11 @@ export default function LiveScene() {
               {scene.title.toUpperCase()}
             </Kicker>
             <SceneTimer running={status === "live"} />
+            {scene.goal && (
+              <p className="max-w-xs font-label text-[12px] font-medium uppercase tracking-[0.14em] text-amber/80">
+                Goal · {scene.goal}
+              </p>
+            )}
           </div>
 
           <div className="flex flex-col items-end gap-1.5 text-right">

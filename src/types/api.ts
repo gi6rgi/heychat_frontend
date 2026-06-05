@@ -10,6 +10,8 @@ export interface Scenario {
   greet_first: boolean;
   /** Task for a training scenario ("Get her phone number"); null = plain chat. */
   goal: string | null;
+  /** Plain-language briefing: what to do + what counts as winning. */
+  objective: string | null;
   /** Scene art paths in the public Supabase Storage bucket; null = no art. */
   poster_path: string | null;
   establishing_path: string | null;

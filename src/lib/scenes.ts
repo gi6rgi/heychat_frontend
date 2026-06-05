@@ -34,6 +34,10 @@ export interface Scene {
   emotion: string;
   /** film-copy description, second person — Detail screen */
   logline: string;
+  /** short imperative goal chip ("Get her phone number"); null = plain chat */
+  goal: string | null;
+  /** plain-language briefing: what to do + what counts as winning */
+  objective: string | null;
   poster: string;
   /** establishing scene art (Detail screen + Library hover); null → dark placeholder */
   still: string | null;
@@ -75,6 +79,8 @@ export function toScene(s: Scenario): Scene {
     character: s.character_name ?? s.title.split(/[\s—–-]/)[0] ?? "Partner",
     emotion: s.emotion ?? "present",
     logline: s.logline ?? s.description,
+    goal: s.goal,
+    objective: s.objective,
     poster: sceneImageUrl(s.poster_path) ?? "",
     still: sceneImageUrl(s.establishing_path),
     conversation: sceneImageUrl(s.conversation_path),
