@@ -15,7 +15,7 @@ export function SubScoreRow({
 }) {
   return (
     <div className="flex items-center gap-5">
-      <span className="w-[5.5rem] shrink-0 font-mono text-[12px] uppercase tracking-[0.14em] text-paper-dim">
+      <span className="w-[10rem] shrink-0 font-mono text-[12px] uppercase tracking-[0.14em] text-paper-dim">
         {label}
       </span>
       <Meter value={value / 10} className="flex-1" />

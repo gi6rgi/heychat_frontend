@@ -10,6 +10,8 @@ import {
 } from "@/hooks/useConversations";
 import { AmberAction, Hairline, Kicker, TopBar } from "@/components/cinema";
 import { SubScoreRow } from "@/components/debrief/SubScoreRow";
+import { MatchOrb } from "@/components/create/MatchOrb";
+import { WorkingLines } from "@/components/create/WorkingLines";
 
 /**
  * Post-scene debrief — the real flight recorder.
@@ -23,6 +25,14 @@ import { SubScoreRow } from "@/components/debrief/SubScoreRow";
  * better answers. Without a conversation id there is nothing to grade — we
  * bounce back to the scene page.
  */
+
+/** Rotating status lines while the coach reads the transcript (~10-20s). */
+const REVIEW_LINES = [
+  "Rolling the tape back…",
+  "Reading your lines…",
+  "Marking the moments that mattered…",
+  "Writing the coach's note…",
+];
 
 /** mm:ss between the first and last message of the conversation. */
 function sceneDuration(
@@ -80,7 +90,6 @@ export default function Debrief() {
           transition: { duration: 0.5, ease: "easeOut" as const, delay },
         };
 
-  const outcome = conversation?.goal_outcome;
   const duration = sceneDuration(conversation?.messages);
   const strengths = report?.metrics.filter((m) => m.kind === "strength") ?? [];
 
@@ -94,23 +103,25 @@ export default function Debrief() {
         </Kicker>
         <Link
           to="/"
-          className="shrink-0 font-mono text-[13px] tracking-[0.08em] text-paper-dim transition-colors duration-300 ease-[var(--ease-cinema)] hover:text-paper"
+          className="shrink-0 font-label text-[13px] font-medium uppercase tracking-[0.14em] text-paper-dim transition-colors duration-300 ease-[var(--ease-cinema)] hover:text-paper"
         >
           HOME
         </Link>
       </TopBar>
 
+      {/* While the coach is still reading there's no verdict to stage — show
+          the same quiet ritual as the create flow's working step: the orb and
+          a few rotating lines, nothing else. */}
+      {reviewing && !report && !failed ? (
+        <div className="flex min-h-[70vh] flex-col items-center justify-center gap-8 py-12 text-center">
+          <MatchOrb />
+          <WorkingLines lines={REVIEW_LINES} />
+        </div>
+      ) : (
       <div className="mx-auto w-full max-w-6xl px-6 pb-14 md:px-10">
-        {/* HERO — goal outcome + scene meta */}
+        {/* HERO — the coach's headline + scene meta */}
         <motion.div className="mt-14" {...rise(0.05)}>
-          <Kicker as="p" className={outcome === "success" ? "text-amber" : ""}>
-            {outcome === "success"
-              ? "Goal achieved"
-              : outcome === "failure"
-                ? "Goal missed"
-                : "Scene played"}
-          </Kicker>
-          <h1 className="font-display mt-4 max-w-3xl text-4xl font-light leading-[1.05] text-paper sm:text-5xl">
+          <h1 className="font-display max-w-3xl text-4xl font-light leading-[1.05] text-paper sm:text-5xl">
             {report?.headline ?? "The scene is in the can."}
           </h1>
           <p className="mt-5 font-mono text-[13px] uppercase tracking-[0.1em] text-paper-faint">
@@ -125,27 +136,6 @@ export default function Debrief() {
         </motion.div>
 
         <Hairline className="mt-14" />
-
-        {/* REVIEWING — the coach is reading the transcript */}
-        {reviewing && !report && !failed && (
-          <motion.div
-            className="flex flex-col items-center gap-4 py-24 text-center"
-            {...rise(0.1)}
-          >
-            <Kicker as="p" className="text-amber">
-              Reviewing the scene
-            </Kicker>
-            <p className="max-w-md font-display text-2xl italic leading-snug text-paper-dim">
-              The coach is replaying your conversation, line by line…
-            </p>
-            <motion.div
-              aria-hidden
-              className="mt-4 h-px w-56 bg-gradient-to-r from-transparent via-amber to-transparent"
-              animate={reduce ? undefined : { opacity: [0.25, 1, 0.25] }}
-              transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
-            />
-          </motion.div>
-        )}
 
         {/* ERROR — analysis failed; offer a retry */}
         {failed && !report && (
@@ -186,15 +176,14 @@ export default function Debrief() {
                     /10
                   </span>
                 </div>
-                <div className="mt-8 max-w-md space-y-3">
-                  <Kicker as="p">Coach's Note</Kicker>
-                  <p className="font-display text-[18px] italic leading-relaxed text-paper-dim">
+                <div className="mt-8 max-w-md">
+                  <p className="text-[16px] leading-relaxed text-paper-dim">
                     {report.summary}
                   </p>
                 </div>
               </motion.div>
 
-              {/* RIGHT — metric breakdown + strengths / advice */}
+              {/* RIGHT — metric breakdown */}
               <motion.div {...rise(0.25)}>
                 <Kicker as="h2">Breakdown</Kicker>
                 <div className="mt-6 flex flex-col gap-5">
@@ -202,47 +191,53 @@ export default function Debrief() {
                     <SubScoreRow key={m.name} label={m.name} value={m.score} />
                   ))}
                 </div>
-
-                <div className="mt-12 grid gap-x-12 gap-y-10 sm:grid-cols-2">
-                  <div>
-                    <Kicker as="p">What Landed</Kicker>
-                    <ul className="mt-4">
-                      {strengths.map((m, i) => (
-                        <li key={m.name}>
-                          {i > 0 && <Hairline className="my-3 bg-hairline-soft" />}
-                          <span className="font-display text-[16px] leading-snug text-paper">
-                            {m.explanation}
-                          </span>
-                        </li>
-                      ))}
-                      {strengths.length === 0 && (
-                        <li className="font-display text-[16px] italic leading-snug text-paper-dim">
-                          Rough night. The next run is where it turns.
-                        </li>
-                      )}
-                    </ul>
-                  </div>
-                  <div>
-                    <Kicker as="p">What To Work On</Kicker>
-                    <ul className="mt-4">
-                      {report.advice.map((a, i) => (
-                        <li key={i}>
-                          {i > 0 && <Hairline className="my-3 bg-hairline-soft" />}
-                          <span className="font-display text-[16px] leading-snug text-paper">
-                            {a.text}
-                          </span>
-                          {a.quote && (
-                            <span className="mt-1 block font-display text-[15px] italic leading-snug text-paper-faint">
-                              “{a.quote}”
-                            </span>
-                          )}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
               </motion.div>
             </div>
+
+            {/* WHAT LANDED / WHAT TO WORK ON — full-width section so each list
+                gets a real column to breathe in (nested in the right half they
+                rendered as unreadable skinny towers). */}
+            <motion.div className="mt-16" {...rise(0.3)}>
+              <Hairline />
+              <div className="mt-12 grid gap-x-16 gap-y-10 sm:grid-cols-2">
+                <div>
+                  <Kicker as="p">What Landed</Kicker>
+                  <ul className="mt-4">
+                    {strengths.map((m, i) => (
+                      <li key={m.name}>
+                        {i > 0 && <Hairline className="my-5 bg-hairline-soft" />}
+                        <span className="block text-[16px] leading-relaxed text-paper">
+                          {m.explanation}
+                        </span>
+                      </li>
+                    ))}
+                    {strengths.length === 0 && (
+                      <li className="text-[16px] italic leading-relaxed text-paper-dim">
+                        Rough night. The next run is where it turns.
+                      </li>
+                    )}
+                  </ul>
+                </div>
+                <div>
+                  <Kicker as="p">What To Work On</Kicker>
+                  <ul className="mt-4">
+                    {report.advice.map((a, i) => (
+                      <li key={i}>
+                        {i > 0 && <Hairline className="my-5 bg-hairline-soft" />}
+                        <span className="block text-[16px] leading-relaxed text-paper">
+                          {a.text}
+                        </span>
+                        {a.quote && (
+                          <span className="mt-2 block font-display text-[16px] italic leading-normal text-paper-faint">
+                            “{a.quote}”
+                          </span>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </motion.div>
 
             {/* SAY IT BETTER — the coach's suggested lines */}
             {!!report.example_answers?.length && (
@@ -250,13 +245,13 @@ export default function Debrief() {
                 <Hairline />
                 <div className="mt-12">
                   <Kicker as="h2">Say It Better</Kicker>
-                  <div className="mt-6 grid gap-x-12 gap-y-8 lg:grid-cols-2">
+                  <div className="mt-6 grid gap-x-12 gap-y-10 lg:grid-cols-2">
                     {report.example_answers.map((ex, i) => (
                       <div key={i}>
-                        <p className="font-display text-[15px] italic leading-snug text-paper-faint">
+                        <p className="font-display text-[16px] italic leading-normal text-paper-faint">
                           {ex.question}
                         </p>
-                        <p className="mt-2 font-display text-[17px] leading-snug text-amber/90">
+                        <p className="mt-2 text-[16px] leading-relaxed text-amber/90">
                           “{ex.answer}”
                         </p>
                       </div>
@@ -278,11 +273,9 @@ export default function Debrief() {
           <AmberAction to={`/scene/${scene.slug}/live`} size="lg">
             Retry Scene
           </AmberAction>
-          <AmberAction tone="dim" arrow={false} to="/">
-            Browse scenes
-          </AmberAction>
         </motion.div>
       </div>
+      )}
     </div>
   );
 }
