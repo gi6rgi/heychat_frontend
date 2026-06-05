@@ -5,7 +5,7 @@ import { Mic, MicOff, Volume2, VolumeX, PhoneOff } from "lucide-react";
 import { AmberAction, Container, Kicker, Meter, Waveform } from "@/components/cinema";
 import { SceneTimer } from "@/components/live/SceneTimer";
 import { Subtitles, type SubtitleLine } from "@/components/live/Subtitles";
-import { splitTranscript } from "@/lib/transcript";
+import { cleanTranscript } from "@/lib/transcript";
 import { RoundButton } from "@/components/live/RoundButton";
 import { useVoiceSession } from "@/hooks/useVoiceSession";
 import { useScenario } from "@/hooks/useScenarios";
@@ -81,26 +81,23 @@ export default function LiveScene() {
   // Subtitle source: pre-connect uses the seed opening lines so the anatomy
   // reads like the reference even with no backend; live uses real transcripts.
   // Lines carry stable per-turn ids (so streamed fragments grow in place) and
-  // are split into the spoken text + the *stage direction* theatre remark.
+  // are cleaned down to the spoken words (stage directions stripped).
   const agentLines = transcripts.filter((t) => t.role === "agent");
   const lastUser = [...transcripts].reverse().find((t) => t.role === "user");
 
   let previous: SubtitleLine | undefined;
   let current: SubtitleLine;
-  let direction: string | null = null;
   let hint: SubtitleLine | undefined;
 
   if (status === "live" && agentLines.length > 0) {
     const last = agentLines[agentLines.length - 1];
-    const parts = splitTranscript(last.text);
-    current = { id: last.id, text: parts.spoken };
-    direction = parts.direction;
+    current = { id: last.id, text: cleanTranscript(last.text) };
     const prev = agentLines[agentLines.length - 2];
     previous = prev
-      ? { id: prev.id, text: splitTranscript(prev.text).spoken }
+      ? { id: prev.id, text: cleanTranscript(prev.text) }
       : undefined;
     hint = lastUser
-      ? { id: lastUser.id, text: splitTranscript(lastUser.text).spoken }
+      ? { id: lastUser.id, text: cleanTranscript(lastUser.text) }
       : undefined;
   } else {
     // idle / connecting / ended / no-transcript-yet → seeded sample lines
@@ -171,13 +168,8 @@ export default function LiveScene() {
           <div className="mx-auto flex w-full max-w-3xl flex-col items-center gap-5">
             <Waveform active={waveActive} level={inputLevel} className="h-7 w-56" />
 
-            {current.text || direction ? (
-              <Subtitles
-                previous={previous}
-                current={current}
-                direction={direction}
-                hint={hint}
-              />
+            {current.text ? (
+              <Subtitles previous={previous} current={current} hint={hint} />
             ) : (
               <p className="font-display text-2xl italic text-paper-faint">
                 The scene is set.

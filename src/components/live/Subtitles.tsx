@@ -9,8 +9,6 @@ export interface SubtitleLine {
 /**
  * Cinema subtitle stack rendered over the film — no box, no chrome.
  *   · `previous`   small + faded, sits above (the line before the current one)
- *   · `direction`  theatre-style stage remark for the current line — what the
- *                  character does, never what they say (faint italic, parens)
  *   · `current`    largest serif, paper — the line being spoken now
  *   · `hint`       faint italic serif below — the user's own last line
  *
@@ -21,12 +19,10 @@ export interface SubtitleLine {
 export function Subtitles({
   previous,
   current,
-  direction,
   hint,
 }: {
   previous?: SubtitleLine;
   current: SubtitleLine;
-  direction?: string | null;
   hint?: SubtitleLine;
 }) {
   return (
@@ -43,23 +39,6 @@ export function Subtitles({
               className="mx-auto max-w-xl truncate font-display text-base leading-snug text-paper-faint"
             >
               {previous.text}
-            </motion.p>
-          ) : null}
-        </AnimatePresence>
-      </div>
-
-      <div className="h-5">
-        <AnimatePresence mode="wait">
-          {direction ? (
-            <motion.p
-              key={direction}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.35, ease: [0.22, 0.61, 0.36, 1] }}
-              className="font-display text-[15px] italic leading-none text-amber/70"
-            >
-              ( {direction} )
             </motion.p>
           ) : null}
         </AnimatePresence>
