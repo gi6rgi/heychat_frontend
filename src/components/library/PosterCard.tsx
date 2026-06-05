@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Lock } from "lucide-react";
 import { type Scene } from "@/lib/scenes";
@@ -17,15 +18,20 @@ function Dot() {
  *  - unlocked → wraps in a <Link> to the scene; hover lifts + brightens meta.
  */
 export function PosterCard({ scene }: { scene: Scene }) {
+  // Fade the poster in once it has loaded so it doesn't pop (same pattern
+  // as CustomPosterCard).
+  const [loaded, setLoaded] = useState(false);
   const poster = (
     <div className="relative aspect-[2/3] overflow-hidden">
       <img
         src={scene.poster}
         alt={`${scene.title} poster`}
         loading="lazy"
+        onLoad={() => setLoaded(true)}
         className={cn(
-          "h-full w-full object-cover transition-transform duration-[450ms] ease-[var(--ease-cinema)]",
-          scene.locked ? "opacity-[0.45]" : "group-hover:scale-[1.025]",
+          "h-full w-full object-cover transition-[opacity,transform] duration-[450ms] ease-[var(--ease-cinema)]",
+          !loaded ? "opacity-0" : scene.locked ? "opacity-[0.45]" : "opacity-100",
+          !scene.locked && "group-hover:scale-[1.025]",
         )}
       />
       {scene.locked && (

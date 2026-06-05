@@ -26,6 +26,9 @@ export function DeckStep({
 }) {
   const [manual, setManual] = useState(false);
   const [draft, setDraft] = useState("");
+  // Card art that has finished loading; the rest stays faded out so images
+  // ease in instead of popping (same pattern as CustomPosterCard).
+  const [loaded, setLoaded] = useState<Set<string>>(new Set());
 
   if (manual) {
     return (
@@ -91,7 +94,11 @@ export function DeckStep({
               src={card.image}
               alt=""
               loading="lazy"
-              className="h-full w-full object-cover transition-transform duration-[450ms] ease-[var(--ease-cinema)] group-hover:scale-[1.025]"
+              onLoad={() => setLoaded((prev) => new Set(prev).add(card.id))}
+              className={cn(
+                "h-full w-full object-cover transition-[opacity,transform] duration-[450ms] ease-[var(--ease-cinema)] group-hover:scale-[1.025]",
+                loaded.has(card.id) ? "opacity-100" : "opacity-0",
+              )}
             />
             <div
               aria-hidden
