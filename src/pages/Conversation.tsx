@@ -61,7 +61,7 @@ export default function Conversation() {
             <Link to={`/session/${conversation.scenario_id}?replay_of=${conversation.id}`}>
               <Button size="lg">
                 <Repeat2 size={16} />
-                Try again — same flow
+                Try again, same flow
               </Button>
             </Link>
           </div>
@@ -78,7 +78,7 @@ export default function Conversation() {
                     <Loader2 size={28} className="animate-spin text-brand-light" />
                     <p className="text-sm font-medium">Analyzing your conversation…</p>
                     <p className="max-w-xs text-xs text-muted-foreground">
-                      This takes a few seconds. You can leave this page — it keeps running
+                      This takes a few seconds. You can leave this page. It keeps running
                       and will be here when you come back.
                     </p>
                   </div>
@@ -94,7 +94,7 @@ export default function Conversation() {
                 ) : (
                   <div className="flex flex-col items-center gap-3 py-8 text-center">
                     <p className="max-w-xs text-sm text-muted-foreground">
-                      Get an AI coach's breakdown of your performance — scores per metric
+                      Get an AI coach's breakdown of your performance: scores per metric
                       plus advice on what to improve.
                     </p>
                     <Button

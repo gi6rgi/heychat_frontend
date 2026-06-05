@@ -238,7 +238,7 @@ export function FeedbackPanel({
             accent="text-emerald-400"
             metrics={strengths}
             prevByName={prevByName}
-            emptyText="No clear strengths this time — focus on the areas at right."
+            emptyText="No clear strengths this time. Focus on the areas at right."
           />
           <MetricColumn
             title="Focus areas"
@@ -246,7 +246,7 @@ export function FeedbackPanel({
             accent="text-brand-light"
             metrics={focus}
             prevByName={prevByName}
-            emptyText="Nothing major to fix — nice work."
+            emptyText="Nothing major to fix. Nice work."
           />
         </div>
       )}
