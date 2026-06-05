@@ -63,49 +63,46 @@ export default function SceneDetail() {
           </Link>
         </motion.div>
 
-        {/* lower-left content stack */}
-        <div className="mt-auto max-w-2xl pb-14 md:pb-20">
-          <motion.h1
-            {...rise(0.05)}
-            className="font-display mt-4 text-5xl font-light uppercase leading-[0.95] tracking-[-0.02em] text-paper sm:text-6xl md:text-7xl lg:text-8xl"
-          >
-            {title}
-          </motion.h1>
-
-          {logline && (
-            <motion.p
-              {...rise(0.2)}
-              className="font-display mt-6 max-w-lg text-xl italic leading-snug text-paper/90"
+        {/* lower-left content stack — mounts only once the scenario has
+            arrived, so the title/logline/action play their stagger together.
+            Rendering it immediately made the title rise with a slug-derived
+            fallback while the logline and button popped in (with their own
+            delayed animations) whenever the GET finished. */}
+        {scene && (
+          <div className="mt-auto max-w-2xl pb-14 md:pb-20">
+            <motion.h1
+              {...rise(0.05)}
+              className="font-display mt-4 text-5xl font-light uppercase leading-[0.95] tracking-[-0.02em] text-paper sm:text-6xl md:text-7xl lg:text-8xl"
             >
-              {logline}
-            </motion.p>
-          )}
+              {title}
+            </motion.h1>
 
-          {/* the mission briefing: goal chip + plain-language objective */}
-          {scene?.goal && (
-            <motion.div
-              {...rise(0.25)}
-              className="mt-7 max-w-lg border-l border-amber/70 pl-4"
-            >
-              <p className="font-label text-[12px] font-medium uppercase tracking-[0.16em] text-amber">
-                Your goal · {scene.goal}
-              </p>
-              {scene.objective && (
-                <p className="mt-2 font-display text-[16px] leading-relaxed text-paper/80">
-                  {scene.objective}
+            {/* the mission briefing: goal chip + plain-language objective */}
+            {scene.goal && (
+              <motion.div
+                {...rise(0.25)}
+                className="mt-7 max-w-lg border-l border-amber/70 pl-4"
+              >
+                <p className="font-label text-[12px] font-medium uppercase tracking-[0.16em] text-amber">
+                  Your goal · {scene.goal}
                 </p>
-              )}
-            </motion.div>
-          )}
+                {scene.objective && (
+                  <p className="mt-2 font-display text-[16px] leading-relaxed text-paper/80">
+                    {scene.objective}
+                  </p>
+                )}
+              </motion.div>
+            )}
 
-          {liveTo && (
-            <motion.div {...rise(0.3)} className="mt-9">
-              <AmberAction to={liveTo} viewTransition size="lg">
-                Start Scene
-              </AmberAction>
-            </motion.div>
-          )}
-        </div>
+            {liveTo && (
+              <motion.div {...rise(0.3)} className="mt-9">
+                <AmberAction to={liveTo} viewTransition size="lg">
+                  Start Scene
+                </AmberAction>
+              </motion.div>
+            )}
+          </div>
+        )}
       </Container>
     </div>
   );
