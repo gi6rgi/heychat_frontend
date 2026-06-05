@@ -85,6 +85,13 @@ export function useVoiceSession(scenarioId: string | undefined, replayOf?: strin
     try {
       const player = new VoicePlayer(setIsAgentSpeaking)
       await player.resume()
+      // The component may have unmounted while we awaited (StrictMode's dev
+      // double-mount does exactly this) — abort instead of finishing a session
+      // whose player was already torn down by cleanup().
+      if (stoppingRef.current) {
+        await player.close()
+        return
+      }
       playerRef.current = player
 
       const recorder = new VoiceRecorder()
@@ -93,6 +100,10 @@ export function useVoiceSession(scenarioId: string | undefined, replayOf?: strin
       const sessionId = crypto.randomUUID()
       // Browsers can't set headers on a WebSocket, so the token goes in the query.
       const token = await getAccessToken()
+      if (stoppingRef.current) {
+        await cleanup()
+        return
+      }
       let url =
         `${getWsBaseUrl()}/ws/sessions/${sessionId}` +
         `?scenario_id=${encodeURIComponent(scenarioId)}&token=${encodeURIComponent(token)}`

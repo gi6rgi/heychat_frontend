@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { motion } from "motion/react";
 import { Mic, MicOff, Volume2, VolumeX, PhoneOff } from "lucide-react";
@@ -66,11 +66,13 @@ export default function LiveScene() {
   // Auto-start on arrival: the Detail "Start Scene" action and the create-flow
   // reveal navigate straight here, so we begin the session immediately (the mic
   // permission prompt is the only gate) instead of showing a second button.
-  const autoStarted = useRef(false);
+  // Deferred via a cancellable timeout so StrictMode's dev double-mount can't
+  // race a half-started session against the simulated unmount's cleanup
+  // (which used to close the player mid-start → live scene with no voice).
   useEffect(() => {
-    if (autoStarted.current || !scenarioId || status !== "idle") return;
-    autoStarted.current = true;
-    void start();
+    if (!scenarioId || status !== "idle") return;
+    const t = setTimeout(() => void start(), 50);
+    return () => clearTimeout(t);
   }, [scenarioId, status, start]);
 
   if (!scene) return null;
