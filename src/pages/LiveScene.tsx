@@ -188,11 +188,11 @@ export default function LiveScene() {
                 >
                   <div className="h-full w-full bg-black [clip-path:polygon(0_0,calc(100%_-_28px)_0,100%_50%,calc(100%_-_28px)_100%,0_100%)]" />
                 </div>
-                <div className="relative py-3 pl-6 pr-16">
+                <div className="relative py-2 pl-6 pr-12 md:py-3 md:pr-16">
                   <span className="font-label text-[11px] font-medium uppercase tracking-[0.2em] text-amber">
                     Goal
                   </span>
-                  <p className="mt-1 font-display text-2xl font-light leading-tight text-amber">
+                  <p className="mt-1 font-display text-xl font-light leading-tight text-amber md:text-2xl">
                     {scene.goal}
                   </p>
                 </div>
@@ -201,12 +201,12 @@ export default function LiveScene() {
           </div>
 
           <div className="flex flex-col items-end gap-2 pt-3 text-right">
-            <h1 className="font-display text-2xl uppercase leading-none tracking-[0.02em] text-paper">
+            <h1 className="font-display text-xl uppercase leading-none tracking-[0.02em] text-paper md:text-2xl">
               {characterName}
             </h1>
             <SceneTimer
               running={status === "live"}
-              className="text-2xl text-paper-dim"
+              className="text-xl text-paper-dim md:text-2xl"
             />
           </div>
         </header>
@@ -257,9 +257,9 @@ export default function LiveScene() {
                 </AmberAction>
               )}
               {status === "live" && (
-                <AmberAction tone="dim" arrow={false} onClick={stop}>
+                <AmberAction tone="dim" arrow={false} size="lg" onClick={stop}>
                   <span className="inline-flex items-center gap-2">
-                    <PhoneOff className="size-3.5" aria-hidden />
+                    <PhoneOff className="size-4" aria-hidden />
                     END
                   </span>
                 </AmberAction>
@@ -279,7 +279,10 @@ export default function LiveScene() {
               </RoundButton>
 
               {devicesOpen && (
-                <div className="absolute bottom-full right-0 z-20 mb-4 flex w-80 flex-col gap-5 border border-hairline bg-night-deep/95 p-5 text-left">
+                /* phones: a fixed sheet spanning the screen above the controls
+                   (the w-80 popover hung off the left edge); md+: anchored
+                   popover above the gear as before */
+                <div className="fixed inset-x-4 bottom-28 z-20 flex flex-col gap-5 border border-hairline bg-night-deep/95 p-5 text-left md:absolute md:inset-x-auto md:bottom-full md:right-0 md:mb-4 md:w-80">
                   <div className="flex flex-col gap-2">
                     <span className="font-label text-[11px] font-medium uppercase tracking-[0.16em] text-paper-faint">
                       Microphone
