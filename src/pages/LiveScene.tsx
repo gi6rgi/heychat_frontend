@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
+import { motion } from "motion/react";
 import { Mic, MicOff, Volume2, VolumeX, PhoneOff } from "lucide-react";
 import { AmberAction, Container, Kicker, Meter, Waveform } from "@/components/cinema";
 import { SceneTimer } from "@/components/live/SceneTimer";
@@ -10,6 +11,7 @@ import { useScenario } from "@/hooks/useScenarios";
 import { useAmbience } from "@/hooks/useAmbience";
 import { scenarioAmbience, type Ambience } from "@/audio/ambience";
 import { getScene, type Scene } from "@/lib/scenes";
+import { sceneImageUrl } from "@/lib/storage";
 
 /**
  * Live Scene (brief 3.3) — full-bleed scene still under a neutral dark
@@ -21,8 +23,10 @@ export default function LiveScene() {
   const { slug } = useParams<{ slug: string }>();
   const catalogScene = getScene(slug);
 
-  // No catalog match → custom/created character: synthesize a minimal scene from
-  // the backend Scenario (dark bg, 'room' ambience). Only fetched when needed.
+  // No catalog match → custom/created character: synthesize a minimal scene
+  // from the backend Scenario. Its generated art comes from Supabase Storage;
+  // useScenario keeps polling while the art is still being painted, so the
+  // stills fade in as they land. Only fetched when needed.
   const { data: scenario } = useScenario(catalogScene ? undefined : slug);
 
   const scene: Scene | undefined = useMemo(() => {
@@ -35,11 +39,12 @@ export default function LiveScene() {
       title: scenario?.title ?? "Untitled Scene",
       genre: "EVERYDAY",
       tags: ["CUSTOM", "ROLEPLAY", "OPEN"],
-      character: "Partner",
+      character: scenario?.title?.split(/[ —-]/)[0] ?? "Partner",
       emotion: "present",
       logline: scenario?.description ?? "",
-      poster: "",
-      still: null,
+      poster: sceneImageUrl(scenario?.poster_path) ?? "",
+      still: sceneImageUrl(scenario?.establishing_path),
+      conversation: sceneImageUrl(scenario?.conversation_path),
       ambience: "room",
       locked: false,
       isNew: false,
@@ -116,12 +121,17 @@ export default function LiveScene() {
 
   return (
     <div className="fixed inset-0 overflow-hidden bg-night-deep text-paper">
-      {/* full-bleed conversation shot (or establishing fallback, or dark) */}
+      {/* full-bleed conversation shot (or establishing fallback, or dark).
+          Keyed + faded so freshly generated art melts in instead of popping. */}
       {liveImage ? (
-        <img
+        <motion.img
+          key={liveImage}
           src={liveImage}
           alt=""
           aria-hidden
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1.2, ease: [0.22, 0.61, 0.36, 1] }}
           className="absolute inset-0 h-full w-full object-cover"
         />
       ) : null}

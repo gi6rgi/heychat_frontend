@@ -8,8 +8,10 @@ import { ApiError } from "@/lib/api-client";
 import { queryKeys } from "@/lib/query-keys";
 import { AmberAction, Container, Kicker, TopBar } from "@/components/cinema";
 import { MatchOrb } from "@/components/create/MatchOrb";
+import { PosterReveal } from "@/components/create/PosterReveal";
 import { WorkingLines } from "@/components/create/WorkingLines";
 import { DeckStep } from "@/components/create/SwipeDeck";
+import { useScenario } from "@/hooks/useScenarios";
 import type { CharacterIntake, Scenario } from "@/types/api";
 
 // Three deck steps, then the generate + reveal. No entry screen, no match path:
@@ -44,6 +46,12 @@ export default function CreateScene() {
   const [limitMessage, setLimitMessage] = useState<string | null>(null);
   // Last submitted intake, kept for retries.
   const [intake, setIntake] = useState<CharacterIntake | null>(null);
+  // Scene art is painted in the background after creation; this poll (it stops
+  // by itself once image_status leaves "generating") feeds the poster reveal.
+  const { data: liveResult } = useScenario(
+    step === "reveal" ? result?.id : undefined,
+  );
+  const revealed = liveResult ?? result;
 
   function reset() {
     setWho("");
@@ -170,31 +178,31 @@ export default function CreateScene() {
               </motion.div>
             )}
 
-            {step === "reveal" && result && (
+            {step === "reveal" && revealed && (
               <motion.div
-                key={`reveal-${result.id}`}
+                key={`reveal-${revealed.id}`}
                 {...stepMotion}
                 className="mx-auto flex max-w-xl flex-col items-center gap-7 text-center"
               >
-                <MatchOrb size={104} initial={result.title.charAt(0)} />
+                <PosterReveal scenario={revealed} />
                 <div className="flex flex-col gap-4">
                   <Kicker className="text-amber">Made for you</Kicker>
                   <h2 className="font-display text-4xl font-light leading-[1.05] text-paper sm:text-5xl">
-                    {result.title}
+                    {revealed.title}
                   </h2>
                   <p className="font-display text-lg italic leading-snug text-paper-dim">
-                    {result.description}
+                    {revealed.description}
                   </p>
-                  {result.goal && (
+                  {revealed.goal && (
                     <p className="font-mono text-[13px] uppercase tracking-[0.1em] text-paper-faint">
-                      Goal · {result.goal}
+                      Goal · {revealed.goal}
                     </p>
                   )}
                 </div>
                 <div className="flex flex-col items-center gap-5">
                   <AmberAction
                     size="lg"
-                    onClick={() => navigate(`/scene/${result.id}/live`)}
+                    onClick={() => navigate(`/scene/${revealed.id}/live`)}
                   >
                     Start scene
                   </AmberAction>

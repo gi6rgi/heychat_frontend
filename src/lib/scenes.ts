@@ -7,10 +7,13 @@
  * the backend scenario the voice session actually opens; `still` is the clean
  * full-bleed art for Detail/Live (null → screens render a dark placeholder).
  *
- * Image assets follow public/scenes/<slug>-{poster,establishing,conversation}.<ext>.
+ * Image assets live in the public Supabase Storage `scenes` bucket as
+ * catalog/<slug>/{poster,establishing,conversation}.png (see lib/storage.ts).
  * Posters have their titles baked in (poster-wall art direction); the establishing
  * and conversation stills are clean (no baked type), so screens render the title in code.
  */
+
+import { catalogImage } from "@/lib/storage";
 
 export type Genre = "DATING" | "EVERYDAY" | "WORK" | "CHAOS";
 export type Ambience = "bar" | "cafe" | "office" | "room" | "none";
@@ -68,9 +71,9 @@ export const SCENES: Scene[] = [
     emotion: "absorbed",
     logline:
       "Sofia is reading alone at the next table. The chair across from her is free. Say something worth looking up for.",
-    poster: "/scenes/cafe-terrace-poster.png",
-    still: "/scenes/cafe-terrace-establishing.png",
-    conversation: "/scenes/cafe-terrace-conversation.png",
+    poster: catalogImage("cafe-terrace", "poster"),
+    still: catalogImage("cafe-terrace", "establishing"),
+    conversation: catalogImage("cafe-terrace", "conversation"),
     ambience: "cafe",
     locked: false,
     isNew: false,
@@ -92,8 +95,8 @@ export const SCENES: Scene[] = [
     emotion: "intrigued",
     logline:
       "Lena's been nursing the same drink for an hour, under a neon sign that reads Liquor, Beer & Regrets. She looks like she's got all three.",
-    poster: "/scenes/dive-bar-poster.png",
-    still: "/scenes/dive-bar-establishing.png",
+    poster: catalogImage("dive-bar", "poster"),
+    still: catalogImage("dive-bar", "establishing"),
     ambience: "bar",
     locked: false,
     isNew: false,
@@ -115,7 +118,7 @@ export const SCENES: Scene[] = [
     emotion: "guarded",
     logline:
       "Two plastic chairs, one broken clock, and a stranger who clearly doesn't want to be here either. Forty minutes to kill. Go.",
-    poster: "/scenes/waiting-room-poster.png",
+    poster: catalogImage("waiting-room", "poster"),
     still: null,
     ambience: "room",
     locked: false,
@@ -138,7 +141,7 @@ export const SCENES: Scene[] = [
     emotion: "hopeful",
     logline:
       "First date, golden hour, two milkshakes between you. She's giving you exactly one chance to not be boring.",
-    poster: "/scenes/first-date-poster.png",
+    poster: catalogImage("first-date", "poster"),
     still: null,
     ambience: "cafe",
     locked: false,
@@ -161,7 +164,7 @@ export const SCENES: Scene[] = [
     emotion: "skeptical",
     logline:
       "He's read your résumé twice and said nothing. Convince him you're the one worth the desk, the title, and the silence he keeps letting hang.",
-    poster: "/scenes/job-interview-poster.png",
+    poster: catalogImage("job-interview", "poster"),
     still: null,
     ambience: "office",
     locked: false,
@@ -184,7 +187,7 @@ export const SCENES: Scene[] = [
     emotion: "distant",
     logline:
       "2 a.m., last train, nowhere to be. The girl by the window hasn't blinked since the last stop.",
-    poster: "/scenes/red-eye-poster.png",
+    poster: catalogImage("red-eye", "poster"),
     still: null,
     ambience: "room",
     locked: true,
@@ -204,7 +207,7 @@ export const SCENES: Scene[] = [
     emotion: "shy",
     logline:
       "Spin cycle, fluorescent hum, and someone who's been reading the same paragraph since you walked in.",
-    poster: "/scenes/laundromat-poster.png",
+    poster: catalogImage("laundromat", "poster"),
     still: null,
     ambience: "room",
     locked: true,
@@ -224,7 +227,7 @@ export const SCENES: Scene[] = [
     emotion: "playful",
     logline:
       "Table 14, the singles table. Strangers in formalwear, an open bar, and three hours until the speeches.",
-    poster: "/scenes/wedding-table-poster.png",
+    poster: catalogImage("wedding-table", "poster"),
     still: null,
     ambience: "room",
     locked: true,

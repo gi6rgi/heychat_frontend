@@ -10,6 +10,12 @@ export interface Scenario {
   greet_first: boolean;
   /** Task for a training scenario ("Get her phone number"); null = plain chat. */
   goal: string | null;
+  /** Scene art paths in the public Supabase Storage bucket; null = no art. */
+  poster_path: string | null;
+  establishing_path: string | null;
+  conversation_path: string | null;
+  /** null (no art planned) / "generating" / "ready" / "error". */
+  image_status: "generating" | "ready" | "error" | null;
 }
 
 /** Conversational Match flow (app/characters/schemas.py). */

@@ -1,8 +1,11 @@
 import { useMemo, useState } from "react";
 import { GENRES, SCENES, type Genre } from "@/lib/scenes";
+import { sceneImageUrl } from "@/lib/storage";
+import { useScenarios } from "@/hooks/useScenarios";
 import { Container } from "@/components/cinema";
 import { LibraryTopBar } from "@/components/library/LibraryTopBar";
 import { PosterCard } from "@/components/library/PosterCard";
+import { CustomPosterCard } from "@/components/library/CustomPosterCard";
 import { CreateCard } from "@/components/library/CreateCard";
 import { cn } from "@/lib/utils";
 
@@ -22,6 +25,13 @@ export default function Library() {
 
   // Only show unlocked scenes; the genre filters track what's actually here.
   const available = useMemo(() => SCENES.filter((s) => !s.locked), []);
+  // The user's own created scenes (backend rows with a user_id) join the wall
+  // under the ALL filter, right before the create cell.
+  const { data: scenarios } = useScenarios();
+  const custom = useMemo(
+    () => (scenarios ?? []).filter((s) => s.user_id !== null),
+    [scenarios],
+  );
   const genres = useMemo(
     () =>
       GENRES.filter(
@@ -57,6 +67,20 @@ export default function Library() {
             />
           ) : null,
         )}
+        {custom.map((s) => {
+          const still = sceneImageUrl(s.establishing_path);
+          return still ? (
+            <img
+              key={s.id}
+              src={still}
+              alt=""
+              className={cn(
+                "absolute inset-0 h-full w-full object-cover transition-opacity duration-[1200ms] ease-[var(--ease-cinema)]",
+                hovered === s.id ? "opacity-[0.42]" : "opacity-0",
+              )}
+            />
+          ) : null;
+        })}
         <div className="absolute inset-0 bg-night/55" />
       </div>
 
@@ -78,9 +102,25 @@ export default function Library() {
                 <PosterCard scene={scene} />
               </div>
             ))}
+            {filter === "ALL" &&
+              custom.map((s, i) => (
+                <div
+                  key={s.id}
+                  className="animate-rise"
+                  style={{ animationDelay: `${(scenes.length + i) * 60}ms` }}
+                  onMouseEnter={() => setHovered(s.id)}
+                  onMouseLeave={() =>
+                    setHovered((cur) => (cur === s.id ? null : cur))
+                  }
+                >
+                  <CustomPosterCard scenario={s} />
+                </div>
+              ))}
             <div
               className="animate-rise"
-              style={{ animationDelay: `${scenes.length * 60}ms` }}
+              style={{
+                animationDelay: `${(scenes.length + (filter === "ALL" ? custom.length : 0)) * 60}ms`,
+              }}
             >
               <CreateCard />
             </div>

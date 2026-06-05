@@ -2,6 +2,8 @@ import { useParams, Link } from "react-router-dom";
 import { motion, useReducedMotion } from "motion/react";
 import { ArrowLeft } from "lucide-react";
 import { getScene } from "@/lib/scenes";
+import { sceneImageUrl } from "@/lib/storage";
+import { useScenario } from "@/hooks/useScenarios";
 import { AmberAction, Container } from "@/components/cinema";
 import { SceneStill } from "@/components/scene-detail/SceneStill";
 
@@ -19,12 +21,26 @@ export default function SceneDetail() {
   const scene = getScene(slug);
   const reduce = useReducedMotion();
 
+  // No catalog match → a user-created scene: pull it from the backend (the
+  // hook keeps polling while its art is still being painted) and compose the
+  // same title card from the generated establishing still + description.
+  const { data: scenario } = useScenario(scene ? undefined : slug);
+
   // Title falls back to a humanised slug if the scene is missing.
   const title =
     scene?.title ??
+    scenario?.title ??
     (slug
       ? slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
       : "Untitled");
+
+  const still = scene?.still ?? sceneImageUrl(scenario?.establishing_path);
+  const logline = scene?.logline ?? scenario?.description;
+  const liveTo = scene
+    ? `/scene/${scene.slug}/live`
+    : scenario
+      ? `/scene/${scenario.id}/live`
+      : null;
 
   const ease = reduce ? undefined : ([0.22, 0.61, 0.36, 1] as const);
   const rise = (delay: number) =>
@@ -38,7 +54,7 @@ export default function SceneDetail() {
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-night-deep text-paper">
-      <SceneStill src={scene?.still ?? null} alt={title} />
+      <SceneStill src={still ?? null} alt={title} />
 
       <Container className="relative z-10 flex min-h-screen flex-col">
         {/* top-left back link */}
@@ -62,18 +78,18 @@ export default function SceneDetail() {
             {title}
           </motion.h1>
 
-          {scene?.logline && (
+          {logline && (
             <motion.p
               {...rise(0.2)}
               className="font-display mt-6 max-w-lg text-xl italic leading-snug text-paper/90"
             >
-              {scene.logline}
+              {logline}
             </motion.p>
           )}
 
-          {scene && (
+          {liveTo && (
             <motion.div {...rise(0.3)} className="mt-9">
-              <AmberAction to={`/scene/${scene.slug}/live`} viewTransition size="lg">
+              <AmberAction to={liveTo} viewTransition size="lg">
                 Start Scene
               </AmberAction>
             </motion.div>
