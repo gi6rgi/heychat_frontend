@@ -25,13 +25,14 @@ export default function Library() {
 
   // The whole wall comes from the backend: catalog rows (user_id null) and
   // the user's own created scenes, which join under the ALL filter right
-  // before the create cell. Only unlocked catalog scenes are shown; the genre
-  // filters track what's actually here.
+  // before the create cell. Locked catalog scenes show as dimmed UNLOCK
+  // teasers (PosterCard renders them un-clickable); the genre filters track
+  // what's actually here.
   const { data: scenarios } = useScenarios();
   const available = useMemo(
     () =>
       (scenarios ?? [])
-        .filter((s) => s.user_id === null && !s.locked)
+        .filter((s) => s.user_id === null)
         .map(toScene)
         .sort((a, b) => a.number.localeCompare(b.number)),
     [scenarios],
