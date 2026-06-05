@@ -16,7 +16,9 @@ export function SceneStill({ src, alt }: { src: string | null; alt: string }) {
         <img
           src={src}
           alt=""
-          className="h-full w-full object-cover"
+          // Portrait phones crop the landscape still hard; the character is
+          // framed right-of-center, so bias the crop right below md.
+          className="h-full w-full object-cover object-[65%_center] md:object-center"
           draggable={false}
         />
       )}
