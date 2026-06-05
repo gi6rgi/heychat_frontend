@@ -1,8 +1,7 @@
 import { useParams, Link } from "react-router-dom";
 import { motion, useReducedMotion } from "motion/react";
 import { ArrowLeft } from "lucide-react";
-import { getScene } from "@/lib/scenes";
-import { sceneImageUrl } from "@/lib/storage";
+import { toScene } from "@/lib/scenes";
 import { useScenario } from "@/hooks/useScenarios";
 import { AmberAction, Container } from "@/components/cinema";
 import { SceneStill } from "@/components/scene-detail/SceneStill";
@@ -18,29 +17,24 @@ import { SceneStill } from "@/components/scene-detail/SceneStill";
  */
 export default function SceneDetail() {
   const { slug } = useParams<{ slug: string }>();
-  const scene = getScene(slug);
   const reduce = useReducedMotion();
 
-  // No catalog match → a user-created scene: pull it from the backend (the
-  // hook keeps polling while its art is still being painted) and compose the
-  // same title card from the generated establishing still + description.
-  const { data: scenario } = useScenario(scene ? undefined : slug);
+  // Every scene — catalog or user-created — lives in the backend now. The
+  // hook keeps polling while a created scene's art is still being painted,
+  // so the establishing still fades in when it lands.
+  const { data: scenario } = useScenario(slug);
+  const scene = scenario ? toScene(scenario) : undefined;
 
-  // Title falls back to a humanised slug if the scene is missing.
+  // Title falls back to a humanised slug while loading / if missing.
   const title =
     scene?.title ??
-    scenario?.title ??
     (slug
       ? slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
       : "Untitled");
 
-  const still = scene?.still ?? sceneImageUrl(scenario?.establishing_path);
-  const logline = scene?.logline ?? scenario?.description;
-  const liveTo = scene
-    ? `/scene/${scene.slug}/live`
-    : scenario
-      ? `/scene/${scenario.id}/live`
-      : null;
+  const still = scene?.still ?? null;
+  const logline = scene?.logline;
+  const liveTo = scene ? `/scene/${scene.slug}/live` : null;
 
   const ease = reduce ? undefined : ([0.22, 0.61, 0.36, 1] as const);
   const rise = (delay: number) =>
@@ -54,7 +48,7 @@ export default function SceneDetail() {
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-night-deep text-paper">
-      <SceneStill src={still ?? null} alt={title} />
+      <SceneStill src={still} alt={title} />
 
       <Container className="relative z-10 flex min-h-screen flex-col">
         {/* top-left back link */}

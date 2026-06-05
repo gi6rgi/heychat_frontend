@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { GENRES, SCENES, type Genre } from "@/lib/scenes";
+import { GENRES, toScene, type Genre } from "@/lib/scenes";
 import { sceneImageUrl } from "@/lib/storage";
 import { useScenarios } from "@/hooks/useScenarios";
 import { Container } from "@/components/cinema";
@@ -23,11 +23,19 @@ export default function Library() {
   // The hovered scene's still slowly fills the page background behind the grid.
   const [hovered, setHovered] = useState<string | null>(null);
 
-  // Only show unlocked scenes; the genre filters track what's actually here.
-  const available = useMemo(() => SCENES.filter((s) => !s.locked), []);
-  // The user's own created scenes (backend rows with a user_id) join the wall
-  // under the ALL filter, right before the create cell.
+  // The whole wall comes from the backend: catalog rows (user_id null) and
+  // the user's own created scenes, which join under the ALL filter right
+  // before the create cell. Only unlocked catalog scenes are shown; the genre
+  // filters track what's actually here.
   const { data: scenarios } = useScenarios();
+  const available = useMemo(
+    () =>
+      (scenarios ?? [])
+        .filter((s) => s.user_id === null && !s.locked)
+        .map(toScene)
+        .sort((a, b) => a.number.localeCompare(b.number)),
+    [scenarios],
+  );
   const custom = useMemo(
     () => (scenarios ?? []).filter((s) => s.user_id !== null),
     [scenarios],

@@ -16,6 +16,17 @@ export interface Scenario {
   conversation_path: string | null;
   /** null (no art planned) / "generating" / "ready" / "error". */
   image_status: "generating" | "ready" | "error" | null;
+  /** Cinema metadata (poster-wall UI); null on personal characters. */
+  genre: string | null;
+  tags: string[] | null;
+  character_name: string | null;
+  emotion: string | null;
+  logline: string | null;
+  ambience: string | null;
+  display_number: string | null;
+  locked: boolean;
+  is_new: boolean;
+  opening_lines: string[] | null;
 }
 
 /** Conversational Match flow (app/characters/schemas.py). */

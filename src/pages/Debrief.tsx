@@ -1,6 +1,7 @@
 import { Link, useParams, Navigate } from "react-router-dom";
 import { motion, useReducedMotion } from "motion/react";
-import { getScene } from "@/lib/scenes";
+import { toScene } from "@/lib/scenes";
+import { useScenario } from "@/hooks/useScenarios";
 import { AmberAction, Hairline, Kicker, TopBar } from "@/components/cinema";
 import {
   RapportChart,
@@ -277,9 +278,11 @@ const FALLBACK: Debrief = {
 
 export default function Debrief() {
   const { slug } = useParams<{ slug: string }>();
-  const scene = getScene(slug);
+  const { data: scenario, isLoading } = useScenario(slug);
+  const scene = scenario ? toScene(scenario) : undefined;
   const reduce = useReducedMotion();
 
+  if (isLoading) return null;
   if (!scene) return <Navigate to="/" replace />;
 
   const data = DEBRIEFS[scene.slug] ?? FALLBACK;

@@ -10,8 +10,7 @@ import { useVoiceSession } from "@/hooks/useVoiceSession";
 import { useScenario } from "@/hooks/useScenarios";
 import { useAmbience } from "@/hooks/useAmbience";
 import { scenarioAmbience, type Ambience } from "@/audio/ambience";
-import { getScene, type Scene } from "@/lib/scenes";
-import { sceneImageUrl } from "@/lib/storage";
+import { toScene, type Scene } from "@/lib/scenes";
 
 /**
  * Live Scene (brief 3.3) — full-bleed scene still under a neutral dark
@@ -21,38 +20,15 @@ import { sceneImageUrl } from "@/lib/storage";
  */
 export default function LiveScene() {
   const { slug } = useParams<{ slug: string }>();
-  const catalogScene = getScene(slug);
 
-  // No catalog match → custom/created character: synthesize a minimal scene
-  // from the backend Scenario. Its generated art comes from Supabase Storage;
-  // useScenario keeps polling while the art is still being painted, so the
-  // stills fade in as they land. Only fetched when needed.
-  const { data: scenario } = useScenario(catalogScene ? undefined : slug);
-
-  const scene: Scene | undefined = useMemo(() => {
-    if (catalogScene) return catalogScene;
-    if (!slug) return undefined;
-    return {
-      slug,
-      scenarioId: slug,
-      number: "00",
-      title: scenario?.title ?? "Untitled Scene",
-      genre: "EVERYDAY",
-      tags: ["CUSTOM", "ROLEPLAY", "OPEN"],
-      character: scenario?.title?.split(/[ —-]/)[0] ?? "Partner",
-      emotion: "present",
-      logline: scenario?.description ?? "",
-      poster: sceneImageUrl(scenario?.poster_path) ?? "",
-      still: sceneImageUrl(scenario?.establishing_path),
-      conversation: sceneImageUrl(scenario?.conversation_path),
-      ambience: "room",
-      locked: false,
-      isNew: false,
-      stars: null,
-      best: null,
-      openingLines: ["", ""],
-    };
-  }, [catalogScene, scenario, slug]);
+  // Every scene — catalog or user-created — lives in the backend. The hook
+  // keeps polling while a created scene's art is still being painted, so the
+  // conversation still fades in as it lands.
+  const { data: scenario } = useScenario(slug);
+  const scene: Scene | undefined = useMemo(
+    () => (scenario ? toScene(scenario) : undefined),
+    [scenario],
+  );
 
   const scenarioId = scene?.scenarioId ?? slug;
   const {
