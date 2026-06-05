@@ -33,6 +33,10 @@ export default function LiveScene() {
   const scenarioId = scene?.scenarioId ?? slug;
   const {
     status,
+    error,
+    limitNotice,
+    goalResult,
+    conversationId,
     transcripts,
     isAgentSpeaking,
     muted,
@@ -156,6 +160,40 @@ export default function LiveScene() {
               </p>
             )}
 
+            {/* goal verdict from the persona's end_conversation call */}
+            {goalResult && status === "ended" && (
+              <div className="flex flex-col items-center gap-2 text-center">
+                <Kicker
+                  className={
+                    goalResult.outcome === "success"
+                      ? "text-amber"
+                      : "text-paper-dim"
+                  }
+                >
+                  {goalResult.outcome === "success"
+                    ? "SCENE COMPLETE"
+                    : "SCENE OVER"}
+                </Kicker>
+                <p className="max-w-xl font-display text-lg italic leading-snug text-paper/90">
+                  {goalResult.reason}
+                </p>
+              </div>
+            )}
+
+            {/* usage-limit notice (daily budget, session cap) — info, not error */}
+            {limitNotice && (
+              <p className="max-w-xl text-center font-display text-lg italic leading-snug text-amber/90">
+                {limitNotice}
+              </p>
+            )}
+
+            {/* connection error detail above the retry affordance */}
+            {status === "error" && error && (
+              <p className="max-w-xl text-center font-display text-lg italic leading-snug text-paper-dim">
+                {error}
+              </p>
+            )}
+
             {/* primary affordance, state-dependent */}
             <div className="mt-1 flex items-center gap-8">
               {(status === "idle" || status === "connecting") && (
@@ -167,7 +205,10 @@ export default function LiveScene() {
                 </AmberAction>
               )}
               {status === "ended" && (
-                <AmberAction to={`/scene/${scene.slug}/debrief`} size="lg">
+                <AmberAction
+                  to={`/scene/${scene.slug}/debrief${conversationId ? `?c=${conversationId}` : ""}`}
+                  size="lg"
+                >
                   DEBRIEF
                 </AmberAction>
               )}
