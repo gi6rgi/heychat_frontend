@@ -1,15 +1,17 @@
 import { useMemo, useState } from "react";
+import { Loader2 } from "lucide-react";
 import { GENRES, toScene, type Genre } from "@/lib/scenes";
 import { sceneImageUrl } from "@/lib/storage";
 import { useScenarios } from "@/hooks/useScenarios";
 import { Container } from "@/components/cinema";
-import { LibraryTopBar } from "@/components/library/LibraryTopBar";
+import {
+  LibraryTopBar,
+  type LibraryFilter,
+} from "@/components/library/LibraryTopBar";
 import { PosterCard } from "@/components/library/PosterCard";
 import { CustomPosterCard } from "@/components/library/CustomPosterCard";
 import { CreateCard } from "@/components/library/CreateCard";
 import { cn } from "@/lib/utils";
-
-type Filter = "ALL" | Genre;
 
 /**
  * Scenario Library, "the poster wall" (brief 3.1).
@@ -19,43 +21,55 @@ type Filter = "ALL" | Genre;
  * staggered fade+rise.
  */
 export default function Library() {
-  const [filter, setFilter] = useState<Filter>("ALL");
+  const [filter, setFilter] = useState<LibraryFilter>("ALL");
   // The hovered scene's still slowly fills the page background behind the grid.
   const [hovered, setHovered] = useState<string | null>(null);
 
   // The whole wall comes from the backend: catalog rows (user_id null) and
-  // the user's own created scenes, which join under the ALL filter right
-  // before the create cell. Locked catalog scenes show as dimmed UNLOCK
-  // teasers (PosterCard renders them un-clickable); the genre filters track
-  // what's actually here.
-  const { data: scenarios } = useScenarios();
+  // the user's own created scenes, which show under ALL and have their own
+  // YOURS filter. Locked catalog scenes show as dimmed UNLOCK teasers
+  // (PosterCard renders them un-clickable); the genre filters track what's
+  // actually here.
+  const {
+    data: scenarios = [],
+    isError: scenesLoadFailed,
+    isLoading: scenesLoading,
+  } = useScenarios();
   const available = useMemo(
     () =>
-      (scenarios ?? [])
+      scenarios
         .filter((s) => s.user_id === null)
         .map(toScene)
         .sort((a, b) => a.number.localeCompare(b.number)),
     [scenarios],
   );
   const custom = useMemo(
-    () => (scenarios ?? []).filter((s) => s.user_id !== null),
+    () => scenarios.filter((s) => s.user_id !== null),
     [scenarios],
   );
-  const genres = useMemo(
-    () =>
-      GENRES.filter(
-        (g) => g === "ALL" || available.some((s) => s.genre === g),
+  const genres = useMemo<LibraryFilter[]>(
+    () => [
+      "ALL",
+      "YOURS",
+      ...GENRES.filter(
+        (g): g is Genre => g !== "ALL" && available.some((s) => s.genre === g),
       ),
+    ],
     [available],
   );
 
-  const scenes = useMemo(
-    () =>
-      filter === "ALL"
-        ? available
-        : available.filter((s) => s.genre === filter),
-    [filter, available],
-  );
+  const scenes = useMemo(() => {
+    if (filter === "YOURS") return [];
+    if (filter === "ALL") return available;
+    return available.filter((s) => s.genre === filter);
+  }, [filter, available]);
+
+  const showCustom = filter === "ALL" || filter === "YOURS";
+  const isYoursEmpty =
+    filter === "YOURS" &&
+    !scenesLoading &&
+    !scenesLoadFailed &&
+    custom.length === 0;
 
   return (
     <div className="relative min-h-screen">
@@ -97,43 +111,60 @@ export default function Library() {
         <LibraryTopBar active={filter} onSelect={setFilter} genres={genres} />
 
         <Container className="py-12">
-          <div className="grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4">
-            {scenes.map((scene, i) => (
-              <div
-                key={scene.slug}
-                className="animate-rise"
-                style={{ animationDelay: `${i * 60}ms` }}
-                onMouseEnter={() => setHovered(scene.slug)}
-                onMouseLeave={() =>
-                  setHovered((cur) => (cur === scene.slug ? null : cur))
-                }
-              >
-                <PosterCard scene={scene} />
-              </div>
-            ))}
-            {filter === "ALL" &&
-              custom.map((s, i) => (
+          {isYoursEmpty && (
+            <p className="mb-10 font-display text-xl italic text-paper-dim">
+              Nothing of yours on the wall yet. Create your first scene below.
+            </p>
+          )}
+          {scenesLoading ? (
+            // The wall hasn't arrived yet; a lone spinner instead of a lone
+            // CreateCard, so the posters don't pop in around it.
+            <div className="flex animate-rise justify-center py-24">
+              <Loader2
+                aria-label="Loading scenes"
+                className="h-6 w-6 animate-spin text-amber"
+                strokeWidth={1.5}
+              />
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-4">
+              {scenes.map((scene, i) => (
                 <div
-                  key={s.id}
+                  key={scene.slug}
                   className="animate-rise"
-                  style={{ animationDelay: `${(scenes.length + i) * 60}ms` }}
-                  onMouseEnter={() => setHovered(s.id)}
+                  style={{ animationDelay: `${i * 60}ms` }}
+                  onMouseEnter={() => setHovered(scene.slug)}
                   onMouseLeave={() =>
-                    setHovered((cur) => (cur === s.id ? null : cur))
+                    setHovered((cur) => (cur === scene.slug ? null : cur))
                   }
                 >
-                  <CustomPosterCard scenario={s} />
+                  <PosterCard scene={scene} />
                 </div>
               ))}
-            <div
-              className="animate-rise"
-              style={{
-                animationDelay: `${(scenes.length + (filter === "ALL" ? custom.length : 0)) * 60}ms`,
-              }}
-            >
-              <CreateCard />
+              {showCustom &&
+                custom.map((s, i) => (
+                  <div
+                    key={s.id}
+                    className="animate-rise"
+                    style={{ animationDelay: `${(scenes.length + i) * 60}ms` }}
+                    onMouseEnter={() => setHovered(s.id)}
+                    onMouseLeave={() =>
+                      setHovered((cur) => (cur === s.id ? null : cur))
+                    }
+                  >
+                    <CustomPosterCard scenario={s} />
+                  </div>
+                ))}
+              <div
+                className="animate-rise"
+                style={{
+                  animationDelay: `${(scenes.length + (showCustom ? custom.length : 0)) * 60}ms`,
+                }}
+              >
+                <CreateCard />
+              </div>
             </div>
-          </div>
+          )}
         </Container>
       </div>
     </div>
