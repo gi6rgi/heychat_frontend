@@ -1,6 +1,8 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 import type { Session } from '@supabase/supabase-js'
+import { AudioLines } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
+import { Grain } from '@/components/cinema'
 
 type AuthState = {
   session: Session | null
@@ -62,8 +64,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   if (!ready) {
     return (
-      <div className="flex min-h-screen items-center justify-center text-muted-foreground">
-        Loading…
+      <div className="relative flex min-h-screen items-center justify-center bg-night text-paper">
+        <Grain />
+        <div className="flex animate-pulse items-center gap-3 [animation-duration:2.4s]">
+          <AudioLines
+            aria-hidden
+            className="h-[18px] w-[18px] text-paper-dim"
+            strokeWidth={1.5}
+          />
+          <span className="font-label text-[13px] font-medium uppercase tracking-[0.16em] text-paper-dim">
+            HEYCHAT
+          </span>
+        </div>
       </div>
     )
   }
