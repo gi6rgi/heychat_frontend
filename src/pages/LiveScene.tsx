@@ -115,7 +115,10 @@ export default function LiveScene() {
   let current: SubtitleLine;
   let hint: SubtitleLine | undefined;
 
-  if (status === "live" && agentLines.length > 0) {
+  if (agentLines.length > 0) {
+    // Real lines exist — keep showing them in every state. Falling back to
+    // the seeds after the session ends would swap what the character really
+    // said for the canned teaser.
     const last = agentLines[agentLines.length - 1];
     current = { id: last.id, text: cleanTranscript(last.text) };
     const prev = agentLines[agentLines.length - 2];
@@ -126,7 +129,7 @@ export default function LiveScene() {
       ? { id: lastUser.id, text: cleanTranscript(lastUser.text) }
       : undefined;
   } else {
-    // idle / connecting / ended / no-transcript-yet → seeded sample lines
+    // idle / connecting / no-transcript-yet → seeded sample lines
     previous = scene.openingLines[0]
       ? { id: "seed-prev", text: scene.openingLines[0] }
       : undefined;

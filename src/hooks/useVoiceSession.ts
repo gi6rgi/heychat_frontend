@@ -41,6 +41,10 @@ export function useVoiceSession(scenarioId: string | undefined, replayOf?: strin
   const recorderRef = useRef<VoiceRecorder | null>(null)
   const playerRef = useRef<VoicePlayer | null>(null)
   const stoppingRef = useRef(false)
+  // Mirrors goalResult for the ws handlers (their closures see the initial
+  // render). Once the verdict arrived, the server tearing the socket down is
+  // the NORMAL end of the session — not a connection error.
+  const settledRef = useRef(false)
   const turnSeq = useRef(0)
 
   const appendTranscript = useCallback((role: 'user' | 'agent', text: string) => {
@@ -76,6 +80,7 @@ export function useVoiceSession(scenarioId: string | undefined, replayOf?: strin
   const start = useCallback(async () => {
     if (!scenarioId || status === 'connecting' || status === 'live') return
     stoppingRef.current = false
+    settledRef.current = false
     setError(null)
     setLimitNotice(null)
     setGoalResult(null)
@@ -161,6 +166,7 @@ export function useVoiceSession(scenarioId: string | undefined, replayOf?: strin
             )
             break
           case 'goal_result':
+            settledRef.current = true
             setGoalResult({ outcome: msg.outcome, reason: msg.reason })
             break
           case 'ready':
@@ -170,7 +176,10 @@ export function useVoiceSession(scenarioId: string | undefined, replayOf?: strin
       }
 
       ws.onerror = () => {
-        if (!stoppingRef.current) {
+        // After the goal verdict, the server closes the socket — Safari can
+        // surface that as an error event. The session is settled; let onclose
+        // land it on 'ended' so the verdict screen shows instead of RETRY.
+        if (!stoppingRef.current && !settledRef.current) {
           setError('Connection lost')
           setStatus('error')
         }
