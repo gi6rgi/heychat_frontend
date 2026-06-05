@@ -162,7 +162,7 @@ export const GOAL_CARDS: VibeCard[] = [
   {
     id: "firm-no",
     title: "Say no without apologizing",
-    description: "Set the boundary — and keep it warm.",
+    description: "Set the boundary and keep it warm.",
     tags: ["boundaries", "calm"],
     accent: "from-violet-500/30 to-purple-700/10",
     emoji: "🙅",
