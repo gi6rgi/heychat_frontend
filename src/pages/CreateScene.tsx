@@ -194,9 +194,16 @@ export default function CreateScene() {
                     {revealed.description}
                   </p>
                   {revealed.goal && (
-                    <p className="font-mono text-[13px] uppercase tracking-[0.1em] text-paper-faint">
-                      Goal · {revealed.goal}
-                    </p>
+                    <div className="flex flex-col gap-2">
+                      <p className="font-mono text-[13px] uppercase tracking-[0.1em] text-amber/90">
+                        Goal · {revealed.goal}
+                      </p>
+                      {revealed.objective && (
+                        <p className="mx-auto max-w-md font-display text-[15px] leading-relaxed text-paper-dim">
+                          {revealed.objective}
+                        </p>
+                      )}
+                    </div>
                   )}
                 </div>
                 <div className="flex flex-col items-center gap-5">
