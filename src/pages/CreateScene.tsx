@@ -10,7 +10,7 @@ import { AmberAction, Container, Kicker, TopBar } from "@/components/cinema";
 import { MatchOrb } from "@/components/create/MatchOrb";
 import { PosterReveal } from "@/components/create/PosterReveal";
 import { WorkingLines } from "@/components/create/WorkingLines";
-import { DeckStep } from "@/components/create/SwipeDeck";
+import { DeckStep } from "@/components/create/DeckStep";
 import { useScenario } from "@/hooks/useScenarios";
 import type { CharacterIntake, Scenario } from "@/types/api";
 

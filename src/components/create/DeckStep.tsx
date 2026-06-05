@@ -6,8 +6,9 @@ import type { VibeCard } from "@/components/match/matchFlow";
 
 /**
  * One create-flow question: a short prompt and a grid of option tiles that fills
- * the width. Click a tile to choose and advance, "Write your own" to type a free
- * answer, or (on optional steps) skip. No swipe deck, no images, just choices.
+ * the width. Each tile leads with the card's art; click a tile to choose and
+ * advance, "Write your own" to type a free answer, or (on optional steps) skip.
+ * Same layout on every viewport — the grid collapses to one column on phones.
  */
 export function DeckStep({
   title,
@@ -84,26 +85,49 @@ export function DeckStep({
             key={card.id}
             type="button"
             onClick={() => onDone(`${card.title}: ${card.description}`)}
-            className="group flex flex-col gap-2 border border-hairline p-5 text-left transition-colors duration-300 ease-[var(--ease-cinema)] hover:border-amber"
+            className="group relative aspect-[4/5] overflow-hidden border border-hairline text-left transition-colors duration-300 ease-[var(--ease-cinema)] hover:border-amber"
           >
-            <span className="font-display text-xl leading-tight text-paper">
-              {card.title}
-            </span>
-            <span className="text-sm leading-snug text-paper-dim">
-              {card.description}
-            </span>
+            <img
+              src={card.image}
+              alt=""
+              loading="lazy"
+              className="h-full w-full object-cover transition-transform duration-[450ms] ease-[var(--ease-cinema)] group-hover:scale-[1.025]"
+            />
+            <div
+              aria-hidden
+              className="pointer-events-none absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-night-deep via-night-deep/55 to-transparent"
+            />
+            <div className="absolute inset-x-0 bottom-0 flex flex-col gap-2 p-5">
+              <span className="font-display text-3xl leading-tight text-paper">
+                {card.title}
+              </span>
+              <span className="text-sm leading-snug text-paper-dim">
+                {card.description}
+              </span>
+            </div>
           </button>
         ))}
 
         <button
           type="button"
           onClick={() => setManual(true)}
-          className="group flex flex-col justify-center gap-2.5 border border-hairline p-5 text-left transition-colors duration-300 ease-[var(--ease-cinema)] hover:border-amber"
+          className="group relative aspect-[4/5] overflow-hidden border border-hairline text-left transition-colors duration-300 ease-[var(--ease-cinema)] hover:border-amber"
         >
-          <Plus aria-hidden className="h-5 w-5 text-amber" strokeWidth={1.5} />
-          <span className="font-label text-[13px] font-medium uppercase tracking-[0.16em] text-amber">
-            Write your own
-          </span>
+          <div className="flex h-full w-full items-center justify-center bg-white/[0.03]">
+            <Plus
+              aria-hidden
+              className="h-10 w-10 text-amber transition-transform duration-[450ms] ease-[var(--ease-cinema)] group-hover:scale-110"
+              strokeWidth={1}
+            />
+          </div>
+          <div className="absolute inset-x-0 bottom-0 flex flex-col gap-2 p-5">
+            <span className="font-display text-3xl leading-tight text-paper">
+              Write your own
+            </span>
+            <span className="text-sm leading-snug text-paper-dim">
+              Put it in your own words instead.
+            </span>
+          </div>
         </button>
       </div>
     </div>
