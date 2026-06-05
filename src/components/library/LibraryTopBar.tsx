@@ -1,10 +1,10 @@
-import { AudioLines } from "lucide-react";
 import { GENRES, type Genre } from "@/lib/scenes";
 import { TopBar } from "@/components/cinema";
 import { HelpButton } from "./HelpButton";
 import { cn } from "@/lib/utils";
 
-type Filter = "ALL" | Genre;
+export type LibraryFilter = "ALL" | "YOURS" | Genre;
+const DEFAULT_FILTERS: LibraryFilter[] = ["ALL", "YOURS", ...GENRES.filter((g) => g !== "ALL")];
 
 /**
  * Library top bar, built on the shared TopBar so it is the same height as every
@@ -16,19 +16,19 @@ type Filter = "ALL" | Genre;
 export function LibraryTopBar({
   active,
   onSelect,
-  genres = GENRES,
+  genres = DEFAULT_FILTERS,
 }: {
-  active: Filter;
-  onSelect: (filter: Filter) => void;
-  genres?: readonly Filter[];
+  active: LibraryFilter;
+  onSelect: (filter: LibraryFilter) => void;
+  genres?: readonly LibraryFilter[];
 }) {
   return (
     <TopBar>
       <div className="flex items-center gap-3">
-        <AudioLines
-          aria-hidden
-          className="h-[18px] w-[18px] text-paper"
-          strokeWidth={1.5}
+        <img
+          src="/android-chrome-192x192.png"
+          alt=""
+          className="h-[28px] w-[28px] rounded-full"
         />
         <span className="font-label text-[13px] font-medium uppercase tracking-[0.16em] text-paper">
           HEYCHAT

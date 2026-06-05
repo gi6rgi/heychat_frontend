@@ -1,6 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 import type { Session } from '@supabase/supabase-js'
-import { AudioLines } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { Grain } from '@/components/cinema'
 
@@ -67,10 +66,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       <div className="relative flex min-h-screen items-center justify-center bg-night text-paper">
         <Grain />
         <div className="flex animate-pulse items-center gap-3 [animation-duration:2.4s]">
-          <AudioLines
-            aria-hidden
-            className="h-[18px] w-[18px] text-paper-dim"
-            strokeWidth={1.5}
+          <img
+            src="/android-chrome-192x192.png"
+            alt=""
+            className="h-[28px] w-[28px] rounded-full opacity-60"
           />
           <span className="font-label text-[13px] font-medium uppercase tracking-[0.16em] text-paper-dim">
             HEYCHAT
