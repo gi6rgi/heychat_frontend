@@ -113,6 +113,17 @@ export default function LiveScene() {
     playVerdictSound(goalResult.outcome);
   }, [goalResult]);
 
+  // Full-screen MISSION stamp: revealed a beat after the verdict lands — the
+  // quest-plate pulse + stinger read first — WITHOUT waiting for the server
+  // to finish its goodbye/teardown and close the socket. Any closing line
+  // keeps playing under the stamp while the session winds down behind it.
+  const [stampVisible, setStampVisible] = useState(false);
+  useEffect(() => {
+    if (!goalResult) return;
+    const t = window.setTimeout(() => setStampVisible(true), 1100);
+    return () => window.clearTimeout(t);
+  }, [goalResult]);
+
   if (!scene) return null;
 
   // Subtitle source: ONLY what the character actually said — no placeholder
@@ -390,8 +401,10 @@ export default function LiveScene() {
       </Container>
 
       {/* MISSION VERDICT — the persona ended the scene: darken the film and
-          stamp the outcome, with the coach's one-liner and the debrief door. */}
-      {goalResult && status === "ended" && (
+          stamp the outcome, with the coach's one-liner and the debrief door.
+          Gated on the verdict itself (not socket close): unmounting via the
+          Debrief link tears the session down through the hook's cleanup. */}
+      {goalResult && stampVisible && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
