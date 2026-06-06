@@ -45,6 +45,10 @@ export function useVoiceSession(scenarioId: string | undefined, replayOf?: strin
   // render). Once the verdict arrived, the server tearing the socket down is
   // the NORMAL end of the session — not a connection error.
   const settledRef = useRef(false)
+  // Gate mic frames until the server confirms the session ('ready'): audio
+  // sent before that would pile up server-side while the voice provider is
+  // still connecting and reach the model as one stale burst.
+  const readyRef = useRef(false)
   const turnSeq = useRef(0)
 
   const appendTranscript = useCallback((role: 'user' | 'agent', text: string) => {
@@ -81,6 +85,7 @@ export function useVoiceSession(scenarioId: string | undefined, replayOf?: strin
     if (!scenarioId || status === 'connecting' || status === 'live') return
     stoppingRef.current = false
     settledRef.current = false
+    readyRef.current = false
     setError(null)
     setLimitNotice(null)
     setGoalResult(null)
@@ -112,7 +117,7 @@ export function useVoiceSession(scenarioId: string | undefined, replayOf?: strin
       await recorder.start(
         (chunk) => {
           const ws = wsRef.current
-          if (ws && ws.readyState === WebSocket.OPEN) {
+          if (ws && ws.readyState === WebSocket.OPEN && readyRef.current) {
             ws.send(chunk)
             if (++sent % 50 === 0) console.debug('[ws] sent %d audio frames', sent)
           }
@@ -128,7 +133,8 @@ export function useVoiceSession(scenarioId: string | undefined, replayOf?: strin
       )
 
       const sessionId = crypto.randomUUID()
-      // Browsers can't set headers on a WebSocket, so the token goes in the query.
+      // Browsers can't set headers on a WebSocket; the token goes as the FIRST
+      // message instead of a query param so the JWT never lands in access logs.
       const token = await getAccessToken()
       if (stoppingRef.current) {
         await cleanup()
@@ -136,13 +142,16 @@ export function useVoiceSession(scenarioId: string | undefined, replayOf?: strin
       }
       let url =
         `${getWsBaseUrl()}/ws/sessions/${sessionId}` +
-        `?scenario_id=${encodeURIComponent(scenarioId)}&token=${encodeURIComponent(token)}`
+        `?scenario_id=${encodeURIComponent(scenarioId)}`
       if (replayOf) url += `&replay_of=${encodeURIComponent(replayOf)}`
       const ws = new WebSocket(url)
       ws.binaryType = 'arraybuffer'
       wsRef.current = ws
 
-      ws.onopen = () => setStatus('live')
+      ws.onopen = () => {
+        ws.send(JSON.stringify({ type: 'auth', token }))
+        setStatus('live')
+      }
 
       ws.onmessage = (event) => {
         if (event.data instanceof ArrayBuffer) {
@@ -175,6 +184,7 @@ export function useVoiceSession(scenarioId: string | undefined, replayOf?: strin
             setGoalResult({ outcome: msg.outcome, reason: msg.reason })
             break
           case 'ready':
+            readyRef.current = true
             setConversationId(msg.conversation_id)
             break
         }
