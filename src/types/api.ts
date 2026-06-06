@@ -1,11 +1,11 @@
-/** Mirror of the backend scenario schema (app/scenarios/schemas.py). */
+/** Mirror of the backend ScenarioOut schema (app/scenarios/schemas.py).
+ * The persona prompt (system_instruction) is deliberately server-side only. */
 export interface Scenario {
   id: string;
   /** Null = built-in catalog character; set = personal character owned by a user. */
   user_id: string | null;
   title: string;
   description: string;
-  system_instruction: string;
   voice_name: string | null;
   greet_first: boolean;
   /** Task for a training scenario ("Get her phone number"); null = plain chat. */
