@@ -5,6 +5,8 @@
  * shared timeline. On barge-in (the user interrupting), `flush()` stops every
  * queued source so the agent goes silent immediately.
  */
+import { getPreferredSpeaker } from './devices'
+
 const PLAYBACK_SAMPLE_RATE = 24000
 
 export class VoicePlayer {
@@ -16,6 +18,17 @@ export class VoicePlayer {
   constructor(onActiveChange?: (active: boolean) => void) {
     this.ctx = new AudioContext()
     this.onActiveChange = onActiveChange
+    const sink = getPreferredSpeaker()
+    if (sink) void this.setSink(sink)
+  }
+
+  /** Route playback to an output device; no-op where unsupported (non-Chromium). */
+  async setSink(deviceId: string | null): Promise<void> {
+    const ctx = this.ctx as AudioContext & {
+      setSinkId?: (id: string) => Promise<void>
+    }
+    if (!ctx.setSinkId) return
+    await ctx.setSinkId(deviceId ?? '').catch(() => {})
   }
 
   /** Must be called from a user gesture to satisfy autoplay policies. */

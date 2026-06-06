@@ -8,3 +8,8 @@ export function listScenarios(): Promise<Scenario[]> {
 export function getScenario(id: string): Promise<Scenario> {
   return apiFetch<Scenario>(`/scenarios/${id}`)
 }
+
+/** Delete the user's own scene (with its conversations and art). */
+export function deleteScenario(id: string): Promise<void> {
+  return apiFetch<void>(`/scenarios/${id}`, { method: 'DELETE' })
+}

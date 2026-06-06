@@ -10,6 +10,25 @@ export interface Scenario {
   greet_first: boolean;
   /** Task for a training scenario ("Get her phone number"); null = plain chat. */
   goal: string | null;
+  /** Plain-language briefing: what to do + what counts as winning. */
+  objective: string | null;
+  /** Scene art paths in the public Supabase Storage bucket; null = no art. */
+  poster_path: string | null;
+  establishing_path: string | null;
+  conversation_path: string | null;
+  /** null (no art planned) / "generating" / "ready" / "error". */
+  image_status: "generating" | "ready" | "error" | null;
+  /** Cinema metadata (poster-wall UI); null on personal characters. */
+  genre: string | null;
+  tags: string[] | null;
+  character_name: string | null;
+  emotion: string | null;
+  logline: string | null;
+  ambience: string | null;
+  display_number: string | null;
+  locked: boolean;
+  is_new: boolean;
+  opening_lines: string[] | null;
 }
 
 /** Conversational Match flow (app/characters/schemas.py). */

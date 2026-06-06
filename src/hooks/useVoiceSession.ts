@@ -5,6 +5,7 @@ import { getAccessToken } from '@/lib/supabase'
 import { queryKeys } from '@/lib/query-keys'
 import { VoicePlayer } from '@/audio/player'
 import { VoiceRecorder } from '@/audio/recorder'
+import { setPreferredMic, setPreferredSpeaker } from '@/audio/devices'
 import type { ServerMessage, Turn } from '@/types/api'
 
 export type SessionStatus = 'idle' | 'connecting' | 'live' | 'ended' | 'error'
@@ -18,7 +19,7 @@ const LIMIT_CODES = new Set(['daily_limit', 'capacity', 'concurrent_session'])
 export function useVoiceSession(scenarioId: string | undefined, replayOf?: string | null) {
   const [status, setStatus] = useState<SessionStatus>('idle')
   const [error, setError] = useState<string | null>(null)
-  // Friendly usage-limit notice (daily budget, session time cap) - rendered
+  // Friendly usage-limit notice (daily budget, session time cap) — rendered
   // as information, not as an error.
   const [limitNotice, setLimitNotice] = useState<string | null>(null)
   // Goal verdict from the persona's end_conversation call; the server closes
@@ -40,6 +41,10 @@ export function useVoiceSession(scenarioId: string | undefined, replayOf?: strin
   const recorderRef = useRef<VoiceRecorder | null>(null)
   const playerRef = useRef<VoicePlayer | null>(null)
   const stoppingRef = useRef(false)
+  // Mirrors goalResult for the ws handlers (their closures see the initial
+  // render). Once the verdict arrived, the server tearing the socket down is
+  // the NORMAL end of the session — not a connection error.
+  const settledRef = useRef(false)
   const turnSeq = useRef(0)
 
   const appendTranscript = useCallback((role: 'user' | 'agent', text: string) => {
@@ -68,13 +73,14 @@ export function useVoiceSession(scenarioId: string | undefined, replayOf?: strin
     setIsAgentSpeaking(false)
     setInputLevel(0)
     setStatus('ended')
-    // The transcript is now persisted server-side - refresh the history list.
+    // The transcript is now persisted server-side — refresh the history list.
     queryClient.invalidateQueries({ queryKey: queryKeys.conversations() })
   }, [cleanup, queryClient])
 
   const start = useCallback(async () => {
     if (!scenarioId || status === 'connecting' || status === 'live') return
     stoppingRef.current = false
+    settledRef.current = false
     setError(null)
     setLimitNotice(null)
     setGoalResult(null)
@@ -85,6 +91,13 @@ export function useVoiceSession(scenarioId: string | undefined, replayOf?: strin
     try {
       const player = new VoicePlayer(setIsAgentSpeaking)
       await player.resume()
+      // The component may have unmounted while we awaited (StrictMode's dev
+      // double-mount does exactly this) — abort instead of finishing a session
+      // whose player was already torn down by cleanup().
+      if (stoppingRef.current) {
+        await player.close()
+        return
+      }
       playerRef.current = player
 
       const recorder = new VoiceRecorder()
@@ -93,6 +106,10 @@ export function useVoiceSession(scenarioId: string | undefined, replayOf?: strin
       const sessionId = crypto.randomUUID()
       // Browsers can't set headers on a WebSocket, so the token goes in the query.
       const token = await getAccessToken()
+      if (stoppingRef.current) {
+        await cleanup()
+        return
+      }
       let url =
         `${getWsBaseUrl()}/ws/sessions/${sessionId}` +
         `?scenario_id=${encodeURIComponent(scenarioId)}&token=${encodeURIComponent(token)}`
@@ -139,16 +156,17 @@ export function useVoiceSession(scenarioId: string | undefined, replayOf?: strin
             break
           case 'error':
             // Limit rejections arrive right before the server closes the
-            // socket - show them as a notice, not a scary error.
+            // socket — show them as a notice, not a scary error.
             if (msg.code && LIMIT_CODES.has(msg.code)) setLimitNotice(msg.message)
             else setError(msg.message)
             break
           case 'session_limit':
             setLimitNotice(
-              'Time flies! This session reached its 10-minute limit - the conversation is saved to your history.',
+              'Time flies! This session reached its 10-minute limit. The conversation is saved to your history.',
             )
             break
           case 'goal_result':
+            settledRef.current = true
             setGoalResult({ outcome: msg.outcome, reason: msg.reason })
             break
           case 'ready':
@@ -158,7 +176,10 @@ export function useVoiceSession(scenarioId: string | undefined, replayOf?: strin
       }
 
       ws.onerror = () => {
-        if (!stoppingRef.current) {
+        // After the goal verdict, the server closes the socket — Safari can
+        // surface that as an error event. The session is settled; let onclose
+        // land it on 'ended' so the verdict screen shows instead of RETRY.
+        if (!stoppingRef.current && !settledRef.current) {
           setError('Connection lost')
           setStatus('error')
         }
@@ -185,6 +206,18 @@ export function useVoiceSession(scenarioId: string | undefined, replayOf?: strin
     })
   }, [])
 
+  // Device switches persist the preference AND apply live to the running
+  // recorder/player (future sessions pick the preference up on their own).
+  const setMicDevice = useCallback((deviceId: string | null) => {
+    setPreferredMic(deviceId)
+    void recorderRef.current?.setDevice(deviceId)
+  }, [])
+
+  const setSpeakerDevice = useCallback((deviceId: string | null) => {
+    setPreferredSpeaker(deviceId)
+    void playerRef.current?.setSink(deviceId)
+  }, [])
+
   // Tear down on unmount.
   useEffect(() => {
     return () => {
@@ -206,5 +239,7 @@ export function useVoiceSession(scenarioId: string | undefined, replayOf?: strin
     start,
     stop,
     toggleMute,
+    setMicDevice,
+    setSpeakerDevice,
   }
 }
