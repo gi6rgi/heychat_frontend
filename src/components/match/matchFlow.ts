@@ -112,6 +112,6 @@ export const GOAL_CARDS: VibeCard[] = [
     id: "three-laughs",
     image: "/create/three-laughs.png",
     title: "Make them laugh",
-    description: "Three real laughs. Corny counts.",
+    description: "A real laugh. Corny counts.",
   },
 ];
