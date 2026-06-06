@@ -22,7 +22,10 @@ export function CustomPosterCard({ scenario }: { scenario: Scenario }) {
   const [loaded, setLoaded] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const poster = sceneImageUrl(scenario.poster_path);
-  const painting = !loaded && scenario.image_status === "generating";
+  // The scene stays locked until ALL its art landed: the poster can already
+  // be on screen while the stills are still painting.
+  const generating = scenario.image_status === "generating";
+  const painting = !loaded && generating;
 
   const queryClient = useQueryClient();
   const remove = useMutation({
@@ -40,7 +43,17 @@ export function CustomPosterCard({ scenario }: { scenario: Scenario }) {
   };
 
   return (
-    <Link to={`/scene/${scenario.id}`} viewTransition className="group block">
+    <Link
+      to={`/scene/${scenario.id}`}
+      viewTransition
+      aria-disabled={generating}
+      onClick={(e) => {
+        // Locked while painting — the card shows PAINTING… until every image
+        // is in, then becomes a normal poster link.
+        if (generating) e.preventDefault();
+      }}
+      className={cn("group block", generating && "cursor-default")}
+    >
       <div
         className={cn(
           "relative aspect-[2/3] overflow-hidden border border-hairline",
@@ -132,7 +145,7 @@ export function CustomPosterCard({ scenario }: { scenario: Scenario }) {
               "transition-colors duration-300 ease-[var(--ease-cinema)] group-hover:text-paper",
             )}
           >
-            {(painting
+            {(generating
               ? ["YOURS", "PAINTING…"]
               : scenario.tags?.length
                 ? scenario.tags

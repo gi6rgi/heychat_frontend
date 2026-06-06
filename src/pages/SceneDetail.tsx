@@ -104,9 +104,23 @@ export default function SceneDetail() {
 
             {liveTo && (
               <motion.div {...rise(0.3)} className="mt-9">
-                <AmberAction to={liveTo} viewTransition size="lg">
-                  Start Scene
-                </AmberAction>
+                {/* Locked until ALL the scene art landed; the scenario poll
+                    flips image_status off "generating" on its own. */}
+                {scenario?.image_status === "generating" ? (
+                  <AmberAction
+                    size="lg"
+                    tone="dim"
+                    arrow={false}
+                    disabled
+                    className="pointer-events-none animate-pulse"
+                  >
+                    Painting the scene…
+                  </AmberAction>
+                ) : (
+                  <AmberAction to={liveTo} viewTransition size="lg">
+                    Start Scene
+                  </AmberAction>
+                )}
               </motion.div>
             )}
           </div>

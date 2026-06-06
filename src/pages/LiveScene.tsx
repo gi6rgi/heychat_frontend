@@ -107,13 +107,13 @@ export default function LiveScene() {
   // Subtitle source: pre-connect uses the seed opening lines so the anatomy
   // reads like the reference even with no backend; live uses real transcripts.
   // Lines carry stable per-turn ids (so streamed fragments grow in place) and
-  // are cleaned down to the spoken words (stage directions stripped).
+  // are cleaned down to the spoken words (stage directions stripped). Only the
+  // AGENT's lines are shown: the user's live ASR is too inaccurate to echo
+  // back (the accurate transcript is re-built from audio for the debrief).
   const agentLines = transcripts.filter((t) => t.role === "agent");
-  const lastUser = [...transcripts].reverse().find((t) => t.role === "user");
 
   let previous: SubtitleLine | undefined;
   let current: SubtitleLine;
-  let hint: SubtitleLine | undefined;
 
   if (agentLines.length > 0) {
     // Real lines exist — keep showing them in every state. Falling back to
@@ -124,9 +124,6 @@ export default function LiveScene() {
     const prev = agentLines[agentLines.length - 2];
     previous = prev
       ? { id: prev.id, text: cleanTranscript(prev.text) }
-      : undefined;
-    hint = lastUser
-      ? { id: lastUser.id, text: cleanTranscript(lastUser.text) }
       : undefined;
   } else {
     // idle / connecting / no-transcript-yet → seeded sample lines
@@ -220,7 +217,7 @@ export default function LiveScene() {
             <Waveform active={waveActive} level={inputLevel} className="h-7 w-56" />
 
             {current.text ? (
-              <Subtitles previous={previous} current={current} hint={hint} />
+              <Subtitles previous={previous} current={current} />
             ) : (
               <p className="font-display text-2xl italic text-paper-faint">
                 The scene is set.

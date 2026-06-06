@@ -198,12 +198,26 @@ export default function CreateScene() {
                     </fieldset>
                   )}
                   <div className="mt-3">
-                    <AmberAction
-                      size="lg"
-                      onClick={() => navigate(`/scene/${revealed.id}/live`)}
-                    >
-                      Start scene
-                    </AmberAction>
+                    {/* The scene unlocks only once ALL its art landed — the
+                        poll flips image_status off "generating" by itself. */}
+                    {revealed.image_status === "generating" ? (
+                      <AmberAction
+                        size="lg"
+                        tone="dim"
+                        arrow={false}
+                        disabled
+                        className="pointer-events-none animate-pulse"
+                      >
+                        Painting the scene…
+                      </AmberAction>
+                    ) : (
+                      <AmberAction
+                        size="lg"
+                        onClick={() => navigate(`/scene/${revealed.id}/live`)}
+                      >
+                        Start scene
+                      </AmberAction>
+                    )}
                   </div>
                 </div>
               </motion.div>

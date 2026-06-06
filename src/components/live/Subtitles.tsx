@@ -10,7 +10,9 @@ export interface SubtitleLine {
  * Cinema subtitle stack rendered over the film — no box, no chrome.
  *   · `previous`   small + faded, sits above (the line before the current one)
  *   · `current`    largest serif, paper — the line being spoken now
- *   · `hint`       faint italic serif below — the user's own last line
+ *
+ * Only the character's lines are shown — the user's own live ASR is too
+ * inaccurate to echo back at them.
  *
  * Lines are keyed by turn id, not by text: streamed fragments grow in place
  * and the crossfade only plays when a NEW turn starts (no per-chunk flicker).
@@ -19,11 +21,9 @@ export interface SubtitleLine {
 export function Subtitles({
   previous,
   current,
-  hint,
 }: {
   previous?: SubtitleLine;
   current: SubtitleLine;
-  hint?: SubtitleLine;
 }) {
   return (
     <div className="flex w-full flex-col items-center gap-2 text-center">
@@ -59,22 +59,6 @@ export function Subtitles({
         </AnimatePresence>
       </div>
 
-      <div className="min-h-[1.5rem] w-full">
-        <AnimatePresence mode="wait">
-          {hint && hint.text ? (
-            <motion.p
-              key={hint.id}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3, ease: [0.22, 0.61, 0.36, 1] }}
-              className="mx-auto max-w-xl truncate font-display text-base italic leading-snug text-paper-faint"
-            >
-              {hint.text}
-            </motion.p>
-          ) : null}
-        </AnimatePresence>
-      </div>
     </div>
   );
 }
