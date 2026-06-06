@@ -102,6 +102,30 @@ export function useVoiceSession(scenarioId: string | undefined, replayOf?: strin
 
       const recorder = new VoiceRecorder()
       recorderRef.current = recorder
+      // Acquire the microphone BEFORE any backend work. The permission prompt
+      // (or a denial) must not happen while a created conversation and a live
+      // Gemini session are already burning minutes — and failing here lands in
+      // this try/catch, instead of an unhandled rejection inside ws.onopen
+      // that left the UI stuck on "connecting" forever. Chunks captured
+      // before the socket opens are simply dropped by the readyState guard.
+      let sent = 0
+      await recorder.start(
+        (chunk) => {
+          const ws = wsRef.current
+          if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(chunk)
+            if (++sent % 50 === 0) console.debug('[ws] sent %d audio frames', sent)
+          }
+        },
+        (level) => {
+          // Throttle level updates to ~15fps so we don't re-render per chunk.
+          const now = performance.now()
+          if (now - lastLevelTs.current >= 66) {
+            lastLevelTs.current = now
+            setInputLevel(level)
+          }
+        },
+      )
 
       const sessionId = crypto.randomUUID()
       // Browsers can't set headers on a WebSocket, so the token goes in the query.
@@ -118,26 +142,7 @@ export function useVoiceSession(scenarioId: string | undefined, replayOf?: strin
       ws.binaryType = 'arraybuffer'
       wsRef.current = ws
 
-      ws.onopen = async () => {
-        let sent = 0
-        await recorder.start(
-          (chunk) => {
-            if (ws.readyState === WebSocket.OPEN) {
-              ws.send(chunk)
-              if (++sent % 50 === 0) console.debug('[ws] sent %d audio frames', sent)
-            }
-          },
-          (level) => {
-            // Throttle level updates to ~15fps so we don't re-render per chunk.
-            const now = performance.now()
-            if (now - lastLevelTs.current >= 66) {
-              lastLevelTs.current = now
-              setInputLevel(level)
-            }
-          },
-        )
-        setStatus('live')
-      }
+      ws.onopen = () => setStatus('live')
 
       ws.onmessage = (event) => {
         if (event.data instanceof ArrayBuffer) {
