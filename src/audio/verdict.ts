@@ -49,13 +49,13 @@ export function playVerdictSound(outcome: 'success' | 'failure'): void {
       [783.99, 0.2],
     ]
     for (const [freq, delay] of steps) {
-      note(ctx, lp, freq, t + delay, 0.11, 1.1, 'triangle')
-      note(ctx, lp, freq * 2, t + delay + 0.01, 0.03, 0.9, 'sine')
+      note(ctx, lp, freq, t + delay, 0.28, 1.1, 'triangle')
+      note(ctx, lp, freq * 2, t + delay + 0.01, 0.08, 0.9, 'sine')
     }
   } else {
     // A3 → F3, muted and brief — a quiet "scene over", not a buzzer.
-    note(ctx, lp, 220.0, t, 0.09, 0.5, 'sine')
-    note(ctx, lp, 174.61, t + 0.16, 0.08, 0.7, 'sine')
+    note(ctx, lp, 220.0, t, 0.22, 0.5, 'sine')
+    note(ctx, lp, 174.61, t + 0.16, 0.2, 0.7, 'sine')
   }
 
   // One-shot context: let the tail ring out, then release the hardware.
