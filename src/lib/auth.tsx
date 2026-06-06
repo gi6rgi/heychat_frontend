@@ -71,8 +71,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             alt=""
             className="h-[28px] w-[28px] rounded-full opacity-60"
           />
-          <span className="font-label text-[13px] font-medium uppercase tracking-[0.16em] text-paper-dim">
-            HEYCHAT
+          <span className="font-display text-[17px] text-paper-dim [font-variation-settings:'opsz'_40,'SOFT'_30,'WONK'_0]">
+            HeyScenes
           </span>
         </div>
       </div>
