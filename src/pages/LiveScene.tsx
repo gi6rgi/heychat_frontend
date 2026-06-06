@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import { motion } from "motion/react";
 import { Mic, MicOff, PhoneOff, Settings } from "lucide-react";
@@ -11,6 +11,7 @@ import { useVoiceSession } from "@/hooks/useVoiceSession";
 import { useScenario } from "@/hooks/useScenarios";
 import { useAmbience } from "@/hooks/useAmbience";
 import { scenarioAmbience, type Ambience } from "@/audio/ambience";
+import { playVerdictSound } from "@/audio/verdict";
 import { getPreferredMic, getPreferredSpeaker } from "@/audio/devices";
 import { toScene, type Scene } from "@/lib/scenes";
 import { cn } from "@/lib/utils";
@@ -101,6 +102,16 @@ export default function LiveScene() {
     const t = setTimeout(() => void start(), 50);
     return () => clearTimeout(t);
   }, [scenarioId, status, start]);
+
+  // Verdict stinger: a quiet chime (or muted descent) the moment goal_result
+  // lands, in sync with the quest-plate pulse — the closing line is usually
+  // still playing, so the cue layers under the voice. Once per session.
+  const verdictPlayed = useRef(false);
+  useEffect(() => {
+    if (!goalResult || verdictPlayed.current) return;
+    verdictPlayed.current = true;
+    playVerdictSound(goalResult.outcome);
+  }, [goalResult]);
 
   if (!scene) return null;
 
