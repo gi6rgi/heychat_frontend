@@ -177,7 +177,7 @@ export default function Debrief() {
                   </span>
                 </div>
                 <div className="mt-8 max-w-md">
-                  <p className="text-[16px] leading-relaxed text-paper-dim">
+                  <p className="text-base leading-relaxed text-paper-dim">
                     {report.summary}
                   </p>
                 </div>
@@ -206,13 +206,13 @@ export default function Debrief() {
                     {strengths.map((m, i) => (
                       <li key={m.name}>
                         {i > 0 && <Hairline className="my-5 bg-hairline-soft" />}
-                        <span className="block text-[16px] leading-relaxed text-paper">
+                        <span className="block text-base leading-relaxed text-paper">
                           {m.explanation}
                         </span>
                       </li>
                     ))}
                     {strengths.length === 0 && (
-                      <li className="text-[16px] italic leading-relaxed text-paper-dim">
+                      <li className="text-base italic leading-relaxed text-paper-dim">
                         Rough night. The next run is where it turns.
                       </li>
                     )}
@@ -224,11 +224,11 @@ export default function Debrief() {
                     {report.advice.map((a, i) => (
                       <li key={i}>
                         {i > 0 && <Hairline className="my-5 bg-hairline-soft" />}
-                        <span className="block text-[16px] leading-relaxed text-paper">
+                        <span className="block text-base leading-relaxed text-paper">
                           {a.text}
                         </span>
                         {a.quote && (
-                          <span className="mt-2 block font-display text-[16px] italic leading-normal text-paper-faint">
+                          <span className="mt-2 block font-display text-base italic leading-normal text-paper-faint">
                             “{a.quote}”
                           </span>
                         )}
@@ -248,10 +248,10 @@ export default function Debrief() {
                   <div className="mt-6 grid gap-x-12 gap-y-10 lg:grid-cols-2">
                     {report.example_answers.map((ex, i) => (
                       <div key={i}>
-                        <p className="font-display text-[16px] italic leading-normal text-paper-faint">
+                        <p className="font-display text-base italic leading-normal text-paper-faint">
                           {ex.question}
                         </p>
-                        <p className="mt-2 text-[16px] leading-relaxed text-amber/90">
+                        <p className="mt-2 text-base leading-relaxed text-amber/90">
                           “{ex.answer}”
                         </p>
                       </div>

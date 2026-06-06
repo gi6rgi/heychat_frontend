@@ -30,7 +30,7 @@ function classes({ tone = "amber", size = "md", className }: Common) {
   return cn(
     "group inline-flex items-center gap-2.5 font-label font-medium uppercase",
     "tracking-[0.16em] transition-colors duration-300 ease-[var(--ease-cinema)]",
-    size === "lg" ? "text-[16px]" : "text-[13.5px]",
+    size === "lg" ? "text-[16px]" : "text-[13px]",
     tone === "amber"
       ? "text-amber hover:text-paper"
       : "text-paper-dim hover:text-paper",

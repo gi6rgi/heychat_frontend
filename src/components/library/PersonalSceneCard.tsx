@@ -37,7 +37,7 @@ export function PersonalSceneCard({ scenario }: { scenario: Scenario }) {
               {scenario.title}
             </h3>
             {scenario.description && (
-              <p className="line-clamp-3 font-display text-[15px] italic leading-snug text-paper-dim">
+              <p className="line-clamp-3 font-display text-base italic leading-snug text-paper-dim">
                 {scenario.description}
               </p>
             )}

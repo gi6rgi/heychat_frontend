@@ -43,7 +43,7 @@ export function HelpButton() {
           <div
             role="dialog"
             aria-modal="true"
-            aria-label="How HeyChat works"
+            aria-label="How HeyScenes works"
             className="animate-rise fixed inset-0 z-50 flex items-center justify-center p-6"
           >
             <button
@@ -76,7 +76,7 @@ export function HelpButton() {
                     <span className="font-mono text-[13px] text-amber-dim">
                       0{i + 1}
                     </span>
-                    <p className="font-display text-base italic leading-snug text-paper-dim">
+                    <p className="font-display text-lg italic leading-snug text-paper-dim">
                       {step}
                     </p>
                   </li>
