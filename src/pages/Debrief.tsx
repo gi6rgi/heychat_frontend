@@ -57,17 +57,22 @@ export default function Debrief() {
   const generate = useGenerateFeedback(conversationId);
   const reduce = useReducedMotion();
 
-  // Kick generation off once when the report doesn't exist yet. (The backend
-  // also guards against duplicate runs; the ref just keeps us polite.)
+  // An empty transcript can't be reviewed — the backend 409s the POST — so
+  // don't even ask; the page shows the "nothing on tape" state instead.
+  const empty = !!conversation && conversation.messages.length === 0;
+
+  // Kick generation off once when the report doesn't exist yet, after the
+  // transcript confirms there is something to grade. (The backend also guards
+  // against duplicate runs; the ref just keeps us polite.)
   const requested = useRef(false);
   const feedbackStatus = feedback.data?.status;
   useEffect(() => {
-    if (!conversationId || requested.current) return;
+    if (!conversationId || requested.current || !conversation || empty) return;
     if (feedbackStatus === "none") {
       requested.current = true;
       generate.mutate();
     }
-  }, [conversationId, feedbackStatus, generate]);
+  }, [conversationId, feedbackStatus, generate, conversation, empty]);
 
   if (isLoading) return null;
   if (!scene) return <Navigate to="/" replace />;
@@ -79,7 +84,10 @@ export default function Debrief() {
     !feedback.data ||
     feedbackStatus === "generating" ||
     (feedbackStatus === "none" && !feedback.data?.error);
-  const failed = feedbackStatus === "error" || !!feedback.error;
+  // generate.isError covers a failed POST (it never flips feedbackStatus) —
+  // without it the page would sit on the reviewing orb forever.
+  const failed =
+    feedbackStatus === "error" || !!feedback.error || generate.isError;
 
   const rise = (delay: number) =>
     reduce
@@ -112,7 +120,7 @@ export default function Debrief() {
       {/* While the coach is still reading there's no verdict to stage — show
           the same quiet ritual as the create flow's working step: the orb and
           a few rotating lines, nothing else. */}
-      {reviewing && !report && !failed ? (
+      {reviewing && !report && !failed && !empty ? (
         <div className="flex min-h-[70vh] flex-col items-center justify-center gap-8 py-12 text-center">
           <MatchOrb />
           <WorkingLines lines={REVIEW_LINES} />
@@ -137,8 +145,22 @@ export default function Debrief() {
 
         <Hairline className="mt-14" />
 
+        {/* EMPTY — the scene ended without a single line; nothing to grade.
+            The bottom RETRY SCENE action is the way back in. */}
+        {empty && !report && (
+          <motion.div
+            className="flex flex-col items-center gap-6 py-24 text-center"
+            {...rise(0.1)}
+          >
+            <p className="max-w-md font-display text-2xl italic leading-snug text-paper-dim">
+              Nothing on tape. Not a single line was spoken, so there is
+              nothing to review.
+            </p>
+          </motion.div>
+        )}
+
         {/* ERROR — analysis failed; offer a retry */}
-        {failed && !report && (
+        {failed && !report && !empty && (
           <motion.div
             className="flex flex-col items-center gap-6 py-24 text-center"
             {...rise(0.1)}
@@ -272,6 +294,9 @@ export default function Debrief() {
         >
           <AmberAction to={`/scene/${scene.slug}/live`} size="lg">
             Retry Scene
+          </AmberAction>
+          <AmberAction to="/" size="lg" tone="dim" arrow={false}>
+            Home
           </AmberAction>
         </motion.div>
       </div>
