@@ -2,8 +2,9 @@
  * Captures microphone audio and emits raw PCM16 mono 16 kHz chunks.
  *
  * The AudioContext is constructed at 16 kHz so the browser resamples the mic
- * for us; the worklet only quantises Float32 -> Int16. Chunks are emitted as
- * ArrayBuffers ready to be sent over the WebSocket as binary frames.
+ * for us; the worklet quantises Float32 -> Int16 (and resamples itself when
+ * the browser ignored the requested rate). Chunks are emitted as ArrayBuffers
+ * ready to be sent over the WebSocket as binary frames.
  */
 import { getPreferredMic } from './devices'
 
@@ -33,6 +34,14 @@ export class VoiceRecorder {
     onLevel?: (level: number) => void,
   ): Promise<void> {
     this.ctx = new AudioContext({ sampleRate: CAPTURE_SAMPLE_RATE })
+    if (this.ctx.sampleRate !== CAPTURE_SAMPLE_RATE) {
+      // The worklet resamples in this case — log it so a report of degraded
+      // audio quality can be traced to this browser/device combination.
+      console.warn(
+        '[recorder] browser ignored the 16 kHz request (ctx at %d Hz) — resampling in the worklet',
+        this.ctx.sampleRate,
+      )
+    }
     await this.ctx.audioWorklet.addModule('/worklets/pcm-capture.js')
 
     // start() runs from ws.onopen, i.e. outside the click handler, so the
