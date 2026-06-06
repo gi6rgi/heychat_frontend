@@ -181,22 +181,59 @@ export default function LiveScene() {
                 bleeding through the fill (the khaki bug). Text sits on top,
                 outside the fade, at full strength. */}
             {scene.goal && (
-              <div className="relative -ml-6 self-start md:-ml-10">
+              <motion.div
+                className="relative -ml-6 self-start md:-ml-10"
+                // The verdict lands seconds before the session winds down (the
+                // character is still speaking its closing line) — pulse the
+                // quest plate the moment it arrives so the win/loss reads
+                // instantly, ahead of the full-screen MISSION stamp.
+                animate={goalResult ? { scale: [1, 1.04, 1] } : { scale: 1 }}
+                transition={{ duration: 0.55, ease: [0.22, 0.61, 0.36, 1] }}
+              >
                 <div
                   aria-hidden
-                  className="absolute inset-0 bg-amber p-px opacity-65 [clip-path:polygon(0_0,calc(100%_-_28px)_0,100%_50%,calc(100%_-_28px)_100%,0_100%)]"
+                  className={cn(
+                    "absolute inset-0 bg-amber p-px transition-opacity duration-500 [clip-path:polygon(0_0,calc(100%_-_28px)_0,100%_50%,calc(100%_-_28px)_100%,0_100%)]",
+                    goalResult
+                      ? goalResult.outcome === "success"
+                        ? "opacity-100"
+                        : "opacity-30"
+                      : "opacity-65",
+                  )}
                 >
                   <div className="h-full w-full bg-black [clip-path:polygon(0_0,calc(100%_-_28px)_0,100%_50%,calc(100%_-_28px)_100%,0_100%)]" />
                 </div>
                 <div className="relative py-2 pl-6 pr-12 md:py-3 md:pr-16">
-                  <span className="font-label text-[11px] font-medium uppercase tracking-[0.2em] text-amber">
-                    Goal
-                  </span>
-                  <p className="mt-1 font-display text-xl font-light leading-tight text-amber md:text-2xl">
+                  <motion.span
+                    key={goalResult?.outcome ?? "open"}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.4 }}
+                    className={cn(
+                      "block font-label text-[11px] font-medium uppercase tracking-[0.2em]",
+                      goalResult?.outcome === "failure"
+                        ? "text-paper-dim"
+                        : "text-amber",
+                    )}
+                  >
+                    {goalResult
+                      ? goalResult.outcome === "success"
+                        ? "Goal · ✓ Accomplished"
+                        : "Goal · ✗ Failed"
+                      : "Goal"}
+                  </motion.span>
+                  <p
+                    className={cn(
+                      "mt-1 font-display text-xl font-light leading-tight transition-colors duration-500 md:text-2xl",
+                      goalResult?.outcome === "failure"
+                        ? "text-paper-dim"
+                        : "text-amber",
+                    )}
+                  >
                     {scene.goal}
                   </p>
                 </div>
-              </div>
+              </motion.div>
             )}
           </div>
 
