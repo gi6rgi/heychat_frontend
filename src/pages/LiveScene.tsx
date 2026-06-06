@@ -115,36 +115,26 @@ export default function LiveScene() {
 
   if (!scene) return null;
 
-  // Subtitle source: pre-connect uses the seed opening lines so the anatomy
-  // reads like the reference even with no backend; live uses real transcripts.
-  // Lines carry stable per-turn ids (so streamed fragments grow in place) and
-  // are cleaned down to the spoken words (stage directions stripped). Only the
-  // AGENT's lines are shown: the user's live ASR is too inaccurate to echo
-  // back (the accurate transcript is re-built from audio for the debrief).
+  // Subtitle source: ONLY what the character actually said — no placeholder
+  // dialogue (seeded opening lines on screen read as a spoken reply that
+  // never happened). Until the first real line lands, the subtitle slot shows
+  // the neutral "The scene is set." placeholder. Lines carry stable per-turn
+  // ids (so streamed fragments grow in place) and are cleaned down to the
+  // spoken words (stage directions stripped). Only the AGENT's lines are
+  // shown: the user's live ASR is too inaccurate to echo back (the accurate
+  // transcript is re-built from audio for the debrief).
   const agentLines = transcripts.filter((t) => t.role === "agent");
 
   let previous: SubtitleLine | undefined;
-  let current: SubtitleLine;
+  let current: SubtitleLine = { id: "none", text: "" };
 
   if (agentLines.length > 0) {
-    // Real lines exist — keep showing them in every state. Falling back to
-    // the seeds after the session ends would swap what the character really
-    // said for the canned teaser.
     const last = agentLines[agentLines.length - 1];
     current = { id: last.id, text: cleanTranscript(last.text) };
     const prev = agentLines[agentLines.length - 2];
     previous = prev
       ? { id: prev.id, text: cleanTranscript(prev.text) }
       : undefined;
-  } else {
-    // idle / connecting / no-transcript-yet → seeded sample lines
-    previous = scene.openingLines[0]
-      ? { id: "seed-prev", text: scene.openingLines[0] }
-      : undefined;
-    current = {
-      id: "seed-current",
-      text: scene.openingLines[1] || scene.openingLines[0] || "",
-    };
   }
 
   const waveActive = isAgentSpeaking || inputLevel > 0.04;
