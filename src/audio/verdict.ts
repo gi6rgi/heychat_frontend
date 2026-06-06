@@ -33,6 +33,9 @@ function note(
 
 export function playVerdictSound(outcome: 'success' | 'failure'): void {
   const ctx = new AudioContext()
+  // Autoplay policy can hand out a suspended context even mid-session —
+  // without an explicit resume the stinger is silently swallowed.
+  if (ctx.state === 'suspended') void ctx.resume().catch(() => {})
 
   // Soften the top end so the stinger sits behind the voice.
   const lp = ctx.createBiquadFilter()
