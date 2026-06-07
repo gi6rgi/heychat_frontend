@@ -149,8 +149,8 @@ export function CustomPosterCard({ scenario }: { scenario: Scenario }) {
         ) : (
           <span
             className={cn(
-              // Same rule as PosterCard: two lines on phones, one on md+.
-              "line-clamp-2 font-display text-xl leading-snug text-paper/90 md:line-clamp-1",
+              // Same rule as PosterCard: three lines on phones, two on md+.
+              "line-clamp-3 font-display text-xl leading-snug text-paper/90 md:line-clamp-2",
               "transition-colors duration-300 ease-[var(--ease-cinema)] group-hover:text-paper",
             )}
           >

@@ -62,7 +62,9 @@ export function PosterCard({ scene }: { scene: Scene }) {
       className={cn(
         // Phones get two lines (cards are full-width, goals read fully);
         // md+ clamps to one so the wall's rows stay even.
-        "line-clamp-2 font-display text-xl leading-snug text-paper/90 md:line-clamp-1",
+        // Goals must read in full: three lines on phones (full-width cards,
+        // long German/Russian goals), two from md up — rows stay near-even.
+        "line-clamp-3 font-display text-xl leading-snug text-paper/90 md:line-clamp-2",
         "transition-colors duration-300 ease-[var(--ease-cinema)] group-hover:text-paper",
       )}
     >
