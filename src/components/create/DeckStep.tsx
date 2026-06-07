@@ -47,6 +47,13 @@ export function DeckStep({
           autoFocus
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => {
+            // Enter submits like the Continue button; Shift+Enter for a newline.
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              if (!required || draft.trim()) onDone(draft.trim());
+            }
+          }}
           rows={2}
           placeholder={manualPlaceholder}
           className="mt-8 w-full resize-none border-0 border-b border-hairline bg-transparent px-0 py-2 font-display text-xl leading-relaxed text-paper outline-none transition-colors duration-300 placeholder:not-italic placeholder:text-paper-faint focus:border-amber"
