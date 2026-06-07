@@ -19,6 +19,58 @@ export function isLocale(value: string | undefined): value is Locale {
   return !!value && (LOCALES as readonly string[]).includes(value);
 }
 
+// The user's language, remembered across visits. Written on an explicit
+// switcher click and by the one-time first-visit detection — an explicit
+// choice always beats re-detection.
+const STORAGE_KEY = "heyscenes.locale";
+
+export function getSavedLocale(): Locale | null {
+  try {
+    const value = localStorage.getItem(STORAGE_KEY) ?? undefined;
+    return isLocale(value) ? value : null;
+  } catch {
+    return null; // storage blocked (private mode, iframe) — detect each visit
+  }
+}
+
+export function saveLocale(locale: Locale): void {
+  try {
+    localStorage.setItem(STORAGE_KEY, locale);
+  } catch {
+    /* storage blocked — nothing to persist */
+  }
+}
+
+/** Best supported match for the browser's preferred languages ("de-AT" → de). */
+export function detectLocale(): Locale {
+  for (const lang of navigator.languages ?? [navigator.language]) {
+    const base = lang?.toLowerCase().split("-")[0];
+    if (isLocale(base)) return base;
+  }
+  return DEFAULT_LOCALE;
+}
+
+/**
+ * First-visit language routing, mounted in the app layout. Acts ONLY on the
+ * bare root `/`: deep links open exactly as shared, and locale-prefixed pages
+ * are already explicit. Priority: saved choice → browser language (saved so
+ * detection runs once per browser) → English.
+ */
+export function AutoLocaleRedirect() {
+  const { pathname, search } = useLocation();
+  if (pathname !== "/") return null;
+  // Resolved synchronously during render — a useEffect redirect would flash
+  // the English wall first. The localStorage write is idempotent, so React
+  // re-running the render (StrictMode) is harmless.
+  let locale = getSavedLocale();
+  if (!locale) {
+    locale = detectLocale();
+    saveLocale(locale);
+  }
+  if (locale === DEFAULT_LOCALE) return null;
+  return <Navigate to={{ pathname: `/${locale}`, search }} replace />;
+}
+
 /** The active locale, derived from the route's :locale segment. */
 export function useLocale(): Locale {
   const { locale } = useParams<{ locale?: string }>();
