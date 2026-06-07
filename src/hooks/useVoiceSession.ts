@@ -76,6 +76,27 @@ export function useVoiceSession(scenarioId: string | undefined, replayOf?: strin
     playerRef.current = null
   }, [])
 
+  // Server-initiated close (goal settled, time cap, connection lost): the
+  // closing line's audio is already fully buffered locally — generation runs
+  // faster than playback — so unlike cleanup() this lets the player DRAIN
+  // its queue instead of cutting the goodbye mid-word. The mic and socket
+  // still stop immediately. cleanup() racing in (unmount, user END) closes
+  // the context, which ends the drain wait at once.
+  const windDown = useCallback(async () => {
+    wsRef.current?.close()
+    wsRef.current = null
+    await recorderRef.current?.stop()
+    recorderRef.current = null
+    const player = playerRef.current
+    if (!player) return
+    await player.drain()
+    if (playerRef.current === player) {
+      playerRef.current = null
+      await player.close()
+    }
+    setIsAgentSpeaking(false)
+  }, [])
+
   const stop = useCallback(async () => {
     stoppingRef.current = true
     await cleanup()
@@ -206,7 +227,7 @@ export function useVoiceSession(scenarioId: string | undefined, replayOf?: strin
 
       ws.onclose = () => {
         if (!stoppingRef.current) {
-          cleanup()
+          void windDown()
           setStatus((s) => (s === 'error' ? s : 'ended'))
         }
       }
@@ -215,7 +236,7 @@ export function useVoiceSession(scenarioId: string | undefined, replayOf?: strin
       setStatus('error')
       await cleanup()
     }
-  }, [scenarioId, replayOf, status, appendTranscript, cleanup, locale, t])
+  }, [scenarioId, replayOf, status, appendTranscript, cleanup, windDown, locale, t])
 
   const toggleMute = useCallback(() => {
     setMuted((m) => {

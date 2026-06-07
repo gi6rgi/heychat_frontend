@@ -29,6 +29,8 @@ export interface Scenario {
   locked: boolean;
   is_new: boolean;
   opening_lines: string[] | null;
+  /** ISO timestamp, set by the DB on insert. */
+  created_at: string | null;
 }
 
 /** Conversational Match flow (app/characters/schemas.py). */

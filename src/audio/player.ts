@@ -227,6 +227,28 @@ export class VoicePlayer {
     this.onActiveChange?.(false)
   }
 
+  /** Let everything already buffered play out to the end, then resolve.
+   *
+   * Used on a server-initiated session close (goal settled, time cap): by
+   * the time the socket closes, the goodbye line's audio has been fully
+   * delivered and sits in the local queue — close() would cut it mid-word.
+   * Safe to race with flush()/close(): both empty the source set (or close
+   * the context), which ends the wait immediately. The cap is a safety net
+   * for a wedged render thread, not an expected path.
+   */
+  async drain(maxWaitMs = 20000): Promise<void> {
+    // Whatever is still coalescing goes out now — no more audio is coming.
+    this.schedulePending()
+    const deadline = performance.now() + maxWaitMs
+    while (
+      this.sources.size > 0 &&
+      (this.ctx.state as string) !== 'closed' &&
+      performance.now() < deadline
+    ) {
+      await new Promise((resolve) => setTimeout(resolve, 100))
+    }
+  }
+
   async close(): Promise<void> {
     clearInterval(this.watchdog)
     document.removeEventListener('visibilitychange', this.onVisible)
