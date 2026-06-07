@@ -3,6 +3,7 @@ import { Loader2 } from "lucide-react";
 import { GENRES, toScene, type Genre } from "@/lib/scenes";
 import { sceneImageUrl } from "@/lib/storage";
 import { useScenarios } from "@/hooks/useScenarios";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { Container } from "@/components/cinema";
 import {
   LibraryTopBar,
@@ -21,6 +22,7 @@ import { cn } from "@/lib/utils";
  * staggered fade+rise.
  */
 export default function Library() {
+  usePageTitle(); // the poster wall keeps the default brand title
   const [filter, setFilter] = useState<LibraryFilter>("ALL");
   // The hovered scene's still slowly fills the page background behind the grid.
   const [hovered, setHovered] = useState<string | null>(null);

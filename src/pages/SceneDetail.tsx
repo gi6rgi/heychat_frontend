@@ -3,6 +3,7 @@ import { motion, useReducedMotion } from "motion/react";
 import { ArrowLeft } from "lucide-react";
 import { toScene } from "@/lib/scenes";
 import { useScenario } from "@/hooks/useScenarios";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { AmberAction, Container } from "@/components/cinema";
 import { SceneStill } from "@/components/scene-detail/SceneStill";
 
@@ -31,6 +32,8 @@ export default function SceneDetail() {
     (slug
       ? slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
       : "Untitled");
+
+  usePageTitle(`${title} · HeyScenes`);
 
   const still = scene?.still ?? null;
   const logline = scene?.logline;

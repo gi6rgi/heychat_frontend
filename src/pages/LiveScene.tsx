@@ -9,6 +9,7 @@ import { cleanTranscript } from "@/lib/transcript";
 import { RoundButton } from "@/components/live/RoundButton";
 import { useVoiceSession } from "@/hooks/useVoiceSession";
 import { useScenario } from "@/hooks/useScenarios";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { useAmbience } from "@/hooks/useAmbience";
 import { scenarioAmbience, type Ambience } from "@/audio/ambience";
 import { playVerdictSound } from "@/audio/verdict";
@@ -33,6 +34,8 @@ export default function LiveScene() {
     () => (scenario ? toScene(scenario) : undefined),
     [scenario],
   );
+
+  usePageTitle(scene && `${scene.character} · Live`);
 
   const scenarioId = scene?.scenarioId ?? slug;
   const {

@@ -3,6 +3,7 @@ import { Link, Navigate, useParams, useSearchParams } from "react-router-dom";
 import { motion, useReducedMotion } from "motion/react";
 import { toScene } from "@/lib/scenes";
 import { useScenario } from "@/hooks/useScenarios";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import {
   useConversation,
   useFeedback,
@@ -56,6 +57,8 @@ export default function Debrief() {
   const feedback = useFeedback(conversationId);
   const generate = useGenerateFeedback(conversationId);
   const reduce = useReducedMotion();
+
+  usePageTitle(scene && `${scene.character} · Debrief`);
 
   // An empty transcript can't be reviewed — the backend 409s the POST — so
   // don't even ask; the page shows the "nothing on tape" state instead.

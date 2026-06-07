@@ -12,6 +12,7 @@ import { PosterReveal } from "@/components/create/PosterReveal";
 import { WorkingLines } from "@/components/create/WorkingLines";
 import { DeckStep } from "@/components/create/DeckStep";
 import { useScenario } from "@/hooks/useScenarios";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import type { CharacterIntake, Scenario } from "@/types/api";
 
 // Three deck steps, then the generate + reveal. No entry screen, no match path:
@@ -52,6 +53,13 @@ export default function CreateScene() {
     step === "reveal" ? result?.id : undefined,
   );
   const revealed = liveResult ?? result;
+
+  // Tab title follows the flow: building → the freshly revealed scene's name.
+  usePageTitle(
+    step === "reveal" && revealed
+      ? `${revealed.title} · HeyScenes`
+      : "Create your scene · HeyScenes",
+  );
 
   async function submit(payload: CharacterIntake) {
     setIntake(payload);
