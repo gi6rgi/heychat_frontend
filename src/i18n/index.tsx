@@ -7,13 +7,13 @@
  */
 import { useCallback } from "react";
 import { Navigate, Outlet, useLocation, useParams } from "react-router-dom";
-import { de, en, type Messages } from "./messages";
+import { de, en, ru, type Messages } from "./messages";
 
-export const LOCALES = ["en", "de"] as const;
+export const LOCALES = ["en", "de", "ru"] as const;
 export type Locale = (typeof LOCALES)[number];
 export const DEFAULT_LOCALE: Locale = "en";
 
-const MESSAGES: Record<Locale, Messages> = { en, de };
+const MESSAGES: Record<Locale, Messages> = { en, de, ru };
 
 export function isLocale(value: string | undefined): value is Locale {
   return !!value && (LOCALES as readonly string[]).includes(value);
