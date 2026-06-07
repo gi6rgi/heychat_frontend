@@ -5,22 +5,28 @@
  * as AudioBufferSourceNodes on a shared timeline. One node per block (instead
  * of one per WS frame) keeps the node churn low on mobile, and the first block
  * after silence is scheduled with a small cushion so network jitter lands
- * inside the cushion instead of tearing the stream into clicky fragments. On
- * barge-in (the user interrupting), `flush()` stops every queued source so the
- * agent goes silent immediately.
+ * inside the cushion instead of tearing the stream into clicky fragments.
+ *
+ * All sources feed a master GainNode. Barge-in (`flush()`) fades the master
+ * bus out over ~30 ms and only then stops the sources: a hard stop leaves a
+ * waveform discontinuity, and mobile WebKit answered exactly that with a
+ * stuck, looping last quantum on every interruption. A silent
+ * ConstantSourceNode keeps the graph rendering through the gaps, so the sink
+ * never sees the stream go dead.
  *
  * Playback is routed through a MediaStreamDestination into an <audio> element
  * rather than straight to AudioContext.destination: browser echo cancellation
  * reliably subtracts media-element output from the mic, but not (on all
  * platforms) raw WebAudio output. Without this, on speakers the model hears
  * its own voice — phantom "user" speech and self-barge-ins. The element also
- * gives us setSinkId on browsers where AudioContext lacks it.
+ * gives us setSinkId on browsers where AudioContext lacks it. `?rawout=1`
+ * bypasses the element (forfeiting those benefits) — a diagnostic switch to
+ * tell element-path glitches from context-path ones.
  *
  * Mobile WebKit parks the context in 'interrupted'/'suspended' after a call,
- * notification, route change or screen lock and never resumes it by itself —
- * sometimes looping the last rendered quantum as a stuck monotone tone. A
- * state-change hook plus a watchdog (currentTime frozen while sources are
- * queued) detect both and try to kick the context back into 'running'.
+ * notification, route change or screen lock and never resumes it by itself.
+ * A state-change hook plus a watchdog (currentTime frozen while 'running')
+ * detect that and try to kick the context back into 'running'.
  */
 import { getPreferredSpeaker } from './devices'
 
@@ -33,11 +39,14 @@ const PREBUFFER_SECONDS = 0.15
 /** How long to wait for more audio before scheduling a partial block — the
  * tail of an utterance never fills MIN_BLOCK_SECONDS on its own. */
 const PARTIAL_FLUSH_MS = 60
+/** Barge-in fade: long enough to avoid a discontinuity, short enough to still
+ * read as "the agent shut up instantly". */
+const FLUSH_FADE_SECONDS = 0.03
 
 export class VoicePlayer {
   private ctx: AudioContext
-  private dest: MediaStreamAudioDestinationNode
-  private el: HTMLAudioElement
+  private master: GainNode
+  private el: HTMLAudioElement | null = null
   private nextStartTime = 0
   private sources = new Set<AudioBufferSourceNode>()
   private onActiveChange?: (active: boolean) => void
@@ -52,12 +61,30 @@ export class VoicePlayer {
 
   constructor(onActiveChange?: (active: boolean) => void) {
     this.ctx = new AudioContext()
-    this.dest = this.ctx.createMediaStreamDestination()
-    this.el = new Audio()
-    this.el.srcObject = this.dest.stream
     this.onActiveChange = onActiveChange
-    const sink = getPreferredSpeaker()
-    if (sink) void this.setSink(sink)
+    this.master = this.ctx.createGain()
+
+    const rawOut = new URLSearchParams(window.location.search).has('rawout')
+    let sink: AudioNode
+    if (rawOut) {
+      console.warn('[player] rawout: bypassing the <audio> element path')
+      sink = this.ctx.destination
+    } else {
+      const dest = this.ctx.createMediaStreamDestination()
+      this.el = new Audio()
+      this.el.srcObject = dest.stream
+      sink = dest
+      const speaker = getPreferredSpeaker()
+      if (speaker) void this.setSink(speaker)
+    }
+    this.master.connect(sink)
+
+    // Constant zero into the sink: the graph keeps rendering through silence,
+    // so the sink never sees the stream go dead between utterances.
+    const keepAlive = this.ctx.createConstantSource()
+    keepAlive.offset.value = 0
+    keepAlive.connect(sink)
+    keepAlive.start()
 
     this.ctx.onstatechange = () => {
       const state = this.ctx.state as string
@@ -66,12 +93,12 @@ export class VoicePlayer {
     }
     document.addEventListener('visibilitychange', this.onVisible)
 
-    // Stuck-buffer watchdog: when the render thread stalls, currentTime stops
-    // advancing while sources are queued (audible as a looping monotone tone).
+    // Stuck-buffer watchdog: a running context whose currentTime stops
+    // advancing means the render thread stalled (audible as a looping tone).
     this.watchdog = window.setInterval(() => {
       const t = this.ctx.currentTime
-      if (this.sources.size > 0 && t === this.lastRenderTime) {
-        console.error('[player] render stalled at %f (state=%s)', t, this.ctx.state)
+      if ((this.ctx.state as string) === 'running' && t === this.lastRenderTime) {
+        console.error('[player] render stalled at %f', t)
         void this.recover('watchdog')
       }
       this.lastRenderTime = t
@@ -84,22 +111,22 @@ export class VoicePlayer {
     if ((this.ctx.state as string) === 'closed') return
     console.warn('[player] recover (%s)', why)
     await this.ctx.resume().catch(() => {})
-    await this.el.play().catch(() => {})
+    if (this.el) await this.el.play().catch(() => {})
   }
 
   /** Route playback to an output device; no-op where unsupported. */
   async setSink(deviceId: string | null): Promise<void> {
-    const el = this.el as HTMLAudioElement & {
-      setSinkId?: (id: string) => Promise<void>
-    }
-    if (!el.setSinkId) return
+    const el = this.el as
+      | (HTMLAudioElement & { setSinkId?: (id: string) => Promise<void> })
+      | null
+    if (!el?.setSinkId) return
     await el.setSinkId(deviceId ?? '').catch(() => {})
   }
 
   /** Must be called from a user gesture to satisfy autoplay policies. */
   async resume(): Promise<void> {
     await this.ctx.resume()
-    await this.el.play().catch(() => {})
+    if (this.el) await this.el.play().catch(() => {})
   }
 
   enqueue(pcm: ArrayBuffer): void {
@@ -144,11 +171,20 @@ export class VoicePlayer {
 
     const src = this.ctx.createBufferSource()
     src.buffer = buffer
-    src.connect(this.dest)
+    src.connect(this.master)
 
     const wasIdle = this.sources.size === 0
     const cushion = wasIdle ? PREBUFFER_SECONDS : 0
     const startAt = Math.max(this.ctx.currentTime + cushion, this.nextStartTime)
+    if (wasIdle) {
+      // Re-arm the master bus after a flush fade. The ramp completes inside
+      // the cushion, before the first sample plays; only silence is rendered
+      // meanwhile, so it is inaudible.
+      const gain = this.master.gain
+      gain.cancelScheduledValues(this.ctx.currentTime)
+      gain.setValueAtTime(0, this.ctx.currentTime)
+      gain.linearRampToValueAtTime(1, startAt)
+    }
     src.start(startAt)
     this.nextStartTime = startAt + buffer.duration
 
@@ -161,7 +197,8 @@ export class VoicePlayer {
     }
   }
 
-  /** Stop everything queued or pending (barge-in / interruption). */
+  /** Stop everything queued or pending (barge-in / interruption): fade the
+   * master bus to zero, then stop the sources at the bottom of the fade. */
   flush(): void {
     if (this.partialTimer !== null) {
       clearTimeout(this.partialTimer)
@@ -169,10 +206,18 @@ export class VoicePlayer {
     }
     this.pending = []
     this.pendingSamples = 0
+
+    const t = this.ctx.currentTime
+    console.debug('[player] flush (barge-in) at %f', t)
+    const gain = this.master.gain
+    gain.cancelScheduledValues(t)
+    gain.setValueAtTime(gain.value, t)
+    gain.linearRampToValueAtTime(0, t + FLUSH_FADE_SECONDS)
+
     for (const src of this.sources) {
       try {
         src.onended = null
-        src.stop()
+        src.stop(t + FLUSH_FADE_SECONDS)
       } catch {
         /* already stopped */
       }
@@ -187,8 +232,8 @@ export class VoicePlayer {
     document.removeEventListener('visibilitychange', this.onVisible)
     this.ctx.onstatechange = null
     this.flush()
-    this.el.pause()
-    this.el.srcObject = null
+    this.el?.pause()
+    if (this.el) this.el.srcObject = null
     await this.ctx.close().catch(() => {})
   }
 }
