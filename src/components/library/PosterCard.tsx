@@ -4,15 +4,11 @@ import { Lock } from "lucide-react";
 import { type Scene } from "@/lib/scenes";
 import { cn } from "@/lib/utils";
 
-/** Faint dot separator for the metadata line. */
-function Dot() {
-  return <span className="px-1.5 text-paper-faint">·</span>;
-}
-
 /**
  * One poster-wall card. The title/tagline are baked into the poster art, so the
- * card only renders the 2:3 image + ONE small-caps tag line beneath it
- * (`DATING · DAYTIME · EASY`), matching the validated poster-wall reference.
+ * card only renders the 2:3 image + ONE quiet italic line beneath it: the
+ * scene's goal ("Get her phone number"), or the logline for goalless scenes.
+ * Tags live on in the data for the filter bar only.
  *  - isNew  → amber small-caps NEW corner tag (top-left).
  *  - locked → dimmed poster, 1px amber outline, UNLOCK label; not a link.
  *  - unlocked → wraps in a <Link> to the scene; hover lifts + brightens meta.
@@ -61,18 +57,13 @@ export function PosterCard({ scene }: { scene: Scene }) {
   ) : (
     <span
       className={cn(
-        // One line, ellipsized: a long tag line must never wrap into a
-        // ragged second row or stretch the grid on narrow screens.
-        "block truncate font-label text-[12px] font-medium uppercase tracking-[0.12em] text-paper-dim",
+        // Phones get two lines (cards are full-width, goals read fully);
+        // md+ clamps to one so the wall's rows stay even.
+        "line-clamp-2 font-display text-xl leading-snug text-paper/90 md:line-clamp-1",
         "transition-colors duration-300 ease-[var(--ease-cinema)] group-hover:text-paper",
       )}
     >
-      {scene.tags.map((tag, i) => (
-        <span key={tag}>
-          {i > 0 && <Dot />}
-          {tag}
-        </span>
-      ))}
+      {scene.goal ?? scene.logline}
     </span>
   );
 

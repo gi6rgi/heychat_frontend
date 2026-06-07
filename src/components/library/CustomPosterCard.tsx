@@ -16,7 +16,8 @@ import type { Scenario } from "@/types/api";
  * scenes without art (generation disabled/failed) keep the quiet titled frame.
  *
  * Hover reveals a ✕ in the corner; deletion confirms inline in the meta line
- * (DELETE? YES · NO) — no dialogs on the poster wall.
+ * (DELETE? YES · NO) — no dialogs on the poster wall. The meta line shows the
+ * scene's goal (or its description when goalless), same as PosterCard.
  */
 export function CustomPosterCard({ scenario }: { scenario: Scenario }) {
   const [loaded, setLoaded] = useState(false);
@@ -136,26 +137,21 @@ export function CustomPosterCard({ scenario }: { scenario: Scenario }) {
               NO
             </button>
           </span>
+        ) : generating ? (
+          <span className="font-label text-[12px] font-medium uppercase tracking-[0.12em] text-paper-dim">
+            YOURS
+            <span className="px-1.5 text-paper-faint">·</span>
+            PAINTING…
+          </span>
         ) : (
           <span
             className={cn(
-              // One line, ellipsized — same rule as PosterCard so long tag
-              // lines never wrap or stretch the grid on narrow screens.
-              "block truncate font-label text-[12px] font-medium uppercase tracking-[0.12em] text-paper-dim",
+              // Same rule as PosterCard: two lines on phones, one on md+.
+              "line-clamp-2 font-display text-xl leading-snug text-paper/90 md:line-clamp-1",
               "transition-colors duration-300 ease-[var(--ease-cinema)] group-hover:text-paper",
             )}
           >
-            {(generating
-              ? ["YOURS", "PAINTING…"]
-              : scenario.tags?.length
-                ? scenario.tags
-                : ["YOURS", "CUSTOM"]
-            ).map((tag, i) => (
-              <span key={tag}>
-                {i > 0 && <span className="px-1.5 text-paper-faint">·</span>}
-                {tag}
-              </span>
-            ))}
+            {scenario.goal ?? scenario.description}
           </span>
         )}
       </div>
