@@ -129,7 +129,7 @@ export default function Debrief() {
           <WorkingLines lines={REVIEW_LINES} />
         </div>
       ) : (
-      <div className="mx-auto w-full max-w-6xl px-6 pb-14 md:px-10">
+      <div className="mx-auto w-full max-w-7xl px-6 pb-14 md:px-10">
         {/* HERO — the coach's headline + scene meta */}
         <motion.div className="mt-14" {...rise(0.05)}>
           <h1 className="font-display max-w-3xl text-4xl font-light leading-[1.05] text-paper sm:text-5xl">
