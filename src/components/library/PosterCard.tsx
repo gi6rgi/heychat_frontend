@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Lock } from "lucide-react";
 import { type Scene } from "@/lib/scenes";
+import { useLocalePath, useT } from "@/i18n";
 import { cn } from "@/lib/utils";
 
 /**
@@ -14,6 +15,8 @@ import { cn } from "@/lib/utils";
  *  - unlocked → wraps in a <Link> to the scene; hover lifts + brightens meta.
  */
 export function PosterCard({ scene }: { scene: Scene }) {
+  const t = useT();
+  const lp = useLocalePath();
   // Fade the poster in once it has loaded so it doesn't pop (same pattern
   // as CustomPosterCard).
   const [loaded, setLoaded] = useState(false);
@@ -27,7 +30,7 @@ export function PosterCard({ scene }: { scene: Scene }) {
     >
       <img
         src={scene.poster}
-        alt={`${scene.title} poster`}
+        alt={t.library.posterAlt(scene.title)}
         loading="lazy"
         onLoad={() => setLoaded(true)}
         className={cn(
@@ -43,7 +46,7 @@ export function PosterCard({ scene }: { scene: Scene }) {
       )}
       {scene.isNew && !scene.locked && (
         <span className="absolute left-0 top-0 bg-amber px-2 py-1 font-label text-[11px] font-semibold uppercase tracking-[0.16em] text-night">
-          NEW
+          {t.library.newTag}
         </span>
       )}
     </div>
@@ -52,7 +55,7 @@ export function PosterCard({ scene }: { scene: Scene }) {
   const meta = scene.locked ? (
     <span className="flex items-center gap-1.5 font-label text-[12px] font-medium uppercase tracking-[0.16em] text-amber">
       <Lock aria-hidden className="h-3 w-3" strokeWidth={1.75} />
-      UNLOCK
+      {t.library.unlock}
     </span>
   ) : (
     <span
@@ -77,7 +80,7 @@ export function PosterCard({ scene }: { scene: Scene }) {
   }
 
   return (
-    <Link to={`/scene/${scene.slug}`} viewTransition className="group block">
+    <Link to={lp(`/scene/${scene.slug}`)} viewTransition className="group block">
       {poster}
       <div className="pt-3">{meta}</div>
     </Link>

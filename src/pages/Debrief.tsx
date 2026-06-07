@@ -13,6 +13,7 @@ import { AmberAction, Hairline, Kicker, TopBar } from "@/components/cinema";
 import { SubScoreRow } from "@/components/debrief/SubScoreRow";
 import { MatchOrb } from "@/components/create/MatchOrb";
 import { WorkingLines } from "@/components/create/WorkingLines";
+import { useLocalePath, useT } from "@/i18n";
 
 /**
  * Post-scene debrief — the real flight recorder.
@@ -26,14 +27,6 @@ import { WorkingLines } from "@/components/create/WorkingLines";
  * better answers. Without a conversation id there is nothing to grade — we
  * bounce back to the scene page.
  */
-
-/** Rotating status lines while the coach reads the transcript (~10-20s). */
-const REVIEW_LINES = [
-  "Rolling the tape back…",
-  "Reading your lines…",
-  "Marking the moments that mattered…",
-  "Writing the coach's note…",
-];
 
 /** mm:ss between the first and last message of the conversation. */
 function sceneDuration(
@@ -50,6 +43,8 @@ export default function Debrief() {
   const { slug } = useParams<{ slug: string }>();
   const [params] = useSearchParams();
   const conversationId = params.get("c") ?? undefined;
+  const t = useT();
+  const lp = useLocalePath();
 
   const { data: scenario, isLoading } = useScenario(slug);
   const scene = scenario ? toScene(scenario) : undefined;
@@ -58,7 +53,7 @@ export default function Debrief() {
   const generate = useGenerateFeedback(conversationId);
   const reduce = useReducedMotion();
 
-  usePageTitle(scene && `${scene.character} · Debrief`);
+  usePageTitle(scene && t.titles.debrief(scene.character));
 
   // An empty transcript can't be reviewed — the backend 409s the POST — so
   // don't even ask; the page shows the "nothing on tape" state instead.
@@ -78,8 +73,9 @@ export default function Debrief() {
   }, [conversationId, feedbackStatus, generate, conversation, empty]);
 
   if (isLoading) return null;
-  if (!scene) return <Navigate to="/" replace />;
-  if (!conversationId) return <Navigate to={`/scene/${scene.slug}`} replace />;
+  if (!scene) return <Navigate to={lp("/")} replace />;
+  if (!conversationId)
+    return <Navigate to={lp(`/scene/${scene.slug}`)} replace />;
 
   const report =
     feedback.data?.status === "ready" ? feedback.data.report : null;
@@ -110,13 +106,13 @@ export default function Debrief() {
         <Kicker as="h2" className="text-paper">
           {scene.title}
           <span className="text-paper-faint"> / </span>
-          Debrief
+          {t.debrief.kicker}
         </Kicker>
         <Link
-          to="/"
+          to={lp("/")}
           className="shrink-0 font-label text-[13px] font-medium uppercase tracking-[0.14em] text-paper-dim transition-colors duration-300 ease-[var(--ease-cinema)] hover:text-paper"
         >
-          HOME
+          {t.debrief.home}
         </Link>
       </TopBar>
 
@@ -126,19 +122,21 @@ export default function Debrief() {
       {reviewing && !report && !failed && !empty ? (
         <div className="flex min-h-[70vh] flex-col items-center justify-center gap-8 py-12 text-center">
           <MatchOrb />
-          <WorkingLines lines={REVIEW_LINES} />
+          <WorkingLines lines={t.debrief.reviewLines} />
         </div>
       ) : (
       <div className="mx-auto w-full max-w-7xl px-6 pb-14 md:px-10">
         {/* HERO — the coach's headline + scene meta */}
         <motion.div className="mt-14" {...rise(0.05)}>
           <h1 className="font-display max-w-3xl text-4xl font-light leading-[1.05] text-paper sm:text-5xl">
-            {report?.headline ?? "The scene is in the can."}
+            {report?.headline ?? t.debrief.fallbackHeadline}
           </h1>
           <p className="mt-5 font-mono text-[13px] uppercase tracking-[0.1em] text-paper-faint">
             {[
               duration,
-              conversation ? `${conversation.messages.length} lines` : null,
+              conversation
+                ? t.debrief.lineCount(conversation.messages.length)
+                : null,
               scene.character,
             ]
               .filter(Boolean)
@@ -156,8 +154,7 @@ export default function Debrief() {
             {...rise(0.1)}
           >
             <p className="max-w-md font-display text-2xl italic leading-snug text-paper-dim">
-              Nothing on tape. Not a single line was spoken, so there is
-              nothing to review.
+              {t.debrief.nothingOnTape}
             </p>
           </motion.div>
         )}
@@ -169,7 +166,7 @@ export default function Debrief() {
             {...rise(0.1)}
           >
             <p className="max-w-md font-display text-2xl italic leading-snug text-paper-dim">
-              The coach lost their notes. Run the review again?
+              {t.debrief.coachLostNotes}
             </p>
             <AmberAction
               size="lg"
@@ -178,7 +175,7 @@ export default function Debrief() {
                 generate.mutate();
               }}
             >
-              Retry review
+              {t.debrief.retryReview}
             </AmberAction>
           </motion.div>
         )}
@@ -189,7 +186,7 @@ export default function Debrief() {
             <div className="mt-14 grid gap-x-16 gap-y-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.05fr)]">
               {/* LEFT — the score + coach's summary */}
               <motion.div {...rise(0.15)}>
-                <Kicker as="h2">The Verdict</Kicker>
+                <Kicker as="h2">{t.debrief.verdict}</Kicker>
                 <div className="mt-6 flex items-end gap-3">
                   <span className="font-display text-7xl font-light leading-[0.85] tracking-tight text-paper sm:text-8xl lg:text-9xl">
                     {String(report.overall_score.toFixed(1)).split(".")[0]}
@@ -210,7 +207,7 @@ export default function Debrief() {
 
               {/* RIGHT — metric breakdown */}
               <motion.div {...rise(0.25)}>
-                <Kicker as="h2">Breakdown</Kicker>
+                <Kicker as="h2">{t.debrief.breakdown}</Kicker>
                 <div className="mt-6 flex flex-col gap-5">
                   {report.metrics.map((m) => (
                     <SubScoreRow key={m.name} label={m.name} value={m.score} />
@@ -226,7 +223,7 @@ export default function Debrief() {
               <Hairline />
               <div className="mt-12 grid gap-x-16 gap-y-10 sm:grid-cols-2">
                 <div>
-                  <Kicker as="p">What Landed</Kicker>
+                  <Kicker as="p">{t.debrief.whatLanded}</Kicker>
                   <ul className="mt-4">
                     {strengths.map((m, i) => (
                       <li key={m.name}>
@@ -238,13 +235,13 @@ export default function Debrief() {
                     ))}
                     {strengths.length === 0 && (
                       <li className="text-base italic leading-relaxed text-paper-dim">
-                        Rough night. The next run is where it turns.
+                        {t.debrief.roughNight}
                       </li>
                     )}
                   </ul>
                 </div>
                 <div>
-                  <Kicker as="p">What To Work On</Kicker>
+                  <Kicker as="p">{t.debrief.whatToWorkOn}</Kicker>
                   <ul className="mt-4">
                     {report.advice.map((a, i) => (
                       <li key={i}>
@@ -269,7 +266,7 @@ export default function Debrief() {
               <motion.div className="mt-16" {...rise(0.3)}>
                 <Hairline />
                 <div className="mt-12">
-                  <Kicker as="h2">Say It Better</Kicker>
+                  <Kicker as="h2">{t.debrief.sayItBetter}</Kicker>
                   <div className="mt-6 grid gap-x-12 gap-y-10 lg:grid-cols-2">
                     {report.example_answers.map((ex, i) => (
                       <div key={i}>
@@ -295,11 +292,11 @@ export default function Debrief() {
           className="mt-10 flex flex-wrap items-center gap-x-12 gap-y-6"
           {...rise(0.35)}
         >
-          <AmberAction to={`/scene/${scene.slug}/live`} size="lg">
-            Retry Scene
+          <AmberAction to={lp(`/scene/${scene.slug}/live`)} size="lg">
+            {t.debrief.retryScene}
           </AmberAction>
-          <AmberAction to="/" size="lg" tone="dim" arrow={false}>
-            Home
+          <AmberAction to={lp("/")} size="lg" tone="dim" arrow={false}>
+            {t.debrief.homeAction}
           </AmberAction>
         </motion.div>
       </div>

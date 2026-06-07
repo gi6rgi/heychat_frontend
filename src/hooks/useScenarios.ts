@@ -1,12 +1,14 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { getScenario, listScenarios } from '@/services/scenarios'
 import { queryKeys } from '@/lib/query-keys'
+import { useLocale } from '@/i18n'
 import type { Scenario } from '@/types/api'
 
 export function useScenarios() {
+  const locale = useLocale()
   return useQuery({
-    queryKey: queryKeys.scenarios(),
-    queryFn: listScenarios,
+    queryKey: queryKeys.scenarios(locale),
+    queryFn: () => listScenarios(locale),
     staleTime: 5 * 60 * 1000,
     // A freshly created scene may still be painting its art — keep the poster
     // wall polling until every scene has settled.
@@ -19,9 +21,10 @@ export function useScenarios() {
 
 export function useScenario(id: string | undefined) {
   const queryClient = useQueryClient()
+  const locale = useLocale()
   return useQuery({
-    queryKey: queryKeys.scenario(id),
-    queryFn: () => getScenario(id!),
+    queryKey: queryKeys.scenario(id, locale),
+    queryFn: () => getScenario(id!, locale),
     enabled: !!id,
     staleTime: 5 * 60 * 1000,
     // The list response carries the same full objects — seed from it (aged to
@@ -29,10 +32,10 @@ export function useScenario(id: string | undefined) {
     // same scenario on every page.
     initialData: () =>
       queryClient
-        .getQueryData<Scenario[]>(queryKeys.scenarios())
+        .getQueryData<Scenario[]>(queryKeys.scenarios(locale))
         ?.find((s) => s.id === id),
     initialDataUpdatedAt: () =>
-      queryClient.getQueryState(queryKeys.scenarios())?.dataUpdatedAt,
+      queryClient.getQueryState(queryKeys.scenarios(locale))?.dataUpdatedAt,
     // Scene art is generated in the background after creation; poll until the
     // storage paths fill in so the images fade in as they land.
     refetchInterval: (query) =>

@@ -4,6 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { toScene } from "@/lib/scenes";
 import { useScenario } from "@/hooks/useScenarios";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { useLocalePath, useT } from "@/i18n";
 import { AmberAction, Container } from "@/components/cinema";
 import { SceneStill } from "@/components/scene-detail/SceneStill";
 
@@ -19,6 +20,8 @@ import { SceneStill } from "@/components/scene-detail/SceneStill";
 export default function SceneDetail() {
   const { slug } = useParams<{ slug: string }>();
   const reduce = useReducedMotion();
+  const t = useT();
+  const lp = useLocalePath();
 
   // Every scene — catalog or user-created — lives in the backend now. The
   // hook keeps polling while a created scene's art is still being painted,
@@ -31,13 +34,13 @@ export default function SceneDetail() {
     scene?.title ??
     (slug
       ? slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
-      : "Untitled");
+      : t.common.untitled);
 
-  usePageTitle(`${title} · HeyScenes`);
+  usePageTitle(t.titles.scene(title));
 
   const still = scene?.still ?? null;
   const logline = scene?.logline;
-  const liveTo = scene ? `/scene/${scene.slug}/live` : null;
+  const liveTo = scene ? lp(`/scene/${scene.slug}/live`) : null;
 
   const ease = reduce ? undefined : ([0.22, 0.61, 0.36, 1] as const);
   const rise = (delay: number) =>
@@ -57,12 +60,12 @@ export default function SceneDetail() {
         {/* top-left back link */}
         <motion.div {...rise(0)} className="flex h-16 items-center">
           <Link
-            to="/"
+            to={lp("/")}
             viewTransition
             className="group inline-flex items-center gap-2 font-label text-[13px] font-medium uppercase tracking-[0.16em] text-paper transition-colors duration-300 ease-[var(--ease-cinema)] [text-shadow:0_1px_12px_rgba(20,19,17,0.9)] hover:text-amber"
           >
             <ArrowLeft aria-hidden className="h-[14px] w-[14px]" strokeWidth={1.5} />
-            Scenarios
+            {t.common.scenarios}
           </Link>
         </motion.div>
 
@@ -97,7 +100,7 @@ export default function SceneDetail() {
                 className="mt-8 inline-block border border-amber/70 px-7 pb-5 pt-1"
               >
                 <legend className="px-2 font-label text-[12px] font-medium uppercase tracking-[0.2em] text-amber">
-                  Goal
+                  {t.common.goal}
                 </legend>
                 <p className="font-display text-3xl font-light leading-tight text-amber sm:text-4xl md:text-5xl">
                   {scene.goal}
@@ -117,11 +120,11 @@ export default function SceneDetail() {
                     disabled
                     className="pointer-events-none animate-pulse"
                   >
-                    Painting the scene…
+                    {t.detail.paintingScene}
                   </AmberAction>
                 ) : (
                   <AmberAction to={liveTo} viewTransition size="lg">
-                    Start Scene
+                    {t.detail.startScene}
                   </AmberAction>
                 )}
               </motion.div>

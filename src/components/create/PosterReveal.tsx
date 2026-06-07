@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion } from "motion/react";
 import { sceneImageUrl } from "@/lib/storage";
+import { useT } from "@/i18n";
 import { cn } from "@/lib/utils";
 import type { Scenario } from "@/types/api";
 
@@ -12,6 +13,7 @@ import type { Scenario } from "@/types/api";
  * quiet initial frame simply stays.
  */
 export function PosterReveal({ scenario }: { scenario: Scenario }) {
+  const t = useT();
   const [loaded, setLoaded] = useState(false);
   const url = sceneImageUrl(scenario.poster_path);
   const painting = !loaded && scenario.image_status === "generating";
@@ -39,7 +41,7 @@ export function PosterReveal({ scenario }: { scenario: Scenario }) {
       {url && (
         <img
           src={url}
-          alt={`${scenario.title} poster`}
+          alt={t.library.posterAlt(scenario.title)}
           onLoad={() => setLoaded(true)}
           className={cn(
             "absolute inset-0 h-full w-full object-cover transition-opacity duration-[900ms] ease-[var(--ease-cinema)]",
@@ -50,7 +52,7 @@ export function PosterReveal({ scenario }: { scenario: Scenario }) {
 
       {painting && (
         <span className="absolute inset-x-0 bottom-3 text-center font-label text-[11px] font-medium uppercase tracking-[0.16em] text-paper-faint">
-          Painting the poster…
+          {t.create.paintingPoster}
         </span>
       )}
     </div>

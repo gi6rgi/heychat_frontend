@@ -15,6 +15,7 @@ import { scenarioAmbience, type Ambience } from "@/audio/ambience";
 import { playVerdictSound } from "@/audio/verdict";
 import { getPreferredMic, getPreferredSpeaker } from "@/audio/devices";
 import { toScene, type Scene } from "@/lib/scenes";
+import { useLocalePath, useT } from "@/i18n";
 import { cn } from "@/lib/utils";
 
 /**
@@ -25,6 +26,8 @@ import { cn } from "@/lib/utils";
  */
 export default function LiveScene() {
   const { slug } = useParams<{ slug: string }>();
+  const t = useT();
+  const lp = useLocalePath();
 
   // Every scene — catalog or user-created — lives in the backend. The hook
   // keeps polling while a created scene's art is still being painted, so the
@@ -35,7 +38,7 @@ export default function LiveScene() {
     [scenario],
   );
 
-  usePageTitle(scene && `${scene.character} · Live`);
+  usePageTitle(scene && t.titles.live(scene.character));
 
   const scenarioId = scene?.scenarioId ?? slug;
   const {
@@ -233,9 +236,9 @@ export default function LiveScene() {
                   >
                     {goalResult
                       ? goalResult.outcome === "success"
-                        ? "Goal · ✓ Accomplished"
-                        : "Goal · ✗ Failed"
-                      : "Goal"}
+                        ? t.live.goalSuccess
+                        : t.live.goalFailure
+                      : t.live.goalOpen}
                   </motion.span>
                   <p
                     className={cn(
@@ -272,7 +275,7 @@ export default function LiveScene() {
               <Subtitles previous={previous} current={current} />
             ) : (
               <p className="font-display text-2xl italic text-paper-faint">
-                The scene is set.
+                {t.live.sceneSet}
               </p>
             )}
 
@@ -293,26 +296,28 @@ export default function LiveScene() {
             {/* primary affordance, state-dependent */}
             <div className="mt-1 flex items-center gap-8">
               {(status === "idle" || status === "connecting") && (
-                <Kicker className="text-paper-dim">CONNECTING…</Kicker>
+                <Kicker className="text-paper-dim">{t.live.connecting}</Kicker>
               )}
               {status === "error" && (
                 <AmberAction onClick={start} size="lg">
-                  RETRY
+                  {t.live.retry}
                 </AmberAction>
               )}
               {status === "ended" && (
                 <AmberAction
-                  to={`/scene/${scene.slug}/debrief${conversationId ? `?c=${conversationId}` : ""}`}
+                  to={lp(
+                    `/scene/${scene.slug}/debrief${conversationId ? `?c=${conversationId}` : ""}`,
+                  )}
                   size="lg"
                 >
-                  DEBRIEF
+                  {t.live.debrief}
                 </AmberAction>
               )}
               {status === "live" && (
                 <AmberAction tone="dim" arrow={false} size="lg" onClick={stop}>
                   <span className="inline-flex items-center gap-2">
                     <PhoneOff className="size-4" aria-hidden />
-                    END
+                    {t.live.end}
                   </span>
                 </AmberAction>
               )}
@@ -323,7 +328,7 @@ export default function LiveScene() {
           <div className="flex items-end justify-end gap-5">
             <div className="relative">
               <RoundButton
-                ariaLabel="Audio device settings"
+                ariaLabel={t.live.deviceSettings}
                 on={devicesOpen}
                 onClick={() => void toggleDevices()}
               >
@@ -337,7 +342,7 @@ export default function LiveScene() {
                 <div className="fixed inset-x-4 bottom-28 z-20 flex flex-col gap-5 border border-hairline bg-night-deep/95 p-5 text-left md:absolute md:inset-x-auto md:bottom-full md:right-0 md:mb-4 md:w-80">
                   <div className="flex flex-col gap-2">
                     <span className="font-label text-[11px] font-medium uppercase tracking-[0.16em] text-paper-faint">
-                      Microphone
+                      {t.live.microphone}
                     </span>
                     {inputs.map((d, i) => (
                       <button
@@ -352,14 +357,14 @@ export default function LiveScene() {
                             : "text-paper-dim hover:text-paper",
                         )}
                       >
-                        {d.label || `Microphone ${i + 1}`}
+                        {d.label || t.live.micFallback(i + 1)}
                       </button>
                     ))}
                   </div>
 
                   <div className="flex flex-col gap-2">
                     <span className="font-label text-[11px] font-medium uppercase tracking-[0.16em] text-paper-faint">
-                      Speaker
+                      {t.live.speaker}
                     </span>
                     {canPickSpeaker && outputs.length > 0 ? (
                       outputs.map((d, i) => (
@@ -375,12 +380,12 @@ export default function LiveScene() {
                               : "text-paper-dim hover:text-paper",
                           )}
                         >
-                          {d.label || `Speaker ${i + 1}`}
+                          {d.label || t.live.speakerFallback(i + 1)}
                         </button>
                       ))
                     ) : (
                       <span className="font-display text-sm italic text-paper-faint">
-                        Speaker choice isn't supported in this browser.
+                        {t.live.speakerUnsupported}
                       </span>
                     )}
                   </div>
@@ -389,7 +394,7 @@ export default function LiveScene() {
             </div>
 
             <RoundButton
-              ariaLabel={muted ? "Unmute microphone" : "Mute microphone"}
+              ariaLabel={muted ? t.live.unmute : t.live.mute}
               on={!muted && status === "live"}
               onClick={toggleMute}
             >
@@ -422,7 +427,7 @@ export default function LiveScene() {
                   : "text-paper-dim"
               }
             >
-              Goal · {scene.goal}
+              {t.live.goalOpen} · {scene.goal}
             </Kicker>
           )}
           <motion.h2
@@ -439,8 +444,8 @@ export default function LiveScene() {
             )}
           >
             {goalResult.outcome === "success"
-              ? "Mission accomplished"
-              : "Mission failed"}
+              ? t.live.missionAccomplished
+              : t.live.missionFailed}
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 10 }}
@@ -465,10 +470,12 @@ export default function LiveScene() {
             className="mt-4"
           >
             <AmberAction
-              to={`/scene/${scene.slug}/debrief${conversationId ? `?c=${conversationId}` : ""}`}
+              to={lp(
+                `/scene/${scene.slug}/debrief${conversationId ? `?c=${conversationId}` : ""}`,
+              )}
               size="lg"
             >
-              Debrief
+              {t.live.debriefAction}
             </AmberAction>
           </motion.div>
         </motion.div>

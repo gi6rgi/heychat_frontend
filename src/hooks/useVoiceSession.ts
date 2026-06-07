@@ -6,6 +6,7 @@ import { queryKeys } from '@/lib/query-keys'
 import { VoicePlayer } from '@/audio/player'
 import { VoiceRecorder } from '@/audio/recorder'
 import { setPreferredMic, setPreferredSpeaker } from '@/audio/devices'
+import { useLocale, useT } from '@/i18n'
 import type { ServerMessage, Turn } from '@/types/api'
 
 export type SessionStatus = 'idle' | 'connecting' | 'live' | 'ended' | 'error'
@@ -17,6 +18,10 @@ const LIMIT_CODES = new Set(['daily_limit', 'capacity', 'concurrent_session'])
  * audio up, plays the agent's audio down, and surfaces live transcripts.
  */
 export function useVoiceSession(scenarioId: string | undefined, replayOf?: string | null) {
+  // The UI language rides along to the backend: it picks the agent's spoken
+  // language and the language of the eventual feedback report.
+  const locale = useLocale()
+  const t = useT()
   const [status, setStatus] = useState<SessionStatus>('idle')
   const [error, setError] = useState<string | null>(null)
   // Friendly usage-limit notice (daily budget, session time cap) — rendered
@@ -142,7 +147,8 @@ export function useVoiceSession(scenarioId: string | undefined, replayOf?: strin
       }
       let url =
         `${getWsBaseUrl()}/ws/sessions/${sessionId}` +
-        `?scenario_id=${encodeURIComponent(scenarioId)}`
+        `?scenario_id=${encodeURIComponent(scenarioId)}` +
+        `&lang=${locale}`
       if (replayOf) url += `&replay_of=${encodeURIComponent(replayOf)}`
       const ws = new WebSocket(url)
       ws.binaryType = 'arraybuffer'
@@ -175,9 +181,7 @@ export function useVoiceSession(scenarioId: string | undefined, replayOf?: strin
             else setError(msg.message)
             break
           case 'session_limit':
-            setLimitNotice(
-              'Time flies! This session reached its 10-minute limit. The conversation is saved to your history.',
-            )
+            setLimitNotice(t.live.sessionLimit)
             break
           case 'goal_result':
             settledRef.current = true
@@ -195,7 +199,7 @@ export function useVoiceSession(scenarioId: string | undefined, replayOf?: strin
         // surface that as an error event. The session is settled; let onclose
         // land it on 'ended' so the verdict screen shows instead of RETRY.
         if (!stoppingRef.current && !settledRef.current) {
-          setError('Connection lost')
+          setError(t.live.connectionLost)
           setStatus('error')
         }
       }
@@ -207,11 +211,11 @@ export function useVoiceSession(scenarioId: string | undefined, replayOf?: strin
         }
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Could not access the microphone')
+      setError(e instanceof Error ? e.message : t.live.micError)
       setStatus('error')
       await cleanup()
     }
-  }, [scenarioId, replayOf, status, appendTranscript, cleanup])
+  }, [scenarioId, replayOf, status, appendTranscript, cleanup, locale, t])
 
   const toggleMute = useCallback(() => {
     setMuted((m) => {

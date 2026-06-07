@@ -12,6 +12,7 @@ import {
 import { PosterCard } from "@/components/library/PosterCard";
 import { CustomPosterCard } from "@/components/library/CustomPosterCard";
 import { CreateCard } from "@/components/library/CreateCard";
+import { useT } from "@/i18n";
 import { cn } from "@/lib/utils";
 
 /**
@@ -22,7 +23,8 @@ import { cn } from "@/lib/utils";
  * staggered fade+rise.
  */
 export default function Library() {
-  usePageTitle(); // the poster wall keeps the default brand title
+  const t = useT();
+  usePageTitle(t.titles.default); // the poster wall keeps the brand title
   const [filter, setFilter] = useState<LibraryFilter>("ALL");
   // The hovered scene's still slowly fills the page background behind the grid.
   const [hovered, setHovered] = useState<string | null>(null);
@@ -115,7 +117,7 @@ export default function Library() {
         <Container className="py-12">
           {isYoursEmpty && (
             <p className="mb-10 font-display text-xl italic text-paper-dim">
-              Nothing of yours on the wall yet. Create your first scene below.
+              {t.library.yoursEmpty}
             </p>
           )}
           {scenesLoading ? (
@@ -123,7 +125,7 @@ export default function Library() {
             // CreateCard, so the posters don't pop in around it.
             <div className="flex animate-rise justify-center py-24">
               <Loader2
-                aria-label="Loading scenes"
+                aria-label={t.library.loadingScenes}
                 className="h-6 w-6 animate-spin text-amber"
                 strokeWidth={1.5}
               />

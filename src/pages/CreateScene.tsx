@@ -13,6 +13,7 @@ import { WorkingLines } from "@/components/create/WorkingLines";
 import { DeckStep } from "@/components/create/DeckStep";
 import { useScenario } from "@/hooks/useScenarios";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { useLocalePath, useT } from "@/i18n";
 import type { CharacterIntake, Scenario } from "@/types/api";
 
 // Three deck steps, then the generate + reveal. No entry screen, no match path:
@@ -28,16 +29,11 @@ const stepMotion = {
   transition: { duration: 0.36, ease: [0.22, 0.61, 0.36, 1] },
 } as const;
 
-const WORKING_LINES = [
-  "Reading your brief…",
-  "Imagining someone for you…",
-  "Painting the scene…",
-  "Writing their story…",
-];
-
 export default function CreateScene() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const t = useT();
+  const lp = useLocalePath();
   const [step, setStep] = useState<Step>("who");
   // Deck answers: who the companion is, where the scene happens.
   const [who, setWho] = useState("");
@@ -57,8 +53,8 @@ export default function CreateScene() {
   // Tab title follows the flow: building → the freshly revealed scene's name.
   usePageTitle(
     step === "reveal" && revealed
-      ? `${revealed.title} · HeyScenes`
-      : "Create your scene · HeyScenes",
+      ? t.titles.scene(revealed.title)
+      : t.titles.create,
   );
 
   async function submit(payload: CharacterIntake) {
@@ -67,16 +63,16 @@ export default function CreateScene() {
     setStep("working");
     try {
       const created = await generateCharacter(payload);
-      await queryClient.invalidateQueries({ queryKey: queryKeys.scenarios() });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.allScenarios() });
       setResult(created);
       setStep("reveal");
     } catch (e) {
       if (e instanceof ApiError && e.status === 429) {
         try {
           const detail = (JSON.parse(e.body) as { detail?: string }).detail;
-          setLimitMessage(detail || "Daily limit reached. Come back tomorrow.");
+          setLimitMessage(detail || t.create.dailyLimitMessage);
         } catch {
-          setLimitMessage("Daily limit reached. Come back tomorrow.");
+          setLimitMessage(t.create.dailyLimitMessage);
         }
       }
       setStep("error");
@@ -99,11 +95,11 @@ export default function CreateScene() {
       <TopBar>
         {deckBack ? (
           <button type="button" onClick={back} className={backLink}>
-            <span aria-hidden>←</span> Back
+            <span aria-hidden>←</span> {t.common.back}
           </button>
         ) : (
-          <Link to="/" className={backLink}>
-            <span aria-hidden>←</span> Scenarios
+          <Link to={lp("/")} className={backLink}>
+            <span aria-hidden>←</span> {t.common.scenarios}
           </Link>
         )}
         {showProgress ? (
@@ -121,10 +117,10 @@ export default function CreateScene() {
             {step === "who" && (
               <motion.div key="who" {...stepMotion}>
                 <DeckStep
-                  title="Who are they?"
+                  title={t.create.whoTitle}
                   cards={WHO_CARDS}
                   required
-                  manualPlaceholder="Calm, smart, a little playful. Someone I can talk to after work."
+                  manualPlaceholder={t.create.whoPlaceholder}
                   onDone={(v) => {
                     setWho(v);
                     setStep("where");
@@ -136,9 +132,9 @@ export default function CreateScene() {
             {step === "where" && (
               <motion.div key="where" {...stepMotion}>
                 <DeckStep
-                  title="Where are you?"
+                  title={t.create.whereTitle}
                   cards={SCENE_CARDS}
-                  manualPlaceholder="A rainy bus stop at 2am. A starship bridge. Anywhere."
+                  manualPlaceholder={t.create.wherePlaceholder}
                   onDone={(v) => {
                     setScene(v);
                     setStep("goal");
@@ -150,9 +146,9 @@ export default function CreateScene() {
             {step === "goal" && (
               <motion.div key="goal" {...stepMotion}>
                 <DeckStep
-                  title="What's the win?"
+                  title={t.create.winTitle}
                   cards={GOAL_CARDS}
-                  manualPlaceholder="Get the afterparty invite. Win the argument kindly."
+                  manualPlaceholder={t.create.winPlaceholder}
                   onDone={(v) =>
                     void submit({
                       moods: [],
@@ -173,7 +169,7 @@ export default function CreateScene() {
                 className="flex flex-col items-center gap-8 py-12 text-center"
               >
                 <MatchOrb />
-                <WorkingLines lines={WORKING_LINES} />
+                <WorkingLines lines={t.create.workingLines} />
               </motion.div>
             )}
 
@@ -198,7 +194,7 @@ export default function CreateScene() {
                   {revealed.goal && (
                     <fieldset className="mt-2 border border-amber/70 px-7 pb-5 pt-1 text-left">
                       <legend className="px-2 font-label text-[12px] font-medium uppercase tracking-[0.2em] text-amber">
-                        Goal
+                        {t.common.goal}
                       </legend>
                       <p className="font-display text-3xl font-light leading-tight text-amber sm:text-4xl">
                         {revealed.goal}
@@ -216,14 +212,14 @@ export default function CreateScene() {
                         disabled
                         className="pointer-events-none animate-pulse"
                       >
-                        Painting the scene…
+                        {t.create.paintingScene}
                       </AmberAction>
                     ) : (
                       <AmberAction
                         size="lg"
-                        onClick={() => navigate(`/scene/${revealed.id}/live`)}
+                        onClick={() => navigate(lp(`/scene/${revealed.id}/live`))}
                       >
-                        Start scene
+                        {t.create.startScene}
                       </AmberAction>
                     )}
                   </div>
@@ -240,22 +236,22 @@ export default function CreateScene() {
                 {limitMessage ? (
                   <>
                     <div className="flex max-w-lg flex-col gap-3">
-                      <Kicker className="text-amber">Daily limit</Kicker>
+                      <Kicker className="text-amber">{t.create.dailyLimitKicker}</Kicker>
                       <p className="font-display text-2xl italic leading-relaxed text-paper">
                         {limitMessage}
                       </p>
                     </div>
-                    <AmberAction tone="dim" arrow={false} to="/">
-                      Browse scenes
+                    <AmberAction tone="dim" arrow={false} to={lp("/")}>
+                      {t.create.browseScenes}
                     </AmberAction>
                   </>
                 ) : (
                   <>
                     <p className="max-w-lg font-display text-2xl italic leading-relaxed text-paper-dim">
-                      Something went wrong while creating your companion.
+                      {t.create.genericError}
                     </p>
                     <AmberAction onClick={() => intake && void submit(intake)}>
-                      Try again
+                      {t.create.tryAgain}
                     </AmberAction>
                   </>
                 )}

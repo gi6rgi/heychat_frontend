@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import { AmberAction } from "@/components/cinema";
+import { useT } from "@/i18n";
 import { cn } from "@/lib/utils";
 import type { VibeCard } from "@/components/match/matchFlow";
 
@@ -24,11 +25,17 @@ export function DeckStep({
   manualPlaceholder: string;
   onDone: (value: string) => void;
 }) {
+  const t = useT();
   const [manual, setManual] = useState(false);
   const [draft, setDraft] = useState("");
   // Card art that has finished loading; the rest stays faded out so images
   // ease in instead of popping (same pattern as CustomPosterCard).
   const [loaded, setLoaded] = useState<Set<string>>(new Set());
+
+  // Card copy lives in the dictionary (keyed by card id); the card data only
+  // carries id + art. The chosen title/description go into the intake, so a
+  // German pick also briefs the generator in German.
+  const localized = (card: VibeCard) => t.cards[card.id] ?? card;
 
   if (manual) {
     return (
@@ -51,14 +58,14 @@ export function DeckStep({
             onClick={() => onDone(draft.trim())}
             className={cn(required && !draft.trim() && "pointer-events-none opacity-40")}
           >
-            Continue
+            {t.create.continue}
           </AmberAction>
           <button
             type="button"
             onClick={() => setManual(false)}
             className="font-label text-[13px] font-medium uppercase tracking-[0.16em] text-paper-faint transition-colors duration-300 ease-[var(--ease-cinema)] hover:text-paper-dim"
           >
-            Back to options
+            {t.create.backToOptions}
           </button>
         </div>
       </div>
@@ -77,7 +84,7 @@ export function DeckStep({
             onClick={() => onDone("")}
             className="shrink-0 font-label text-[13px] font-medium uppercase tracking-[0.16em] text-paper-faint transition-colors duration-300 ease-[var(--ease-cinema)] hover:text-paper-dim"
           >
-            Skip
+            {t.create.skip}
           </button>
         )}
       </div>
@@ -87,7 +94,9 @@ export function DeckStep({
           <button
             key={card.id}
             type="button"
-            onClick={() => onDone(`${card.title}: ${card.description}`)}
+            onClick={() =>
+              onDone(`${localized(card).title}: ${localized(card).description}`)
+            }
             className="group relative aspect-[4/5] overflow-hidden border border-hairline text-left transition-[scale,border-color] duration-[450ms] ease-[var(--ease-cinema)] hover:scale-[1.025] hover:border-amber"
           >
             <img
@@ -106,10 +115,10 @@ export function DeckStep({
             />
             <div className="absolute inset-x-0 bottom-0 flex flex-col gap-2 p-5">
               <span className="font-display text-3xl leading-tight text-paper">
-                {card.title}
+                {localized(card).title}
               </span>
               <span className="text-sm leading-snug text-paper-dim">
-                {card.description}
+                {localized(card).description}
               </span>
             </div>
           </button>
@@ -125,10 +134,10 @@ export function DeckStep({
           </div>
           <div className="absolute inset-x-0 bottom-0 flex flex-col gap-2 p-5">
             <span className="font-display text-3xl leading-tight text-paper">
-              Write your own
+              {t.create.writeYourOwn}
             </span>
             <span className="text-sm leading-snug text-paper-dim">
-              Put it in your own words instead.
+              {t.create.writeYourOwnDescription}
             </span>
           </div>
         </button>

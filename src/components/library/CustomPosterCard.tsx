@@ -6,6 +6,7 @@ import { X } from "lucide-react";
 import { deleteScenario } from "@/services/scenarios";
 import { queryKeys } from "@/lib/query-keys";
 import { sceneImageUrl } from "@/lib/storage";
+import { useLocalePath, useT } from "@/i18n";
 import { cn } from "@/lib/utils";
 import type { Scenario } from "@/types/api";
 
@@ -20,6 +21,8 @@ import type { Scenario } from "@/types/api";
  * scene's goal (or its description when goalless), same as PosterCard.
  */
 export function CustomPosterCard({ scenario }: { scenario: Scenario }) {
+  const t = useT();
+  const lp = useLocalePath();
   const [loaded, setLoaded] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const poster = sceneImageUrl(scenario.poster_path);
@@ -32,7 +35,7 @@ export function CustomPosterCard({ scenario }: { scenario: Scenario }) {
   const remove = useMutation({
     mutationFn: () => deleteScenario(scenario.id),
     onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: queryKeys.scenarios() }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.allScenarios() }),
     onError: () => setConfirming(false),
   });
 
@@ -45,7 +48,7 @@ export function CustomPosterCard({ scenario }: { scenario: Scenario }) {
 
   return (
     <Link
-      to={`/scene/${scenario.id}`}
+      to={lp(`/scene/${scenario.id}`)}
       viewTransition
       aria-disabled={generating}
       onClick={(e) => {
@@ -85,7 +88,7 @@ export function CustomPosterCard({ scenario }: { scenario: Scenario }) {
         {poster && (
           <img
             src={poster}
-            alt={`${scenario.title} poster`}
+            alt={t.library.posterAlt(scenario.title)}
             loading="lazy"
             onLoad={() => setLoaded(true)}
             className={cn(
@@ -100,7 +103,7 @@ export function CustomPosterCard({ scenario }: { scenario: Scenario }) {
         {!remove.isPending && (
           <button
             type="button"
-            aria-label={`Delete ${scenario.title}`}
+            aria-label={t.library.deleteScene(scenario.title)}
             onClick={guard(() => setConfirming(true))}
             className={cn(
               "absolute right-0 top-0 p-2 text-paper-dim opacity-0 transition-opacity duration-300 ease-[var(--ease-cinema)]",
@@ -116,17 +119,17 @@ export function CustomPosterCard({ scenario }: { scenario: Scenario }) {
       <div className="pt-3">
         {remove.isPending ? (
           <span className="font-label text-[12px] font-medium uppercase tracking-[0.12em] text-paper-faint">
-            REMOVING…
+            {t.library.removing}
           </span>
         ) : confirming ? (
           <span className="font-label text-[12px] font-medium uppercase tracking-[0.12em] text-paper-dim">
-            DELETE?
+            {t.library.deleteQuestion}
             <button
               type="button"
               onClick={guard(() => remove.mutate())}
               className="px-1.5 text-amber transition-colors duration-300 hover:text-paper"
             >
-              YES
+              {t.library.yes}
             </button>
             <span className="text-paper-faint">·</span>
             <button
@@ -134,14 +137,14 @@ export function CustomPosterCard({ scenario }: { scenario: Scenario }) {
               onClick={guard(() => setConfirming(false))}
               className="px-1.5 text-paper-dim transition-colors duration-300 hover:text-paper"
             >
-              NO
+              {t.library.no}
             </button>
           </span>
         ) : generating ? (
           <span className="font-label text-[12px] font-medium uppercase tracking-[0.12em] text-paper-dim">
-            YOURS
+            {t.library.yoursTag}
             <span className="px-1.5 text-paper-faint">·</span>
-            PAINTING…
+            {t.library.paintingTag}
           </span>
         ) : (
           <span
