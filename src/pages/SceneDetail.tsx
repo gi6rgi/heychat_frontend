@@ -4,7 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { toScene } from "@/lib/scenes";
 import { useScenario } from "@/hooks/useScenarios";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { useLocalePath, useT } from "@/i18n";
+import { useLocale, useLocalePath, useT } from "@/i18n";
 import { AmberAction, Container } from "@/components/cinema";
 import { SceneStill } from "@/components/scene-detail/SceneStill";
 
@@ -22,6 +22,7 @@ export default function SceneDetail() {
   const reduce = useReducedMotion();
   const t = useT();
   const lp = useLocalePath();
+  const locale = useLocale();
 
   // Every scene — catalog or user-created — lives in the backend now. The
   // hook keeps polling while a created scene's art is still being painted,
@@ -78,7 +79,13 @@ export default function SceneDetail() {
           <div className="mt-auto max-w-2xl pb-14 md:pb-20">
             <motion.h1
               {...rise(0.05)}
-              className="font-display mt-4 text-5xl font-light uppercase leading-[0.95] tracking-[-0.02em] text-paper sm:text-6xl md:text-7xl lg:text-8xl"
+              // Phones only: hyphenate/break the title so a long German
+              // compound ("VORSTELLUNGS-GESPRÄCH") can't spill off the edge.
+              // lang drives the break point. From md up the title is meant to
+              // bleed across the wide still on one line, so reset to normal —
+              // otherwise break-words wraps it inside the max-w-2xl box.
+              lang={locale}
+              className="font-display mt-4 hyphens-auto break-words text-5xl font-light uppercase leading-[0.95] tracking-[-0.02em] text-paper sm:text-6xl md:hyphens-none md:break-normal md:text-7xl lg:text-8xl"
             >
               {title}
             </motion.h1>
