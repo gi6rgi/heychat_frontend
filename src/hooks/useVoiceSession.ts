@@ -85,21 +85,28 @@ export function useVoiceSession(scenarioId: string | undefined, replayOf?: strin
   const windDown = useCallback(async () => {
     wsRef.current?.close()
     wsRef.current = null
+    // On the clean goal-settled ending, DON'T release the mic or close the
+    // player here. Stopping the mic track (getTracks().stop()) flips the iOS
+    // audio session out of record mode, which makes iOS play its system chime
+    // right over the mission-accomplished stamp. Leave the mic and player
+    // alive (idle) and let cleanup() tear them down on unmount — when the user
+    // leaves for the debrief and the chime is masked by the navigation. The
+    // socket is already closed, so the still-live mic sends nothing. (Cost: the
+    // iOS recording indicator stays lit while the verdict stamp is on screen.)
+    if (settledRef.current) {
+      await playerRef.current?.drain()
+      setIsAgentSpeaking(false)
+      return
+    }
+    // Connection drop / time cap: no verdict to protect and the screen offers
+    // RETRY in place, so tear down now — a lingering context would leak across
+    // the restart.
     await recorderRef.current?.stop()
     recorderRef.current = null
     const player = playerRef.current
     if (!player) return
     await player.drain()
-    // On the clean goal-settled ending, DON'T close the player's AudioContext
-    // here: it is the last audio context alive, so closing it fully deactivates
-    // the iOS audio session and makes iOS play its system "Siri" session-change
-    // chime right over the mission-accomplished moment. Leaving it open (idle)
-    // keeps the session in playback; cleanup() closes it on unmount (the user
-    // leaving for the debrief), where the transition is masked by navigation.
-    // On a connection drop (not settled) there is no verdict to protect and the
-    // screen offers RETRY in place, so close now — otherwise start() would
-    // overwrite playerRef and leak this context across the restart.
-    if (!settledRef.current && playerRef.current === player) {
+    if (playerRef.current === player) {
       playerRef.current = null
       await player.close()
     }
