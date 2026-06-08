@@ -90,7 +90,16 @@ export function useVoiceSession(scenarioId: string | undefined, replayOf?: strin
     const player = playerRef.current
     if (!player) return
     await player.drain()
-    if (playerRef.current === player) {
+    // On the clean goal-settled ending, DON'T close the player's AudioContext
+    // here: it is the last audio context alive, so closing it fully deactivates
+    // the iOS audio session and makes iOS play its system "Siri" session-change
+    // chime right over the mission-accomplished moment. Leaving it open (idle)
+    // keeps the session in playback; cleanup() closes it on unmount (the user
+    // leaving for the debrief), where the transition is masked by navigation.
+    // On a connection drop (not settled) there is no verdict to protect and the
+    // screen offers RETRY in place, so close now — otherwise start() would
+    // overwrite playerRef and leak this context across the restart.
+    if (!settledRef.current && playerRef.current === player) {
       playerRef.current = null
       await player.close()
     }
