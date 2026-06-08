@@ -11,6 +11,7 @@ import { useVoiceSession } from "@/hooks/useVoiceSession";
 import { useScenario } from "@/hooks/useScenarios";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useAmbience } from "@/hooks/useAmbience";
+import { useWakeLock } from "@/hooks/useWakeLock";
 import { scenarioAmbience, type Ambience } from "@/audio/ambience";
 import { playVerdictSound } from "@/audio/verdict";
 import { getPreferredMic, getPreferredSpeaker } from "@/audio/devices";
@@ -96,6 +97,10 @@ export default function LiveScene() {
     ? scene.ambience
     : scenarioAmbience(scenarioId);
   useAmbience(ambKind, status === "live");
+
+  // Hold the screen awake during the call: a voice conversation has no touch
+  // input, so the phone would otherwise dim and lock. Live screen only.
+  useWakeLock(status === "live");
 
   // Auto-start on arrival: the Detail "Start Scene" action and the create-flow
   // reveal navigate straight here, so we begin the session immediately (the mic
