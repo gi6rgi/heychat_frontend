@@ -15,7 +15,12 @@ import type { Scenario } from "@/types/api";
 export function PosterReveal({ scenario }: { scenario: Scenario }) {
   const t = useT();
   const [loaded, setLoaded] = useState(false);
-  const url = sceneImageUrl(scenario.poster_path);
+  const url = sceneImageUrl(scenario.poster_path, {
+    width: 720,
+    height: 1080,
+    resize: "cover",
+    quality: 75,
+  });
   const painting = !loaded && scenario.image_status === "generating";
 
   return (

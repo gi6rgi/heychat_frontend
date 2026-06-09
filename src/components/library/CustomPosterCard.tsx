@@ -25,7 +25,12 @@ export function CustomPosterCard({ scenario }: { scenario: Scenario }) {
   const lp = useLocalePath();
   const [loaded, setLoaded] = useState(false);
   const [confirming, setConfirming] = useState(false);
-  const poster = sceneImageUrl(scenario.poster_path);
+  const poster = sceneImageUrl(scenario.poster_path, {
+    width: 600,
+    height: 900,
+    resize: "cover",
+    quality: 72,
+  });
   // The scene stays locked until ALL its art landed: the poster can already
   // be on screen while the stills are still painting.
   const generating = scenario.image_status === "generating";

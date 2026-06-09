@@ -84,10 +84,10 @@ export default function Library() {
           it fills the whole page (and blurs under the glass top bar). */}
       <div aria-hidden className="pointer-events-none fixed inset-0 z-0">
         {available.map((s) =>
-          s.still ? (
+          s.backdrop ? (
             <img
               key={s.slug}
-              src={s.still}
+              src={s.backdrop}
               alt=""
               className={cn(
                 "absolute inset-0 h-full w-full object-cover transition-opacity duration-[1200ms] ease-[var(--ease-cinema)]",
@@ -97,7 +97,13 @@ export default function Library() {
           ) : null,
         )}
         {custom.map((s) => {
-          const still = sceneImageUrl(s.establishing_path);
+          // Dimmed hover wash: tiny + crunchy is fine, and these load eagerly.
+          const still = sceneImageUrl(s.establishing_path, {
+            width: 768,
+            height: 432,
+            resize: "cover",
+            quality: 50,
+          });
           return still ? (
             <img
               key={s.id}

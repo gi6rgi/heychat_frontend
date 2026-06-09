@@ -39,8 +39,10 @@ export interface Scene {
   /** plain-language briefing: what to do + what counts as winning */
   objective: string | null;
   poster: string;
-  /** establishing scene art (Detail screen + Library hover); null → dark placeholder */
+  /** establishing scene art, near-full quality for the full-screen Detail hero; null → dark placeholder */
   still: string | null;
+  /** tiny, heavily compressed variant of `still` for the dimmed Library hover wash */
+  backdrop: string | null;
   /** POV "they're looking at you" shot for the Live screen; falls back to `still` */
   conversation?: string | null;
   ambience: Ambience;
@@ -77,9 +79,41 @@ export function toScene(s: Scenario): Scene {
     logline: s.logline ?? s.description,
     goal: s.goal,
     objective: s.objective,
-    poster: sceneImageUrl(s.poster_path) ?? "",
-    still: sceneImageUrl(s.establishing_path),
-    conversation: sceneImageUrl(s.conversation_path),
+    // The raw PNGs are ~0.6-4 MB each and tanked LCP. Route everything through
+    // the transform CDN (WebP, CDN-cached). Pass an explicit aspect box
+    // (posters 2:3, stills 16:9) with resize=cover: with width only, Supabase
+    // keeps the source height and distorts the image.
+    //
+    // Two still variants by use: `still`/`conversation` are full-screen heroes
+    // (Detail + Live) at the source's native 1376w, near-lossless quality —
+    // WebP keeps q95 at ~170 KB (vs the 600 KB raw PNG), visually the original.
+    // `backdrop` is the dimmed (42%) Library hover wash, where 7 load eagerly,
+    // so it's tiny and crunchy.
+    poster:
+      sceneImageUrl(s.poster_path, {
+        width: 600,
+        height: 900,
+        resize: "cover",
+        quality: 72,
+      }) ?? "",
+    still: sceneImageUrl(s.establishing_path, {
+      width: 1376,
+      height: 768,
+      resize: "cover",
+      quality: 95,
+    }),
+    backdrop: sceneImageUrl(s.establishing_path, {
+      width: 768,
+      height: 432,
+      resize: "cover",
+      quality: 50,
+    }),
+    conversation: sceneImageUrl(s.conversation_path, {
+      width: 1376,
+      height: 768,
+      resize: "cover",
+      quality: 95,
+    }),
     ambience: (s.ambience as Ambience) ?? "room",
     locked: s.locked,
     isNew: s.is_new,
