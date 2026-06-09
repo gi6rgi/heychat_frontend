@@ -131,7 +131,7 @@ export default function Library() {
             <h1 className="font-display text-3xl font-light leading-none text-paper [font-variation-settings:'opsz'_40,'SOFT'_30,'WONK'_0] sm:text-4xl">
               {t.library.heroTitle}
             </h1>
-            <span className="shrink-0 text-right font-label text-[12px] font-medium uppercase leading-[1.5] tracking-[0.16em] text-paper-dim">
+            <span className="hidden shrink-0 text-right font-label text-[12px] font-medium uppercase leading-[1.5] tracking-[0.16em] text-paper-dim sm:block">
               {t.library.heroTagA}
               <br />
               {t.library.heroTagB}
