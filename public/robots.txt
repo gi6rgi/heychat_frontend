@@ -1,0 +1,9 @@
+# https://heyscenes.com
+# Crawl everything. Session screens (/scene/*/live, /scene/*/debrief) and the
+# create flow carry a noindex meta tag instead of a Disallow, so crawlers can
+# reach them, read the noindex, and keep them out of the index without us
+# blocking the rendering resources they need.
+User-agent: *
+Allow: /
+
+Sitemap: https://heyscenes.com/sitemap.xml

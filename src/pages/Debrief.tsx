@@ -3,7 +3,7 @@ import { Link, Navigate, useParams, useSearchParams } from "react-router-dom";
 import { motion, useReducedMotion } from "motion/react";
 import { toScene } from "@/lib/scenes";
 import { useScenario } from "@/hooks/useScenarios";
-import { usePageTitle } from "@/hooks/usePageTitle";
+import { useSeo } from "@/hooks/useSeo";
 import {
   useConversation,
   useFeedback,
@@ -53,7 +53,11 @@ export default function Debrief() {
   const generate = useGenerateFeedback(conversationId);
   const reduce = useReducedMotion();
 
-  usePageTitle(scene && t.titles.debrief(scene.character));
+  // A post-session report tied to one conversation id — keep it out of the index.
+  useSeo({
+    title: scene ? t.titles.debrief(scene.character) : undefined,
+    noindex: true,
+  });
 
   // An empty transcript can't be reviewed — the backend 409s the POST — so
   // don't even ask; the page shows the "nothing on tape" state instead.

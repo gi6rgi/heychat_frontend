@@ -9,7 +9,7 @@ import { cleanTranscript } from "@/lib/transcript";
 import { RoundButton } from "@/components/live/RoundButton";
 import { useVoiceSession } from "@/hooks/useVoiceSession";
 import { useScenario } from "@/hooks/useScenarios";
-import { usePageTitle } from "@/hooks/usePageTitle";
+import { useSeo } from "@/hooks/useSeo";
 import { useAmbience } from "@/hooks/useAmbience";
 import { useWakeLock } from "@/hooks/useWakeLock";
 import { scenarioAmbience, type Ambience } from "@/audio/ambience";
@@ -39,7 +39,11 @@ export default function LiveScene() {
     [scenario],
   );
 
-  usePageTitle(scene && t.titles.live(scene.character));
+  // A live session screen, not content — keep it out of the index.
+  useSeo({
+    title: scene ? t.titles.live(scene.character) : undefined,
+    noindex: true,
+  });
 
   const scenarioId = scene?.scenarioId ?? slug;
   const {

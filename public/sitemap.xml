@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://heyscenes.com/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://heyscenes.com/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://heyscenes.com/de"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://heyscenes.com/ru"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://heyscenes.com/"/>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://heyscenes.com/de</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://heyscenes.com/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://heyscenes.com/de"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://heyscenes.com/ru"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://heyscenes.com/"/>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://heyscenes.com/ru</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://heyscenes.com/"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://heyscenes.com/de"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://heyscenes.com/ru"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://heyscenes.com/"/>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://heyscenes.com/create</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://heyscenes.com/create"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://heyscenes.com/de/create"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://heyscenes.com/ru/create"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://heyscenes.com/create"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://heyscenes.com/de/create</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://heyscenes.com/create"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://heyscenes.com/de/create"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://heyscenes.com/ru/create"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://heyscenes.com/create"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://heyscenes.com/ru/create</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://heyscenes.com/create"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://heyscenes.com/de/create"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://heyscenes.com/ru/create"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://heyscenes.com/create"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://heyscenes.com/scene/dive-bar</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://heyscenes.com/scene/dive-bar"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://heyscenes.com/de/scene/dive-bar"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://heyscenes.com/ru/scene/dive-bar"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://heyscenes.com/scene/dive-bar"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://heyscenes.com/de/scene/dive-bar</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://heyscenes.com/scene/dive-bar"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://heyscenes.com/de/scene/dive-bar"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://heyscenes.com/ru/scene/dive-bar"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://heyscenes.com/scene/dive-bar"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://heyscenes.com/ru/scene/dive-bar</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://heyscenes.com/scene/dive-bar"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://heyscenes.com/de/scene/dive-bar"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://heyscenes.com/ru/scene/dive-bar"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://heyscenes.com/scene/dive-bar"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://heyscenes.com/scene/cafe-terrace</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://heyscenes.com/scene/cafe-terrace"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://heyscenes.com/de/scene/cafe-terrace"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://heyscenes.com/ru/scene/cafe-terrace"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://heyscenes.com/scene/cafe-terrace"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://heyscenes.com/de/scene/cafe-terrace</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://heyscenes.com/scene/cafe-terrace"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://heyscenes.com/de/scene/cafe-terrace"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://heyscenes.com/ru/scene/cafe-terrace"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://heyscenes.com/scene/cafe-terrace"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://heyscenes.com/ru/scene/cafe-terrace</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://heyscenes.com/scene/cafe-terrace"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://heyscenes.com/de/scene/cafe-terrace"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://heyscenes.com/ru/scene/cafe-terrace"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://heyscenes.com/scene/cafe-terrace"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://heyscenes.com/scene/waiting-room</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://heyscenes.com/scene/waiting-room"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://heyscenes.com/de/scene/waiting-room"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://heyscenes.com/ru/scene/waiting-room"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://heyscenes.com/scene/waiting-room"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://heyscenes.com/de/scene/waiting-room</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://heyscenes.com/scene/waiting-room"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://heyscenes.com/de/scene/waiting-room"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://heyscenes.com/ru/scene/waiting-room"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://heyscenes.com/scene/waiting-room"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://heyscenes.com/ru/scene/waiting-room</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://heyscenes.com/scene/waiting-room"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://heyscenes.com/de/scene/waiting-room"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://heyscenes.com/ru/scene/waiting-room"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://heyscenes.com/scene/waiting-room"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://heyscenes.com/scene/first-date</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://heyscenes.com/scene/first-date"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://heyscenes.com/de/scene/first-date"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://heyscenes.com/ru/scene/first-date"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://heyscenes.com/scene/first-date"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://heyscenes.com/de/scene/first-date</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://heyscenes.com/scene/first-date"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://heyscenes.com/de/scene/first-date"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://heyscenes.com/ru/scene/first-date"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://heyscenes.com/scene/first-date"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://heyscenes.com/ru/scene/first-date</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://heyscenes.com/scene/first-date"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://heyscenes.com/de/scene/first-date"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://heyscenes.com/ru/scene/first-date"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://heyscenes.com/scene/first-date"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://heyscenes.com/scene/job-interview</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://heyscenes.com/scene/job-interview"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://heyscenes.com/de/scene/job-interview"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://heyscenes.com/ru/scene/job-interview"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://heyscenes.com/scene/job-interview"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://heyscenes.com/de/scene/job-interview</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://heyscenes.com/scene/job-interview"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://heyscenes.com/de/scene/job-interview"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://heyscenes.com/ru/scene/job-interview"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://heyscenes.com/scene/job-interview"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://heyscenes.com/ru/scene/job-interview</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://heyscenes.com/scene/job-interview"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://heyscenes.com/de/scene/job-interview"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://heyscenes.com/ru/scene/job-interview"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://heyscenes.com/scene/job-interview"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://heyscenes.com/scene/bike-deal</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://heyscenes.com/scene/bike-deal"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://heyscenes.com/de/scene/bike-deal"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://heyscenes.com/ru/scene/bike-deal"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://heyscenes.com/scene/bike-deal"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://heyscenes.com/de/scene/bike-deal</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://heyscenes.com/scene/bike-deal"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://heyscenes.com/de/scene/bike-deal"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://heyscenes.com/ru/scene/bike-deal"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://heyscenes.com/scene/bike-deal"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://heyscenes.com/ru/scene/bike-deal</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://heyscenes.com/scene/bike-deal"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://heyscenes.com/de/scene/bike-deal"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://heyscenes.com/ru/scene/bike-deal"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://heyscenes.com/scene/bike-deal"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://heyscenes.com/scene/guess-the-word</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://heyscenes.com/scene/guess-the-word"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://heyscenes.com/de/scene/guess-the-word"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://heyscenes.com/ru/scene/guess-the-word"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://heyscenes.com/scene/guess-the-word"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://heyscenes.com/de/scene/guess-the-word</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://heyscenes.com/scene/guess-the-word"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://heyscenes.com/de/scene/guess-the-word"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://heyscenes.com/ru/scene/guess-the-word"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://heyscenes.com/scene/guess-the-word"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://heyscenes.com/ru/scene/guess-the-word</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://heyscenes.com/scene/guess-the-word"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://heyscenes.com/de/scene/guess-the-word"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://heyscenes.com/ru/scene/guess-the-word"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://heyscenes.com/scene/guess-the-word"/>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+</urlset>

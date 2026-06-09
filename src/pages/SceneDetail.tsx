@@ -3,7 +3,7 @@ import { motion, useReducedMotion } from "motion/react";
 import { ArrowLeft } from "lucide-react";
 import { toScene } from "@/lib/scenes";
 import { useScenario } from "@/hooks/useScenarios";
-import { usePageTitle } from "@/hooks/usePageTitle";
+import { useSeo } from "@/hooks/useSeo";
 import { useLocale, useLocalePath, useT } from "@/i18n";
 import { AmberAction, Container } from "@/components/cinema";
 import { SceneStill } from "@/components/scene-detail/SceneStill";
@@ -37,7 +37,13 @@ export default function SceneDetail() {
       ? slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
       : t.common.untitled);
 
-  usePageTitle(t.titles.scene(title));
+  useSeo({
+    title: t.titles.scene(title),
+    description: scene?.logline,
+    path: slug ? `/scene/${slug}` : undefined,
+    locale,
+    image: scene?.still ?? undefined,
+  });
 
   const still = scene?.still ?? null;
   const logline = scene?.logline;

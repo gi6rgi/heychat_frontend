@@ -3,7 +3,7 @@ import { Loader2 } from "lucide-react";
 import { GENRES, toScene, type Genre } from "@/lib/scenes";
 import { sceneImageUrl } from "@/lib/storage";
 import { useScenarios } from "@/hooks/useScenarios";
-import { usePageTitle } from "@/hooks/usePageTitle";
+import { useSeo } from "@/hooks/useSeo";
 import { Container } from "@/components/cinema";
 import {
   LibraryTopBar,
@@ -12,7 +12,7 @@ import {
 import { PosterCard } from "@/components/library/PosterCard";
 import { CustomPosterCard } from "@/components/library/CustomPosterCard";
 import { CreateCard } from "@/components/library/CreateCard";
-import { useT } from "@/i18n";
+import { useLocale, useT } from "@/i18n";
 import { cn } from "@/lib/utils";
 
 /**
@@ -24,7 +24,9 @@ import { cn } from "@/lib/utils";
  */
 export default function Library() {
   const t = useT();
-  usePageTitle(t.titles.default); // the poster wall keeps the brand title
+  const locale = useLocale();
+  // The poster wall keeps the brand title; canonical + hreflang per locale.
+  useSeo({ title: t.titles.default, path: "/", locale });
   const [filter, setFilter] = useState<LibraryFilter>("ALL");
   // The hovered scene's still slowly fills the page background behind the grid.
   const [hovered, setHovered] = useState<string | null>(null);
@@ -114,7 +116,21 @@ export default function Library() {
       <div className="relative z-10">
         <LibraryTopBar active={filter} onSelect={setFilter} genres={genres} />
 
-        <Container className="py-12">
+        <Container className="pb-12 pt-6">
+          {/* Marquee: the page's only H1 — gives a first-time visitor one line
+              of context and search crawlers real, keyword-bearing text above
+              the (image-baked) poster titles. Tag is vertically centered to
+              the title so the two read as one row. */}
+          <div className="mb-6 flex items-center justify-between gap-6">
+            <h1 className="font-display text-3xl font-light leading-none text-paper [font-variation-settings:'opsz'_40,'SOFT'_30,'WONK'_0] sm:text-4xl">
+              {t.library.heroTitle}
+            </h1>
+            <span className="shrink-0 text-right font-label text-[12px] font-medium uppercase leading-[1.5] tracking-[0.16em] text-paper-dim">
+              {t.library.heroTagA}
+              <br />
+              {t.library.heroTagB}
+            </span>
+          </div>
           {isYoursEmpty && (
             <p className="mb-10 font-display text-xl italic text-paper-dim">
               {t.library.yoursEmpty}

@@ -12,8 +12,8 @@ import { PosterReveal } from "@/components/create/PosterReveal";
 import { WorkingLines } from "@/components/create/WorkingLines";
 import { DeckStep } from "@/components/create/DeckStep";
 import { useScenario } from "@/hooks/useScenarios";
-import { usePageTitle } from "@/hooks/usePageTitle";
-import { useLocalePath, useT } from "@/i18n";
+import { useSeo } from "@/hooks/useSeo";
+import { useLocale, useLocalePath, useT } from "@/i18n";
 import type { CharacterIntake, Scenario } from "@/types/api";
 
 // Three deck steps, then the generate + reveal. No entry screen, no match path:
@@ -34,6 +34,7 @@ export default function CreateScene() {
   const queryClient = useQueryClient();
   const t = useT();
   const lp = useLocalePath();
+  const locale = useLocale();
   const [step, setStep] = useState<Step>("who");
   // Deck answers: who the companion is, where the scene happens.
   const [who, setWho] = useState("");
@@ -50,11 +51,12 @@ export default function CreateScene() {
   );
   const revealed = liveResult ?? result;
 
-  // Tab title follows the flow: building → the freshly revealed scene's name.
-  usePageTitle(
+  // The bare /create landing is indexable; the reveal shows a freshly
+  // generated, user-specific scene, so keep that step out of the index.
+  useSeo(
     step === "reveal" && revealed
-      ? t.titles.scene(revealed.title)
-      : t.titles.create,
+      ? { title: t.titles.scene(revealed.title), noindex: true }
+      : { title: t.titles.create, path: "/create", locale },
   );
 
   async function submit(payload: CharacterIntake) {

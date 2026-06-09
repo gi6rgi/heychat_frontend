@@ -1,1 +1,17 @@
-{"name":"HeyScenes","short_name":"HeyScenes","icons":[{"src":"/android-chrome-192x192.png","sizes":"192x192","type":"image/png"},{"src":"/android-chrome-512x512.png","sizes":"512x512","type":"image/png"}],"theme_color":"#1a1916","background_color":"#1a1916","display":"standalone"}
+{
+  "id": "/",
+  "name": "HeyScenes",
+  "short_name": "HeyScenes",
+  "description": "Live voice conversations with AI characters: a first date, a job interview, a red-eye flight. You talk, they talk back, and you get a debrief after the scene.",
+  "lang": "en",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "theme_color": "#1a1916",
+  "background_color": "#1a1916",
+  "categories": ["lifestyle", "education"],
+  "icons": [
+    { "src": "/android-chrome-192x192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/android-chrome-512x512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

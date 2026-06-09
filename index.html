@@ -3,6 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Warm the connections that gate first paint: scene art (LCP poster
+         images) is served from Supabase Storage, content from the API. -->
+    <link rel="preconnect" href="https://dbogszhiqygyeozgcnnq.supabase.co" />
+    <link rel="preconnect" href="https://api.heyscenes.com" crossorigin />
+
     <title>HeyScenes · step into a scene with your AI companion</title>
     <meta
       name="description"
@@ -10,6 +16,12 @@
     />
     <link rel="canonical" href="https://heyscenes.com/" />
     <meta name="theme-color" content="#1a1916" />
+
+    <!-- Home-screen / installed-app behaviour (iOS reads the apple-* variants). -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="apple-mobile-web-app-title" content="HeyScenes" />
 
     <meta property="og:site_name" content="HeyScenes" />
     <meta property="og:type" content="website" />
