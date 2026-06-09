@@ -132,8 +132,13 @@ function stripManagedHead(html) {
 /** Produce a route's full HTML from the stripped template. */
 function renderRoute(template, opts) {
   const heading = opts.heading ?? opts.title;
+  // Visually hidden (NOT display:none) so non-JS crawlers still read the text
+  // in the raw HTML, while sighted users never see it flash before the bundle
+  // loads and React wipes #root to render the app.
+  const hide =
+    "position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0";
   const snippet =
-    `<div id="root"><div id="seo-prerender">` +
+    `<div id="root"><div id="seo-prerender" style="${hide}">` +
     `<h1>${esc(heading)}</h1><p>${esc(opts.description)}</p></div></div>`;
   return template
     .replace(/<html lang="[^"]*"/i, `<html lang="${opts.locale}"`)
