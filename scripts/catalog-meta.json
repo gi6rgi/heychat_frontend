@@ -13,8 +13,8 @@
       },
       "logline": {
         "en": "Lena's been nursing the same drink for an hour, under a neon sign that reads Liquor, Beer & Regrets. She looks like she's got all three.",
-        "de": "Lena nippt seit einer Stunde am selben Drink, unter einer Neonschrift, auf der \"Schnaps, Bier & Reue\" steht. Sie sieht aus, als hätte sie von allem dreien.",
-        "ru": "Лена уже час тянет один и тот же коктейль под неоновой вывеской «Виски, пиво и сожаления». Похоже, у неё есть все три."
+        "de": "Lena nippt seit einer Stunde am selben Drink, unter einem Neonschild, auf dem \"Schnaps, Bier & schlechte Entscheidungen\" steht. Sieht aus, als hätte sie von allen dreien genug.",
+        "ru": "Лена уже час тянет один и тот же коктейль под неоновой вывеской «Выпивка, пиво и сожаления». Похоже, у неё есть все три."
       }
     },
     {
@@ -41,7 +41,7 @@
       },
       "logline": {
         "en": "Two plastic chairs, one broken clock, and a stranger who clearly doesn't want to be here either. Forty minutes to kill. Go.",
-        "de": "Zwei Plastikstühle, eine kaputte Uhr und ein Fremder, der hier genauso wenig sein will wie du. Vierzig Minuten totzuschlagen. Los.",
+        "de": "Zwei Plastikstühle, eine kaputte Uhr und ein Typ, der hier genauso wenig sein will wie du. Vierzig Minuten totschlagen. Los.",
         "ru": "Два пластиковых стула, одни сломанные часы и незнакомец, которому тут так же не место, как и тебе. Сорок минут на убой. Вперёд."
       }
     },
@@ -68,9 +68,9 @@
         "ru": "Собеседование"
       },
       "logline": {
-        "en": "He's read your résumé twice and said nothing. Convince him you're the one worth the desk, the title, and the silence he keeps letting hang.",
-        "de": "Er hat deinen Lebenslauf zweimal gelesen und nichts gesagt. Überzeug ihn, dass du den Schreibtisch, den Titel und das Schweigen wert bist, das er immer wieder hängen lässt.",
-        "ru": "Он дважды прочитал твоё резюме и не сказал ни слова. Убеди его, что именно ты достоин этого стола, должности и той паузы, которую он всё время оставляет висеть."
+        "en": "He's read your résumé twice and said nothing. Make the silence worth breaking.",
+        "de": "Er hat deinen Lebenslauf zweimal gelesen und nichts gesagt. Sorg dafür, dass es sich lohnt, das Schweigen zu brechen.",
+        "ru": "Он дважды прочитал твоё резюме и не сказал ни слова. Сделай так, чтобы эту тишину стоило нарушить."
       }
     },
     {
@@ -96,8 +96,8 @@
         "ru": "Угадай слово"
       },
       "logline": {
-        "en": "Maya has a secret word and a smug little smile. You get yes/no questions and nothing else — crack it before you crack.",
-        "de": "Maya hat ein geheimes Wort und ein süffisantes Lächeln. Du hast Ja/Nein-Fragen und sonst nichts — knack es, bevor du durchdrehst.",
+        "en": "Maya has a secret word and a smug little smile. You get yes/no questions and nothing else. Crack it before you crack.",
+        "de": "Maya hat ein geheimes Wort und ein freches Grinsen. Du hast Ja/Nein-Fragen und sonst nichts. Knack es, bevor du durchdrehst.",
         "ru": "У Майи есть секретное слово и самодовольная улыбочка. У тебя — только вопросы «да/нет» и ничего больше. Расколи его, пока не раскололся сам."
       }
     }
