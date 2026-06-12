@@ -1,4 +1,5 @@
 import { Meter } from "@/components/cinema";
+import { useLocale } from "@/i18n";
 
 /**
  * One sub-score line in the debrief right column: a small-caps/mono label, a thin
@@ -13,9 +14,17 @@ export function SubScoreRow({
   /** 0–10 */
   value: number;
 }) {
+  // German rubric labels are long single-word compounds (e.g.
+  // KOMMUNIKATIONSBEREITSCHAFT) with no space to wrap at, so they'd overrun the
+  // fixed label column into the meter. lang lets the browser hyphenate them with
+  // the right rules even though the page's <html lang> isn't the active locale.
+  const locale = useLocale();
   return (
     <div className="flex items-center gap-5">
-      <span className="w-[10rem] shrink-0 font-mono text-[12px] uppercase tracking-[0.14em] text-paper-dim">
+      <span
+        lang={locale}
+        className="w-[10rem] shrink-0 hyphens-auto break-words font-mono text-[12px] uppercase tracking-[0.14em] text-paper-dim"
+      >
         {label}
       </span>
       <Meter value={value / 10} className="flex-1" />
