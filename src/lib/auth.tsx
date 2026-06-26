@@ -69,7 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           <img
             src="/android-chrome-192x192.png"
             alt=""
-            className="h-[28px] w-[28px] rounded-full opacity-60"
+            className="h-[28px] w-[28px] opacity-60"
           />
           <span className="font-display text-[17px] text-paper-dim [font-variation-settings:'opsz'_40,'SOFT'_30,'WONK'_0]">
             HeyScenes
